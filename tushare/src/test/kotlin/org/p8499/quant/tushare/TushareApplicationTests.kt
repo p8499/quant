@@ -41,6 +41,15 @@ class TushareApplicationTests {
     @Autowired
     lateinit var dailyRequest: DailyRequest
 
+    @Autowired
+    lateinit var adjFactorRequest: AdjFactorRequest
+
+    @Autowired
+    lateinit var dailyBasicRequest: DailyBasicRequest
+
+    @Autowired
+    lateinit var moneyflowRequest: MoneyflowRequest
+
     @Test
     fun contextLoads() {
         assert(tradeCalRequest.invoke(TradeCalRequest.InParams(exchange = "SSE", endDate = Date(), isOpen = true), TradeCalRequest.OutParams::class.java).isNotEmpty())
@@ -54,5 +63,8 @@ class TushareApplicationTests {
         assert(expressRequest.invoke(ExpressRequest.InParams(tsCode = "600000.SH", startDate = GregorianCalendar(2011, 1, 1).time, endDate = GregorianCalendar(2021, 7, 1).time), ExpressRequest.OutParams::class.java).isNotEmpty())
         assert(forecastRequest.invoke(ForecastRequest.InParams(annDate = GregorianCalendar(2019, 0, 31).time), ForecastRequest.OutParams::class.java).isNotEmpty())
         assert(dailyRequest.invoke(DailyRequest.InParams(tsCode = "000001.SZ", startDate = GregorianCalendar(2018, 6, 1).time, endDate = GregorianCalendar(2018, 6, 18).time), DailyRequest.OutParams::class.java).isNotEmpty())
+        assert(adjFactorRequest.invoke(AdjFactorRequest.InParams(tradeDate = GregorianCalendar(2018, 6, 18).time), AdjFactorRequest.OutParams::class.java).isNotEmpty())
+        assert(dailyBasicRequest.invoke(DailyBasicRequest.InParams(tsCode = "000001.SZ", startDate = GregorianCalendar(2018, 6, 1).time, endDate = GregorianCalendar(2018, 6, 18).time), DailyBasicRequest.OutParams::class.java).isNotEmpty())
+        assert(moneyflowRequest.invoke(DailyBasicRequest.InParams(tradeDate = GregorianCalendar(2019, 2, 15).time), DailyBasicRequest.OutParams::class.java).isNotEmpty())
     }
 }

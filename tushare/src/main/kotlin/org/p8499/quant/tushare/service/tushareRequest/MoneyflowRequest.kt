@@ -13,8 +13,8 @@ import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
-class DailyRequest : TushareRequest() {
-    override val apiName = "daily"
+class MoneyflowRequest : TushareRequest() {
+    override val apiName = "moneyflow"
 
     @Autowired
     override lateinit var objectMapper: ObjectMapper
@@ -54,15 +54,51 @@ class DailyRequest : TushareRequest() {
             @set:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
             var tradeDate: Date? = null,
 
-            var open: Double? = null,
+            @set:JsonProperty("buy_sm_vol")
+            var buySmVol: Double? = null,
 
-            var high: Double? = null,
+            @set:JsonProperty("buy_sm_amount")
+            var buySmAmount: Double? = null,
 
-            var low: Double? = null,
+            @set:JsonProperty("sell_sm_vol")
+            var sellSmVol: Double? = null,
 
-            var close: Double? = null,
+            @set:JsonProperty("sell_sm_amount")
+            var sellSmAmount: Double? = null,
 
-            var vol: Double? = null,
+            @set:JsonProperty("buy_md_vol")
+            var buyMdVol: Double? = null,
 
-            var amount: Double? = null)
+            @set:JsonProperty("buy_md_amount")
+            var buyMdAmount: Double? = null,
+
+            @set:JsonProperty("sell_md_vol")
+            var sellMdVol: Double? = null,
+
+            @set:JsonProperty("sell_md_amount")
+            var sellMdAmount: Double? = null,
+
+            @set:JsonProperty("buy_lg_vol")
+            var buyLgVol: Double? = null,
+
+            @set:JsonProperty("buy_lg_amount")
+            var buyLgAmount: Double? = null,
+
+            @set:JsonProperty("sell_lg_vol")
+            var sellLgVol: Double? = null,
+
+            @set:JsonProperty("sell_lg_amount")
+            var sellLgAmount: Double? = null,
+
+            @set:JsonProperty("buy_elg_vol")
+            var buyElgVol: Double? = null,
+
+            @set:JsonProperty("buy_elg_amount")
+            var buyElgAmount: Double? = null,
+
+            @set:JsonProperty("sell_elg_vol")
+            var sellElgVol: Double? = null,
+
+            @set:JsonProperty("sell_elg_amount")
+            var sellElgAmount: Double? = null)
 }

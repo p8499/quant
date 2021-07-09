@@ -13,8 +13,8 @@ import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
-class DailyRequest : TushareRequest() {
-    override val apiName = "daily"
+class AdjFactorRequest : TushareRequest() {
+    override val apiName = "adj_factor"
 
     @Autowired
     override lateinit var objectMapper: ObjectMapper
@@ -54,15 +54,6 @@ class DailyRequest : TushareRequest() {
             @set:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
             var tradeDate: Date? = null,
 
-            var open: Double? = null,
-
-            var high: Double? = null,
-
-            var low: Double? = null,
-
-            var close: Double? = null,
-
-            var vol: Double? = null,
-
-            var amount: Double? = null)
+            @set:JsonProperty("adj_factor")
+            var adjFactor: Double? = null)
 }

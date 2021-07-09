@@ -36,6 +36,7 @@ class StockBasicRequest : TushareRequest() {
             var exchange: String? = null,
 
             @get:JsonInclude(JsonInclude.Include.NON_NULL)
+            @get:JsonProperty("ts_code")
             var tsCode: String? = null,
 
             @get:JsonInclude(JsonInclude.Include.NON_NULL)
