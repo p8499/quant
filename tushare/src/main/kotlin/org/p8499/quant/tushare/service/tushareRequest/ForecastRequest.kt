@@ -13,8 +13,8 @@ import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
-class BalancesheetRequest : TushareRequest() {
-    override val apiName = "balancesheet"
+class ForecastRequest : TushareRequest() {
+    override val apiName = "forecast"
 
     @Autowired
     override lateinit var objectMapper: ObjectMapper
@@ -50,12 +50,7 @@ class BalancesheetRequest : TushareRequest() {
             var period: Date? = null,
 
             @get:JsonInclude(JsonInclude.Include.NON_NULL)
-            @get:JsonProperty("report_type")
-            var reportType: String? = null,
-
-            @get:JsonInclude(JsonInclude.Include.NON_NULL)
-            @get:JsonProperty("comp_type")
-            var compType: String? = null)
+            var type: String? = null)
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     class OutParams(
@@ -66,20 +61,18 @@ class BalancesheetRequest : TushareRequest() {
             @set:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
             var annDate: Date? = null,
 
-            @set:JsonProperty("f_ann_date")
-            @set:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
-            var fAnnDate: Date? = null,
-
             @set:JsonProperty("end_date")
             @set:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
             var endDate: Date? = null,
 
-            @set:JsonProperty("report_type")
-            var reportType: String? = null,
+            var type: String? = null,
 
-            @set:JsonProperty("comp_type")
-            var compType: String? = null,
+            @set:JsonProperty("p_change_min")
+            var pChangeMin: Double? = null,
 
-            @set:JsonProperty("total_hldr_eqy_exc_min_int")
-            var totalHldrEqyExcMinInt: Double? = null)
+            @set:JsonProperty("p_change_max")
+            var pChangeMax: Double? = null,
+
+            @set:JsonProperty("change_reason")
+            var changeReason: String? = null)
 }

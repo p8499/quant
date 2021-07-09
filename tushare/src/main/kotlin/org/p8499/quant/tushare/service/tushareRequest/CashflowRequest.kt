@@ -13,8 +13,8 @@ import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
-class BalancesheetRequest : TushareRequest() {
-    override val apiName = "balancesheet"
+class CashflowRequest : TushareRequest() {
+    override val apiName = "cashflow"
 
     @Autowired
     override lateinit var objectMapper: ObjectMapper
@@ -80,6 +80,6 @@ class BalancesheetRequest : TushareRequest() {
             @set:JsonProperty("comp_type")
             var compType: String? = null,
 
-            @set:JsonProperty("total_hldr_eqy_exc_min_int")
-            var totalHldrEqyExcMinInt: Double? = null)
+            @set:JsonProperty("n_cashflow_act")
+            var nCashflowAct: Double? = null)
 }

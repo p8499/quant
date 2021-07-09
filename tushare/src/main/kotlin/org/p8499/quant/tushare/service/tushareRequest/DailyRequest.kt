@@ -13,8 +13,8 @@ import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
-class BalancesheetRequest : TushareRequest() {
-    override val apiName = "balancesheet"
+class DailyRequest : TushareRequest() {
+    override val apiName = "daily"
 
     @Autowired
     override lateinit var objectMapper: ObjectMapper
@@ -27,13 +27,12 @@ class BalancesheetRequest : TushareRequest() {
 
     class InParams(
             @get:JsonInclude(JsonInclude.Include.NON_NULL)
-            @get:JsonProperty("ts_code")
             var tsCode: String? = null,
 
             @get:JsonInclude(JsonInclude.Include.NON_NULL)
-            @get:JsonProperty("ann_date")
+            @get:JsonProperty("trade_date")
             @get:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
-            var annDate: Date? = null,
+            var tradeDate: Date? = null,
 
             @get:JsonInclude(JsonInclude.Include.NON_NULL)
             @get:JsonProperty("start_date")
@@ -43,43 +42,26 @@ class BalancesheetRequest : TushareRequest() {
             @get:JsonInclude(JsonInclude.Include.NON_NULL)
             @get:JsonProperty("end_date")
             @get:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
-            var endDate: Date? = null,
-
-            @get:JsonInclude(JsonInclude.Include.NON_NULL)
-            @get:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
-            var period: Date? = null,
-
-            @get:JsonInclude(JsonInclude.Include.NON_NULL)
-            @get:JsonProperty("report_type")
-            var reportType: String? = null,
-
-            @get:JsonInclude(JsonInclude.Include.NON_NULL)
-            @get:JsonProperty("comp_type")
-            var compType: String? = null)
+            var endDate: Date? = null)
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     class OutParams(
-            @get:JsonProperty("ts_code")
+            @set:JsonProperty("ts_code")
             var tsCode: String? = null,
 
-            @set:JsonProperty("ann_date")
+            @set:JsonProperty("trade_date")
             @set:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
-            var annDate: Date? = null,
+            var tradeDate: Date? = null,
 
-            @set:JsonProperty("f_ann_date")
-            @set:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
-            var fAnnDate: Date? = null,
+            var open: Double? = null,
 
-            @set:JsonProperty("end_date")
-            @set:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
-            var endDate: Date? = null,
+            var high: Double? = null,
 
-            @set:JsonProperty("report_type")
-            var reportType: String? = null,
+            var low: Double? = null,
 
-            @set:JsonProperty("comp_type")
-            var compType: String? = null,
+            var close: Double? = null,
 
-            @set:JsonProperty("total_hldr_eqy_exc_min_int")
-            var totalHldrEqyExcMinInt: Double? = null)
+            var vol: Double? = null,
+
+            var amount: Double? = null)
 }

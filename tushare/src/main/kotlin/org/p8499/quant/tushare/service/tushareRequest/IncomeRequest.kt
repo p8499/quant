@@ -45,7 +45,6 @@ class IncomeRequest : TushareRequest() {
             @get:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
             var endDate: Date? = null,
 
-
             @get:JsonInclude(JsonInclude.Include.NON_NULL)
             @get:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
             var period: Date? = null,
@@ -75,12 +74,12 @@ class IncomeRequest : TushareRequest() {
             @set:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
             var endDate: Date? = null,
 
-            @get:JsonProperty("report_type")
+            @set:JsonProperty("report_type")
             var reportType: String? = null,
 
-            @get:JsonProperty("comp_type")
+            @set:JsonProperty("comp_type")
             var compType: String? = null,
 
-            @get:JsonProperty("n_income_attr_p")
+            @set:JsonProperty("n_income_attr_p")
             var nIncomeAttrP: Double? = null)
 }
