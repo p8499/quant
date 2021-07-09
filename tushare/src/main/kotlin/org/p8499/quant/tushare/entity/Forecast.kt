@@ -9,7 +9,7 @@ data class Forecast(
         @Id
         @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "Forecast_id")
         @SequenceGenerator(name = "Forecast_id", allocationSize = 1)
-        var id: Int? = null,
+        var id: Long? = null,
 
         @Column(nullable = false, length = 16)
         var stockId: String? = null,

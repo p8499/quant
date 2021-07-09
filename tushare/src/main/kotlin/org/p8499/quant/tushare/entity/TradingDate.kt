@@ -9,7 +9,7 @@ data class TradingDate(
         @Id
         @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "TradingDate_id")
         @SequenceGenerator(name = "TradingDate_id", allocationSize = 1)
-        var id: Int? = null,
+        var id: Long? = null,
 
         @Column(nullable = false, length = 4)
         var exchangeId: String? = null,

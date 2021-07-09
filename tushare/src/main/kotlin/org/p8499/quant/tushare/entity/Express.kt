@@ -9,7 +9,7 @@ data class Express(
         @Id
         @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "Express_id")
         @SequenceGenerator(name = "Express_id", allocationSize = 1)
-        var id: Int? = null,
+        var id: Long? = null,
 
         @Column(nullable = false, length = 16)
         var stockId: String? = null,

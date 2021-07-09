@@ -9,7 +9,7 @@ data class Cashflow(
         @Id
         @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "Cashflow_id")
         @SequenceGenerator(name = "Cashflow_id", allocationSize = 1)
-        var id: Int? = null,
+        var id: Long? = null,
 
         @Column(nullable = false, length = 16)
         var stockId: String? = null,

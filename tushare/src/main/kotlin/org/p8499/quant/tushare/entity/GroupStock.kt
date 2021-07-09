@@ -8,7 +8,7 @@ data class GroupStock(
         @Id
         @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "GroupStock_id")
         @SequenceGenerator(name = "GroupStock_id", allocationSize = 1)
-        var id: Int? = null,
+        var id: Long? = null,
 
         @Column(nullable = false, length = 32)
         var groupId: String? = null,

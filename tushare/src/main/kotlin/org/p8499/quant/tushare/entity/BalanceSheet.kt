@@ -9,7 +9,7 @@ data class BalanceSheet(
         @Id
         @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "BalanceSheet_id")
         @SequenceGenerator(name = "BalanceSheet_id", allocationSize = 1)
-        var id: Int? = null,
+        var id: Long? = null,
 
         @Column(nullable = false, length = 16)
         var stockId: String? = null,

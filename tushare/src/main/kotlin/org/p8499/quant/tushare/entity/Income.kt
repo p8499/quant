@@ -9,7 +9,7 @@ data class Income(
         @Id
         @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "Income_id")
         @SequenceGenerator(name = "Income_id", allocationSize = 1)
-        var id: Int? = null,
+        var id: Long? = null,
 
         @Column(nullable = false, length = 16)
         var stockId: String? = null,

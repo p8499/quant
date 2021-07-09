@@ -9,7 +9,7 @@ data class Level1(
         @Id
         @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "Level1_id")
         @SequenceGenerator(name = "Level1_id", allocationSize = 1)
-        var id: Int? = null,
+        var id: Long? = null,
 
         @Column(nullable = false, length = 16)
         var stockId: String? = null,
