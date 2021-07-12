@@ -27,9 +27,11 @@ class StockBasicRequest : TushareRequest() {
 
     class InParams(
             @get:JsonInclude(JsonInclude.Include.NON_NULL)
+            @get:JsonProperty("is_hs")
             var isHs: Char? = null,
 
             @get:JsonInclude(JsonInclude.Include.NON_NULL)
+            @get:JsonProperty("list_status")
             var listStatus: Char? = null,
 
             @get:JsonInclude(JsonInclude.Include.NON_NULL)

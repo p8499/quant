@@ -4,6 +4,7 @@ import org.p8499.quant.tushare.entity.TradingDate
 import org.p8499.quant.tushare.repository.TradingDateRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import javax.transaction.Transactional
 
 @Service
 class TradingDateService {
@@ -12,5 +13,6 @@ class TradingDateService {
 
     fun last(exchangeId: String) = tradingDateRepository.last(exchangeId)
 
-    fun saveAll(entityList: List<TradingDate>) = tradingDateRepository.saveAll(entityList)
+    @Transactional
+    fun saveAll(entityList: List<TradingDate>) = tradingDateRepository.saveAllAndFlush(entityList)
 }
