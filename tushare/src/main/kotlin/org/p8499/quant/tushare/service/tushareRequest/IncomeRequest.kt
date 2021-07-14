@@ -81,5 +81,9 @@ class IncomeRequest : TushareRequest() {
             var compType: String? = null,
 
             @set:JsonProperty("n_income_attr_p")
-            var nIncomeAttrP: Double? = null)
+            var nIncomeAttrP: Double? = null,
+
+            @set:JsonProperty("update_flag")
+            @set:JsonFormat(shape = JsonFormat.Shape.NUMBER)
+            var updateFlag: Boolean? = null)
 }

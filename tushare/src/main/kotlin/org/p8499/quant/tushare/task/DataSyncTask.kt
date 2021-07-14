@@ -35,6 +35,12 @@ class DataSyncTask {
     lateinit var balanceSheetService: BalanceSheetService
 
     @Autowired
+    lateinit var incomeService: IncomeService
+
+    @Autowired
+    lateinit var cashflowService: CashflowService
+
+    @Autowired
     lateinit var tradeCalRequest: TradeCalRequest
 
     @Autowired
@@ -95,6 +101,8 @@ class DataSyncTask {
         syncLevel2()
         syncGroupStock()
         syncBalanceSheet()
+        syncIncome()
+        syncCashflow()
     }
 
     private fun syncExchange() {
@@ -207,7 +215,7 @@ class DataSyncTask {
 
     private fun syncBalanceSheet() {
         val stockIdList = stockService.findAll().map(Stock::id)
-        for (stockId in stockIdList) {
+        for (stockId in stockIdList)
             balanceSheetService.saveAll(balancesheetRequest.invoke(BalancesheetRequest.InParams(tsCode = stockId), BalancesheetRequest.OutParams::class.java, arrayOf("ann_date", "end_date", "total_hldr_eqy_exc_min_int", "update_flag"))
                     .groupBy(BalancesheetRequest.OutParams::endDate).mapValues { it.value.sortedWith(compareBy(BalancesheetRequest.OutParams::updateFlag)).last() }.map {
                         Calendar.getInstance().run {
@@ -215,6 +223,29 @@ class DataSyncTask {
                             BalanceSheet(stockId, get(Calendar.YEAR), get(Calendar.MONTH / 4) + 1, it.value.annDate, it.value.totalHldrEqyExcMinInt)
                         }
                     })
-        }
+    }
+
+    private fun syncIncome() {
+        val stockIdList = stockService.findAll().map(Stock::id)
+        for (stockId in stockIdList)
+            incomeService.saveAll(incomeRequest.invoke(IncomeRequest.InParams(tsCode = stockId), IncomeRequest.OutParams::class.java, arrayOf("ann_date", "end_date", "n_income_attr_p", "update_flag"))
+                    .groupBy(IncomeRequest.OutParams::endDate).mapValues { it.value.sortedWith(compareBy(IncomeRequest.OutParams::updateFlag)).last() }.map {
+                        Calendar.getInstance().run {
+                            time = it.value.endDate
+                            Income(stockId, get(Calendar.YEAR), get(Calendar.MONTH / 4) + 1, it.value.annDate, it.value.nIncomeAttrP)
+                        }
+                    })
+    }
+
+    private fun syncCashflow() {
+        val stockIdList = stockService.findAll().map(Stock::id)
+        for (stockId in stockIdList)
+            cashflowService.saveAll(cashflowRequest.invoke(CashflowRequest.InParams(tsCode = stockId), CashflowRequest.OutParams::class.java, arrayOf("ann_date", "end_date", "n_cashflow_act", "update_flag"))
+                    .groupBy(CashflowRequest.OutParams::endDate).mapValues { it.value.sortedWith(compareBy(CashflowRequest.OutParams::updateFlag)).last() }.map {
+                        Calendar.getInstance().run {
+                            time = it.value.endDate
+                            Cashflow(stockId, get(Calendar.YEAR), get(Calendar.MONTH / 4) + 1, it.value.annDate, it.value.nCashflowAct)
+                        }
+                    })
     }
 }

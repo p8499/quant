@@ -81,5 +81,9 @@ class CashflowRequest : TushareRequest() {
             var compType: String? = null,
 
             @set:JsonProperty("n_cashflow_act")
-            var nCashflowAct: Double? = null)
+            var nCashflowAct: Double? = null,
+
+            @set:JsonProperty("update_flag")
+            @set:JsonFormat(shape = JsonFormat.Shape.NUMBER)
+            var updateFlag: Boolean? = null)
 }
