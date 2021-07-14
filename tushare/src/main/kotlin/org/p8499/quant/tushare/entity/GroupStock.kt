@@ -1,21 +1,23 @@
 package org.p8499.quant.tushare.entity
 
+import java.io.Serializable
 import javax.persistence.*
 
 @Entity
-@Table(name = "F05", uniqueConstraints = [UniqueConstraint(columnNames = ["groupId", "stockId"])])
+@Table(name = "F05")
+@IdClass(GroupStock.GroupStockId::class)
 data class GroupStock(
         @Id
-        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "GroupStock_id")
-        @SequenceGenerator(name = "GroupStock_id", allocationSize = 1)
-        var id: Long? = null,
-
         @Column(nullable = false, length = 32)
         var groupId: String? = null,
 
+        @Id
         @Column(nullable = false, length = 16)
         var stockId: String? = null,
 
         @Column(nullable = false, precision = 8, scale = 4)
-        var weight: Double? = null
-)
+        var weight: Double? = null) {
+    data class GroupStockId(
+            var groupId: String? = null,
+            var stockId: String? = null) : Serializable
+}

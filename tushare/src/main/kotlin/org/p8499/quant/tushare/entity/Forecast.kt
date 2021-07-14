@@ -1,22 +1,22 @@
 package org.p8499.quant.tushare.entity
 
+import java.io.Serializable
 import java.util.*
 import javax.persistence.*
 
 @Entity
-@Table(name = "F07", uniqueConstraints = [UniqueConstraint(columnNames = ["stockId", "year", "period"])])
+@Table(name = "F07")
+@IdClass(Forecast.ForecastId::class)
 data class Forecast(
         @Id
-        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "Forecast_id")
-        @SequenceGenerator(name = "Forecast_id", allocationSize = 1)
-        var id: Long? = null,
-
         @Column(nullable = false, length = 16)
         var stockId: String? = null,
 
+        @Id
         @Column(nullable = false)
         var year: Short? = null,
 
+        @Id
         @Column(nullable = false)
         var period: Short? = null,
 
@@ -29,5 +29,9 @@ data class Forecast(
 
         @Lob
         @Column(nullable = false, columnDefinition = "CLOB")
-        var content: String? = null,
-)
+        var content: String? = null) {
+    data class ForecastId(
+            var stockId: String? = null,
+            var year: Int? = null,
+            var period: Int? = null) : Serializable
+}

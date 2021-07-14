@@ -1,22 +1,22 @@
 package org.p8499.quant.tushare.entity
 
+import java.io.Serializable
 import java.util.*
 import javax.persistence.*
 
 @Entity
-@Table(name = "F062", uniqueConstraints = [UniqueConstraint(columnNames = ["stockId", "year", "period"])])
+@Table(name = "F062")
+@IdClass(Income.IncomeId::class)
 data class Income(
         @Id
-        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "Income_id")
-        @SequenceGenerator(name = "Income_id", allocationSize = 1)
-        var id: Long? = null,
-
         @Column(nullable = false, length = 16)
         var stockId: String? = null,
 
+        @Id
         @Column(nullable = false)
         var year: Short? = null,
 
+        @Id
         @Column(nullable = false)
         var period: Short? = null,
 
@@ -33,5 +33,9 @@ data class Income(
          * 净利润(不含少数股东损益) -> 净利润(年初至今)
          */
         @Column(nullable = false, precision = 26, scale = 2)
-        var nIncomeAttrP: Double? = null
-)
+        var nIncomeAttrP: Double? = null) {
+    data class IncomeId(
+            var stockId: String? = null,
+            var year: Int? = null,
+            var period: Int? = null) : Serializable
+}

@@ -24,5 +24,4 @@ data class Stock(
         var listed: Date? = null,
 
         @Temporal(TemporalType.DATE)
-        var delisted: Date? = null
-)
+        var delisted: Date? = null)

@@ -81,5 +81,9 @@ class BalancesheetRequest : TushareRequest() {
             var compType: String? = null,
 
             @set:JsonProperty("total_hldr_eqy_exc_min_int")
-            var totalHldrEqyExcMinInt: Double? = null)
+            var totalHldrEqyExcMinInt: Double? = null,
+
+            @set:JsonProperty("update_flag")
+            @set:JsonFormat(shape = JsonFormat.Shape.NUMBER)
+            var updateFlag: Boolean? = null)
 }

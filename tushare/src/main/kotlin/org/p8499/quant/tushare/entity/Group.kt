@@ -14,7 +14,6 @@ data class Group(
 
         @Column(nullable = false)
         @Enumerated(EnumType.ORDINAL)
-        var type: Type? = null
-) {
+        var type: Type? = null) {
     enum class Type { INDEX, INDUSTRY, CONCEPT }
 }

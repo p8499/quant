@@ -13,6 +13,5 @@ data class Exchange(
         var id: String? = null,
 
         @Column(nullable = false, length = 8)
-        var name: String? = null
-)
+        var name: String? = null)
 

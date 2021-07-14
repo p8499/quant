@@ -1,22 +1,22 @@
 package org.p8499.quant.tushare.entity
 
+import java.io.Serializable
 import java.util.*
 import javax.persistence.*
 
 @Entity
-@Table(name = "F06E", uniqueConstraints = [UniqueConstraint(columnNames = ["stockId", "year", "period"])])
+@Table(name = "F06E")
+@IdClass(Express.ExpressId::class)
 data class Express(
         @Id
-        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "Express_id")
-        @SequenceGenerator(name = "Express_id", allocationSize = 1)
-        var id: Long? = null,
-
         @Column(nullable = false, length = 16)
         var stockId: String? = null,
 
+        @Id
         @Column(nullable = false)
         var year: Short? = null,
 
+        @Id
         @Column(nullable = false)
         var period: Short? = null,
 
@@ -34,5 +34,10 @@ data class Express(
          * 营业收入(元) -> 营业收入(年初至今)
          */
         @Column(nullable = false, precision = 26, scale = 2)
-        var revenue: Double? = null,
-)
+        var revenue: Double? = null) {
+    data class ExpressId(
+            var stockId: String? = null,
+            var year: Int? = null,
+            var period: Int? = null) : Serializable
+}
+

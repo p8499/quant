@@ -40,6 +40,7 @@ class TradeCalRequest : TushareRequest() {
             var endDate: Date? = null,
 
             @get:JsonInclude(JsonInclude.Include.NON_NULL)
+            @get:JsonProperty("is_open")
             @get:JsonFormat(shape = JsonFormat.Shape.NUMBER)
             var isOpen: Boolean? = null)
 

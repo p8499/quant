@@ -1,19 +1,18 @@
 package org.p8499.quant.tushare.entity
 
+import java.io.Serializable
 import java.util.*
 import javax.persistence.*
 
 @Entity
-@Table(name = "F150", uniqueConstraints = [UniqueConstraint(columnNames = ["stockId", "dte"])])
+@Table(name = "F150")
+@IdClass(Level1.Level1Id::class)
 data class Level1(
         @Id
-        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "Level1_id")
-        @SequenceGenerator(name = "Level1_id", allocationSize = 1)
-        var id: Long? = null,
-
         @Column(nullable = false, length = 16)
         var stockId: String? = null,
 
+        @Id
         @Column(nullable = false, name = "dte")
         @Temporal(TemporalType.DATE)
         var date: Date? = null,
@@ -43,5 +42,8 @@ data class Level1(
         var flowShare: Double? = null,
 
         @Column(nullable = false, precision = 24, scale = 12)
-        var factor: Double? = null
-)
+        var factor: Double? = null) {
+    data class Level1Id(
+            var stockId: String? = null,
+            var date: Date? = null) : Serializable
+}
