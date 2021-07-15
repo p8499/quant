@@ -14,11 +14,11 @@ data class Forecast(
 
         @Id
         @Column(nullable = false)
-        var year: Short? = null,
+        var year: Int? = null,
 
         @Id
         @Column(nullable = false)
-        var period: Short? = null,
+        var period: Int? = null,
 
         @Column(nullable = false)
         @Temporal(TemporalType.DATE)

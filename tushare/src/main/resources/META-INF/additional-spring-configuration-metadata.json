@@ -1,0 +1,17 @@
+{
+  "groups": [
+    {
+      "name": "tushare",
+      "type": "org.p8499.quant.tushare.TushareProperties",
+      "sourceType": "org.p8499.quant.tushare.TushareProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "tushare.token",
+      "type": "java.lang.String",
+      "sourceType": "org.p8499.quant.tushare.TushareProperties",
+      "description": "Description for tushare.token."
+    }
+  ]
+}

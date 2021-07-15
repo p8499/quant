@@ -5,9 +5,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.p8499.quant.tushare.TushareRequestBodyFactory
 import org.p8499.quant.tushare.feignClient.TushareFeignClient
 import org.p8499.quant.tushare.service.TushareRequest
+import org.p8499.quant.tushare.service.TushareRequestBodyFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.util.*
@@ -65,5 +65,9 @@ class ExpressRequest : TushareRequest() {
             @set:JsonProperty("total_hldr_eqy_exc_min_int")
             var totalHldrEqyExcMinInt: Double? = null,
 
-            var revenue: Double? = null)
+            var revenue: Double? = null,
+
+            @set:JsonProperty("is_audit")
+            @set:JsonFormat(shape = JsonFormat.Shape.NUMBER)
+            var isAudit: Boolean? = null)
 }

@@ -5,9 +5,9 @@ import java.util.*
 import javax.persistence.*
 
 @Entity
-@Table(name = "F150")
-@IdClass(Level1.Level1Id::class)
-data class Level1(
+@Table(name = "F1501")
+@IdClass(Level1Candlestick.Level1CandlestickId::class)
+data class Level1Candlestick(
         @Id
         @Column(nullable = false, length = 16)
         var stockId: String? = null,
@@ -33,17 +33,8 @@ data class Level1(
         var volume: Double? = null,
 
         @Column(nullable = false, precision = 26, scale = 2)
-        var amount: Double? = null,
-
-        @Column(nullable = false, precision = 18, scale = 2)
-        var totalShare: Double? = null,
-
-        @Column(nullable = false, precision = 18, scale = 2)
-        var flowShare: Double? = null,
-
-        @Column(nullable = false, precision = 24, scale = 12)
-        var factor: Double? = null) {
-    data class Level1Id(
+        var amount: Double? = null) {
+    data class Level1CandlestickId(
             var stockId: String? = null,
             var date: Date? = null) : Serializable
 }

@@ -13,5 +13,5 @@ class Level2Service {
 
     operator fun get(stockId: String, date: Date) = level2Repository.get(stockId, date)
 
-    fun save(entity: Level2) = level2Repository.saveAndFlush(entity)
+    fun saveAll(entityList: List<Level2>) = level2Repository.saveAllAndFlush(entityList)
 }

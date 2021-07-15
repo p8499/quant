@@ -3,9 +3,9 @@ package org.p8499.quant.tushare.service.tushareRequest
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.p8499.quant.tushare.TushareRequestBodyFactory
 import org.p8499.quant.tushare.feignClient.TushareFeignClient
 import org.p8499.quant.tushare.service.TushareRequest
+import org.p8499.quant.tushare.service.TushareRequestBodyFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 

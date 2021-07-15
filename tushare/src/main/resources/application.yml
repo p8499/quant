@@ -16,16 +16,16 @@ spring:
       naming:
         physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
         implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
+
+tushare:
+  token: 38625237adbb054f362501dd9e8ebaa68e8406ac316e6c792ec41600
+
 feign:
   client:
     config:
       default:
         loggerLevel: full
-tushare:
-  token: 38625237adbb054f362501dd9e8ebaa68e8406ac316e6c792ec41600
 logging:
   level:
-    org:
-      hibernate:
-        SQL: DEBUG
-    org.p8499.quant.tushare.feignClient.*: DEBUG
+    org.hibernate.SQL: debug
+    org.p8499.quant.tushare.feignClient.*: debug

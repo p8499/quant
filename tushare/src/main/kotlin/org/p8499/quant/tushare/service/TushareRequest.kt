@@ -1,8 +1,12 @@
 package org.p8499.quant.tushare.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.p8499.quant.tushare.TushareRequestBodyFactory
 import org.p8499.quant.tushare.feignClient.TushareFeignClient
+import org.p8499.quant.tushare.feignClient.TushareRequestBody
+
+class TushareRequestBodyFactory(val token: String) {
+    fun <T> tushareRequestBody(apiName: String, params: T, fields: Array<String>) = TushareRequestBody(apiName, token, params, fields)
+}
 
 abstract class TushareRequest {
     abstract val apiName: String

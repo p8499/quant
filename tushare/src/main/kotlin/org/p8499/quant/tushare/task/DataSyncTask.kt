@@ -6,6 +6,7 @@ import org.p8499.quant.tushare.service.tushareRequest.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
+import java.text.DecimalFormat
 import java.util.*
 
 @Component
@@ -23,7 +24,13 @@ class DataSyncTask {
     lateinit var groupService: GroupService
 
     @Autowired
-    lateinit var level1Service: Level1Service
+    lateinit var level1CandlestickService: Level1CandlestickService
+
+    @Autowired
+    lateinit var level1BasicService: Level1BasicService
+
+    @Autowired
+    lateinit var level1AdjFactorService: Level1AdjFactorService
 
     @Autowired
     lateinit var level2Service: Level2Service
@@ -39,6 +46,12 @@ class DataSyncTask {
 
     @Autowired
     lateinit var cashflowService: CashflowService
+
+    @Autowired
+    lateinit var expressService: ExpressService
+
+    @Autowired
+    lateinit var forecastService: ForecastService
 
     @Autowired
     lateinit var tradeCalRequest: TradeCalRequest
@@ -97,12 +110,16 @@ class DataSyncTask {
         syncTradingDate()
         syncStock()
         syncGroup()
-        syncLevel1()
+        syncLevel1Candlestick()
+        syncLevel1Basic()
+        syncLevel1AdjFactor()
         syncLevel2()
         syncGroupStock()
         syncBalanceSheet()
         syncIncome()
         syncCashflow()
+        syncExpress()
+        syncForecast()
     }
 
     private fun syncExchange() {
@@ -144,38 +161,60 @@ class DataSyncTask {
         groupService.saveAll(indexListOfMarket("MSCI") + indexListOfMarket("CSI") + indexListOfMarket("SSE") + indexListOfMarket("SZSE") + indexListOfMarket("CICC") + indexListOfMarket("SW") + indexListOfMarket("OTH") + industryList() + conceptList())
     }
 
-    private fun syncLevel1() {
-        val level1: (String, Date) -> Level1? = { tsCode, tradeDate ->
-            val daily = dailyRequest.invoke(DailyRequest.InParams(tsCode = tsCode, tradeDate = tradeDate), DailyRequest.OutParams::class.java).firstOrNull()
-            val dailyBasic = dailyBasicRequest.invoke(DailyBasicRequest.InParams(tsCode = tsCode, tradeDate = tradeDate), DailyBasicRequest.OutParams::class.java).firstOrNull()
-            val adjFactor = adjFactorRequest.invoke(AdjFactorRequest.InParams(tsCode = tsCode, tradeDate = tradeDate), AdjFactorRequest.OutParams::class.java).firstOrNull()
-            if (daily != null && dailyBasic != null && adjFactor != null)
-                Level1(tsCode, tradeDate, daily.open, daily.close, daily.high, daily.low, daily.vol, daily.amount, dailyBasic.totalShare, dailyBasic.floatShare, adjFactor.adjFactor)
-            else
-                null
+    private fun syncLevel1Candlestick() {
+        val level1CandlestickList: (String) -> List<Level1Candlestick> = { tsCode ->
+            tradingDateService.unprocessedForLevel1Candlestick(tsCode).mapNotNull(TradingDate::date).groupBy {
+                Calendar.getInstance().run {
+                    time = it
+                    get(Calendar.YEAR)
+                }
+            }.flatMap { dailyRequest.invoke(DailyRequest.InParams(tsCode = tsCode, startDate = it.value.minOrNull(), endDate = it.value.maxOrNull()), DailyRequest.OutParams::class.java).asList() }
+                    .map { Level1Candlestick(tsCode, it.tradeDate, it.open, it.close, it.high, it.low, it.vol, it.amount) }
         }
-        for (stock in stockService.findAll())
-            for (tradingDate in stock.id?.let(tradingDateService::unprocessedForLevel1) ?: continue) {
-                val stockId = stock.id ?: continue
-                val date = tradingDate.date ?: continue
-                level1(stockId, date)?.run(level1Service::save)
-            }
+        for (stockId in stockService.findAll().mapNotNull(Stock::id))
+            level1CandlestickService.saveAll(level1CandlestickList(stockId))
+    }
+
+    private fun syncLevel1Basic() {
+        val level1BasicList: (String) -> List<Level1Basic> = { tsCode ->
+            tradingDateService.unprocessedForLevel1Basic(tsCode).mapNotNull(TradingDate::date).groupBy {
+                Calendar.getInstance().run {
+                    time = it
+                    get(Calendar.YEAR)
+                }
+            }.flatMap { dailyBasicRequest.invoke(DailyBasicRequest.InParams(tsCode = tsCode, startDate = it.value.minOrNull(), endDate = it.value.maxOrNull()), DailyBasicRequest.OutParams::class.java).asList() }
+                    .map { Level1Basic(tsCode, it.tradeDate, it.totalShare, it.floatShare) }
+        }
+        for (stockId in stockService.findAll().mapNotNull(Stock::id))
+            level1BasicService.saveAll(level1BasicList(stockId))
+    }
+
+    private fun syncLevel1AdjFactor() {
+        val level1AdjFactorList: (String) -> List<Level1AdjFactor> = { tsCode ->
+            tradingDateService.unprocessedForLevel1AdjFactor(tsCode).mapNotNull(TradingDate::date).groupBy {
+                Calendar.getInstance().run {
+                    time = it
+                    get(Calendar.YEAR)
+                }
+            }.flatMap { adjFactorRequest.invoke(AdjFactorRequest.InParams(tsCode = tsCode, startDate = it.value.minOrNull(), endDate = it.value.maxOrNull()), AdjFactorRequest.OutParams::class.java).asList() }
+                    .map { Level1AdjFactor(tsCode, it.tradeDate, it.adjFactor) }
+        }
+        for (stockId in stockService.findAll().mapNotNull(Stock::id))
+            level1AdjFactorService.saveAll(level1AdjFactorList(stockId))
     }
 
     private fun syncLevel2() {
-        val level2: (String, Date) -> Level2? = { tsCode, tradeDate ->
-            val moneyflow = moneyflowRequest.invoke(MoneyflowRequest.InParams(tsCode = tsCode, tradeDate = tradeDate), MoneyflowRequest.OutParams::class.java).firstOrNull()
-            if (moneyflow != null)
-                Level2(tsCode, tradeDate, moneyflow.buySmVol, moneyflow.sellSmVol, moneyflow.buyMdVol, moneyflow.sellMdVol, moneyflow.buyLgVol, moneyflow.sellLgVol, moneyflow.buyElgVol, moneyflow.sellElgVol)
-            else
-                null
+        val level2List: (String) -> List<Level2> = { tsCode ->
+            tradingDateService.unprocessedForLevel2(tsCode).mapNotNull(TradingDate::date).groupBy {
+                Calendar.getInstance().run {
+                    time = it
+                    get(Calendar.YEAR)
+                }
+            }.flatMap { moneyflowRequest.invoke(MoneyflowRequest.InParams(tsCode = tsCode, startDate = it.value.minOrNull(), endDate = it.value.maxOrNull()), MoneyflowRequest.OutParams::class.java).asList() }
+                    .map { Level2(tsCode, it.tradeDate, it.buySmVol, it.sellSmVol, it.buyMdVol, it.sellMdVol, it.buyLgVol, it.sellLgVol, it.buyElgVol, it.sellElgVol) }
         }
-        for (stock in stockService.findAll())
-            for (tradingDate in stock.id?.let(tradingDateService::unprocessedForLevel2) ?: continue) {
-                val stockId = stock.id ?: continue
-                val date = tradingDate.date ?: continue
-                level2(stockId, date)?.run(level2Service::save)
-            }
+        for (stockId in stockService.findAll().mapNotNull(Stock::id))
+            level2Service.saveAll(level2List(stockId))
     }
 
     private fun syncGroupStock() {
@@ -185,7 +224,7 @@ class DataSyncTask {
             groupStockList.filter { stockIdList.contains(it.groupId) }
         }
         val weightList: (List<String>, Date) -> List<Double> = { stockIdList, tradeDate ->
-            val flowShareList = stockIdList.map { level1Service[it, tradeDate] }.map { it?.flowShare ?: 0.0 }
+            val flowShareList = stockIdList.map { level1BasicService[it, tradeDate] }.map { it?.flowShare ?: 0.0 }
             val maxFlowShare = flowShareList.maxOf { it }
             flowShareList.map { it * 1000 / maxFlowShare }
         }
@@ -245,6 +284,31 @@ class DataSyncTask {
                         Calendar.getInstance().run {
                             time = it.value.endDate
                             Cashflow(stockId, get(Calendar.YEAR), get(Calendar.MONTH / 4) + 1, it.value.annDate, it.value.nCashflowAct)
+                        }
+                    })
+    }
+
+    private fun syncExpress() {
+        val stockIdList = stockService.findAll().map(Stock::id)
+        for (stockId in stockIdList)
+            expressService.saveAll(expressRequest.invoke(ExpressRequest.InParams(tsCode = stockId), ExpressRequest.OutParams::class.java, arrayOf("ann_date", "end_date", "revenue", "total_hldr_eqy_exc_min_int", "is_audit"))
+                    .groupBy(ExpressRequest.OutParams::endDate).mapValues { it.value.sortedWith(compareBy(ExpressRequest.OutParams::isAudit)).last() }.map {
+                        Calendar.getInstance().run {
+                            time = it.value.endDate
+                            Express(stockId, get(Calendar.YEAR), get(Calendar.MONTH / 4) + 1, it.value.annDate, it.value.totalHldrEqyExcMinInt, it.value.revenue)
+                        }
+                    })
+    }
+
+    private fun syncForecast() {
+        val stockIdList = stockService.findAll().map(Stock::id)
+        for (stockId in stockIdList)
+            forecastService.saveAll(forecastRequest.invoke(ForecastRequest.InParams(tsCode = stockId), ForecastRequest.OutParams::class.java, arrayOf("ann_date", "end_date", "type", "p_change_min", "p_change_max", "change_reason"))
+                    .groupBy(ForecastRequest.OutParams::endDate).mapValues { it.value.sortedWith(compareBy(ForecastRequest.OutParams::annDate)).last() }.map {
+                        Calendar.getInstance().run {
+                            time = it.value.endDate
+                            val format = DecimalFormat("0.00")
+                            Forecast(stockId, get(Calendar.YEAR), get(Calendar.MONTH / 4) + 1, it.value.annDate, "${it.value.type} (${format.format(it.value.pChangeMin)} - ${format.format(it.value.pChangeMax)})", it.value.changeReason)
                         }
                     })
     }
