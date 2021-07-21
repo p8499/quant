@@ -13,5 +13,7 @@ class Level1AdjFactorService {
 
     operator fun get(stockId: String, date: Date) = level1AdjFactorRepository.get(stockId, date)
 
+    fun findByStockId(stockId: String) = level1AdjFactorRepository.findByStockId(stockId)
+
     fun saveAll(entityList: List<Level1AdjFactor>) = level1AdjFactorRepository.saveAllAndFlush(entityList)
 }

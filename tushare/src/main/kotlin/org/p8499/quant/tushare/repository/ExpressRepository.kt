@@ -1,5 +1,6 @@
 package org.p8499.quant.tushare.repository
 
+import org.p8499.quant.tushare.dao.ExpressDao
 import org.p8499.quant.tushare.entity.Express
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor
@@ -10,4 +11,5 @@ import org.springframework.stereotype.Repository
 interface ExpressRepository :
         JpaRepository<Express, Long>,
         JpaSpecificationExecutor<Express>,
-        PagingAndSortingRepository<Express, Long>
+        PagingAndSortingRepository<Express, Long>,
+        ExpressDao

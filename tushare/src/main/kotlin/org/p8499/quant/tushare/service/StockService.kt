@@ -14,5 +14,7 @@ class StockService {
 
     fun findByStockIdList(stockIdList: List<String>) = stockRepository.findByStockIdList(stockIdList)
 
+    fun findByExchangeId(exchangeId: String) = stockRepository.findByExchangeId(exchangeId)
+
     fun saveAll(entityList: List<Stock>) = stockRepository.saveAllAndFlush(entityList)
 }

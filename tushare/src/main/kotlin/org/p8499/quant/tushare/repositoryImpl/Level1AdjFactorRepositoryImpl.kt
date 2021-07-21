@@ -15,4 +15,8 @@ class Level1AdjFactorRepositoryImpl : Level1AdjFactorDao {
     override fun get(stockId: String, date: Date): Level1AdjFactor? = em
             .createQuery("select t0 from Level1AdjFactor as t0 where t0.stockId = :stockId and t0.date <= :date and not exists (select 1 from Level1AdjFactor t1 where t1.stockId = :stockId and t1.date > t0.date)", Level1AdjFactor::class.java)
             .setParameter("stockId", stockId).setParameter("date", date).resultList.firstOrNull()
+
+    override fun findByStockId(stockId: String): List<Level1AdjFactor> = em
+            .createQuery("select t0 from Level1AdjFactor as t0 where t0.stockId = :stockId order by t0.date asc", Level1AdjFactor::class.java)
+            .setParameter("stockId", stockId).resultList
 }

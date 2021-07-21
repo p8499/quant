@@ -5,4 +5,6 @@ import java.util.*
 
 interface Level1AdjFactorDao {
     fun get(stockId: String, date: Date): Level1AdjFactor?
+
+    fun findByStockId(stockId: String): List<Level1AdjFactor>
 }

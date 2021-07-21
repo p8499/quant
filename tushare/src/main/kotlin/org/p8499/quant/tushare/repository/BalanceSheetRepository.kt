@@ -1,5 +1,6 @@
 package org.p8499.quant.tushare.repository
 
+import org.p8499.quant.tushare.dao.BalanceSheetDao
 import org.p8499.quant.tushare.entity.BalanceSheet
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor
@@ -10,4 +11,5 @@ import org.springframework.stereotype.Repository
 interface BalanceSheetRepository :
         JpaRepository<BalanceSheet, Long>,
         JpaSpecificationExecutor<BalanceSheet>,
-        PagingAndSortingRepository<BalanceSheet, Long>
+        PagingAndSortingRepository<BalanceSheet, Long>,
+        BalanceSheetDao

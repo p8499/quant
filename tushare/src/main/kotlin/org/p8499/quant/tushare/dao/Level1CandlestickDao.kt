@@ -5,4 +5,6 @@ import java.util.*
 
 interface Level1CandlestickDao {
     fun get(stockId: String, date: Date): Level1Candlestick?
+
+    fun findByStockId(stockId: String): List<Level1Candlestick>
 }

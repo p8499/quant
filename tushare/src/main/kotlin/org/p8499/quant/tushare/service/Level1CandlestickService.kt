@@ -13,5 +13,7 @@ class Level1CandlestickService {
 
     operator fun get(stockId: String, date: Date) = level1CandlestickRepository.get(stockId, date)
 
+    fun findByStockId(stockId: String) = level1CandlestickRepository.findByStockId(stockId)
+
     fun saveAll(entityList: List<Level1Candlestick>) = level1CandlestickRepository.saveAllAndFlush(entityList)
 }

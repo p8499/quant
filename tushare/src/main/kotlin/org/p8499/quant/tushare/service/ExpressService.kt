@@ -10,5 +10,7 @@ class ExpressService {
     @Autowired
     lateinit var expressRepository: ExpressRepository
 
-    fun saveAll(entityList: List<Express>) = expressRepository.saveAll(entityList)
+    fun findByStockId(stockId: String) = expressRepository.findByStockId(stockId)
+
+    fun saveAll(entityList: List<Express>) = expressRepository.saveAllAndFlush(entityList)
 }

@@ -13,5 +13,7 @@ class Level2Service {
 
     operator fun get(stockId: String, date: Date) = level2Repository.get(stockId, date)
 
+    fun findByStockId(stockId: String) = level2Repository.findByStockId(stockId)
+
     fun saveAll(entityList: List<Level2>) = level2Repository.saveAllAndFlush(entityList)
 }

@@ -45,5 +45,5 @@ class TushareResponseBodyDeserializer : JsonDeserializer<TushareResponseBody>() 
 @FeignClient(name = "tushare", url = "http://api.tushare.pro")
 interface TushareFeignClient {
     @PostMapping
-    fun <T> request(@RequestBody body: TushareRequestBody<T>): TushareResponseBody
+    fun <T> request(@RequestBody body: TushareRequestBody<T>): String
 }

@@ -12,4 +12,6 @@ interface TradingDateDao {
     fun firstUnprocessedForLevel1AdjFactor(stockId: String): TradingDate?
     fun unprocessedForLevel2(stockId: String): List<TradingDate>
     fun firstUnprocessedForLevel2(stockId: String): TradingDate?
+    fun findByStockId(stockId: String): List<TradingDate>
+    fun findByExchangeId(exchangeId: String): List<TradingDate>
 }

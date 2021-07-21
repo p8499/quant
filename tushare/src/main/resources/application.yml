@@ -16,6 +16,11 @@ spring:
       naming:
         physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
         implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
 
 tushare:
   token: 38625237adbb054f362501dd9e8ebaa68e8406ac316e6c792ec41600
@@ -27,5 +32,6 @@ feign:
         loggerLevel: full
 logging:
   level:
-    org.hibernate.SQL: debug
-    org.p8499.quant.tushare.feignClient.*: debug
+    org.hibernate.SQL: off
+    org.p8499.quant.tushare.feignClient.*: info
+    org.p8499.quant.tushare.service.*: info

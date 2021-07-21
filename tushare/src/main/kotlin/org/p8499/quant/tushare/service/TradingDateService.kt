@@ -28,5 +28,9 @@ class TradingDateService {
 
     fun firstUnprocessedForLevel2(stockId: String) = tradingDateRepository.firstUnprocessedForLevel2(stockId)
 
+    fun findByStockId(stockId: String) = tradingDateRepository.findByStockId(stockId)
+
+    fun findByExchangeId(exchangeId: String) = tradingDateRepository.findByExchangeId(exchangeId)
+
     fun saveAll(entityList: List<TradingDate>) = tradingDateRepository.saveAllAndFlush(entityList)
 }

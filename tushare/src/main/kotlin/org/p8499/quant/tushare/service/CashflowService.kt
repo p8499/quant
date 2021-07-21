@@ -4,11 +4,16 @@ import org.p8499.quant.tushare.entity.Cashflow
 import org.p8499.quant.tushare.repository.CashflowRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import java.util.*
 
 @Service
 class CashflowService {
     @Autowired
     lateinit var cashflowRepository: CashflowRepository
 
-    fun saveAll(entityList: List<Cashflow>) = cashflowRepository.saveAll(entityList)
+    operator fun get(stockId: String, date: Date) = cashflowRepository.get(stockId, date)
+
+    fun findByStockId(stockId: String) = cashflowRepository.findByStockId(stockId)
+
+    fun saveAll(entityList: List<Cashflow>) = cashflowRepository.saveAllAndFlush(entityList)
 }

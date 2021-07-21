@@ -5,4 +5,6 @@ import java.util.*
 
 interface Level2Dao {
     fun get(stockId: String, date: Date): Level2?
+
+    fun findByStockId(stockId: String): List<Level2>
 }

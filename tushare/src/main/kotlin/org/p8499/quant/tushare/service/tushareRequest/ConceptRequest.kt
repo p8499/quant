@@ -7,10 +7,12 @@ import org.p8499.quant.tushare.feignClient.TushareFeignClient
 import org.p8499.quant.tushare.service.TushareRequest
 import org.p8499.quant.tushare.service.TushareRequestBodyFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.retry.annotation.Backoff
+import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Service
 
 @Service
-class ConceptRequest : TushareRequest() {
+class ConceptRequest : TushareRequest<ConceptRequest.InParams, ConceptRequest.OutParams>() {
     override val apiName = "concept"
 
     @Autowired
@@ -21,6 +23,9 @@ class ConceptRequest : TushareRequest() {
 
     @Autowired
     override lateinit var tushareFeignClient: TushareFeignClient
+
+    @Retryable(maxAttempts = 10, backoff = Backoff(delay = 5000))
+    override fun invoke(inParams: InParams, outParamsClass: Class<OutParams>, fields: Array<String>): Array<OutParams> = super.invoke(inParams, outParamsClass, fields)
 
     class InParams(
             @get:JsonInclude(JsonInclude.Include.NON_NULL)
