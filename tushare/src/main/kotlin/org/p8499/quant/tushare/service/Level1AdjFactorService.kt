@@ -9,7 +9,7 @@ import java.util.*
 @Service
 class Level1AdjFactorService {
     @Autowired
-    lateinit var level1AdjFactorRepository: Level1AdjFactorRepository
+    protected lateinit var level1AdjFactorRepository: Level1AdjFactorRepository
 
     operator fun get(stockId: String, date: Date) = level1AdjFactorRepository.get(stockId, date)
 

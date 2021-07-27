@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service
 @Service
 class StockService {
     @Autowired
-    lateinit var stockRepository: StockRepository
+    protected lateinit var stockRepository: StockRepository
 
     fun findAll() = stockRepository.findAll()
 

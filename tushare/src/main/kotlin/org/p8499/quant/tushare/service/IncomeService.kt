@@ -9,7 +9,7 @@ import java.util.*
 @Service
 class IncomeService {
     @Autowired
-    lateinit var incomeRepository: IncomeRepository
+    protected lateinit var incomeRepository: IncomeRepository
 
     operator fun get(stockId: String, date: Date) = incomeRepository.get(stockId, date)
 

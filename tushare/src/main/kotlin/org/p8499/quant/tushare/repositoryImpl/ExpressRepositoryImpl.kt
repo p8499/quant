@@ -9,7 +9,7 @@ import javax.persistence.PersistenceContext
 @Repository
 class ExpressRepositoryImpl : ExpressDao {
     @PersistenceContext
-    lateinit var em: EntityManager
+    protected lateinit var em: EntityManager
 
     override fun findByStockId(stockId: String): List<Express> = em
             .createQuery("select t0 from Express as t0 where t0.stockId = :stockId order by t0.publish asc", Express::class.java)

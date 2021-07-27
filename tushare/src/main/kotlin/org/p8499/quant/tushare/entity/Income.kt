@@ -27,12 +27,12 @@ data class Income(
         /**
          * 营业收入 -> 营业收入(年初至今)
          */
-        @Column(nullable = false, precision = 26, scale = 2)
+        @Column(nullable = true, precision = 26, scale = 2)
         var revenue: Double? = null,
         /**
          * 净利润(不含少数股东损益) -> 净利润(年初至今)
          */
-        @Column(nullable = false, precision = 26, scale = 2)
+        @Column(nullable = true, precision = 26, scale = 2)
         var nIncomeAttrP: Double? = null) {
     data class IncomeId(
             var stockId: String? = null,

@@ -27,13 +27,13 @@ data class Express(
         /**
          * 股东权益合计(不含少数股东权益)(元) -> 净资产
          */
-        @Column(nullable = false, precision = 26, scale = 2)
+        @Column(nullable = true, precision = 26, scale = 2)
         var totalHldrEqyExcMinInt: Double? = null,
 
         /**
          * 营业收入(元) -> 营业收入(年初至今)
          */
-        @Column(nullable = false, precision = 26, scale = 2)
+        @Column(nullable = true, precision = 26, scale = 2)
         var revenue: Double? = null) {
     data class ExpressId(
             var stockId: String? = null,

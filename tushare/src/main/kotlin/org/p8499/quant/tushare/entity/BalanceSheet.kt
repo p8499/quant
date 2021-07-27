@@ -27,7 +27,7 @@ data class BalanceSheet(
         /**
          * 股东权益合计(不含少数股东权益) -> 净资产
          */
-        @Column(nullable = false, precision = 26, scale = 2)
+        @Column(nullable = true, precision = 26, scale = 2)
         var totalHldrEqyExcMinInt: Double? = null) {
     data class BalanceSheetId(
             var stockId: String? = null,

@@ -10,7 +10,7 @@ import javax.persistence.PersistenceContext
 @Repository
 class CashflowRepositoryImpl : CashflowDao {
     @PersistenceContext
-    lateinit var em: EntityManager
+    protected lateinit var em: EntityManager
 
     override fun get(stockId: String, date: Date): Cashflow? = em
             .createQuery("select t0 from Cashflow as t0 where t0.stockId = :stockId and t0.publish <= :date and not exists (select 1 from Cashflow as t1 where t1.stockId = :stockId and t1.publish = :date and t1.publish < t0.publish)", Cashflow::class.java)

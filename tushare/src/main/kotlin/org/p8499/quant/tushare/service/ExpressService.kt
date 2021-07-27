@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service
 @Service
 class ExpressService {
     @Autowired
-    lateinit var expressRepository: ExpressRepository
+    protected lateinit var expressRepository: ExpressRepository
 
     fun findByStockId(stockId: String) = expressRepository.findByStockId(stockId)
 

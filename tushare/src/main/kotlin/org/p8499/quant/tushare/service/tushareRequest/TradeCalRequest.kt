@@ -27,7 +27,7 @@ class TradeCalRequest : TushareRequest<TradeCalRequest.InParams, TradeCalRequest
     @Autowired
     override lateinit var tushareFeignClient: TushareFeignClient
 
-    @Retryable(maxAttempts = 10, backoff = Backoff(delay = 5000))
+    @Retryable(maxAttempts = 20, backoff = Backoff(delay = 5000))
     override fun invoke(inParams: InParams, outParamsClass: Class<OutParams>, fields: Array<String>): Array<OutParams> = super.invoke(inParams, outParamsClass, fields)
 
     class InParams(
@@ -46,8 +46,7 @@ class TradeCalRequest : TushareRequest<TradeCalRequest.InParams, TradeCalRequest
 
             @get:JsonInclude(JsonInclude.Include.NON_NULL)
             @get:JsonProperty("is_open")
-            @get:JsonFormat(shape = JsonFormat.Shape.NUMBER)
-            var isOpen: Boolean? = null)
+            var isOpen: Int? = null)
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     class OutParams(
@@ -58,8 +57,7 @@ class TradeCalRequest : TushareRequest<TradeCalRequest.InParams, TradeCalRequest
             var calDate: Date? = null,
 
             @set:JsonProperty("is_open")
-            @set:JsonFormat(shape = JsonFormat.Shape.NUMBER)
-            var isOpen: Boolean? = null,
+            var isOpen: Int? = null,
 
             @set:JsonProperty("pretrade_date")
             @set:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service
 @Service
 class GroupService {
     @Autowired
-    lateinit var groupRepository: GroupRepository
+    protected lateinit var groupRepository: GroupRepository
 
     fun findByType(type: Group.Type) = groupRepository.findByType(type)
 

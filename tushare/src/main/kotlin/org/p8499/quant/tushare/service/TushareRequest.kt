@@ -13,15 +13,15 @@ class TushareRequestBodyFactory(val token: String) {
 }
 
 abstract class TushareRequest<I, O> {
-    val logger by lazy { LoggerFactory.getLogger(TushareApplication::class.java) }
+    protected val logger by lazy { LoggerFactory.getLogger(TushareApplication::class.java) }
 
-    abstract val apiName: String
+    protected abstract val apiName: String
 
-    abstract val objectMapper: ObjectMapper
+    protected abstract val objectMapper: ObjectMapper
 
-    abstract val tushareRequestBodyFactory: TushareRequestBodyFactory
+    protected abstract val tushareRequestBodyFactory: TushareRequestBodyFactory
 
-    abstract val tushareFeignClient: TushareFeignClient
+    protected abstract val tushareFeignClient: TushareFeignClient
 
     open fun invoke(inParams: I, outParamsClass: Class<O>, fields: Array<String> = arrayOf()): Array<O> {
         val requestBody = tushareRequestBodyFactory.tushareRequestBody(apiName, inParams, fields)
@@ -30,8 +30,8 @@ abstract class TushareRequest<I, O> {
             val responseBody = objectMapper.readValue(responseStr, TushareResponseBody::class.java)
             return objectMapper.convertValue(responseBody.data, objectMapper.typeFactory.constructArrayType(outParamsClass))
         } catch (e: Throwable) {
-            logger.error("requestBody: ${objectMapper.writeValueAsString(requestBody)}")
-            logger.error("responseStr: ${StringEscapeUtils.unescapeJava(responseStr)}")
+            logger.info("requestBody: ${objectMapper.writeValueAsString(requestBody)}")
+            logger.info("responseStr: ${StringEscapeUtils.unescapeJava(responseStr)}")
             throw e
         }
     }

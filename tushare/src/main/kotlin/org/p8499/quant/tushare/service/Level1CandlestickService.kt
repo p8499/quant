@@ -9,7 +9,7 @@ import java.util.*
 @Service
 class Level1CandlestickService {
     @Autowired
-    lateinit var level1CandlestickRepository: Level1CandlestickRepository
+    protected lateinit var level1CandlestickRepository: Level1CandlestickRepository
 
     operator fun get(stockId: String, date: Date) = level1CandlestickRepository.get(stockId, date)
 
