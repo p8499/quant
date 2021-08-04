@@ -28,7 +28,7 @@ data class Forecast(
         var subject: String? = null,
 
         @Lob
-        @Column(nullable = false, columnDefinition = "CLOB")
+        @Column(nullable = true, columnDefinition = "CLOB")
         var content: String? = null) {
     data class ForecastId(
             var stockId: String? = null,

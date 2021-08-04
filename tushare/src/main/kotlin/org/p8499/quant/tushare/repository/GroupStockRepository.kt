@@ -1,5 +1,6 @@
 package org.p8499.quant.tushare.repository
 
+import org.p8499.quant.tushare.dao.GroupStockDao
 import org.p8499.quant.tushare.entity.GroupStock
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor
@@ -10,4 +11,5 @@ import org.springframework.stereotype.Repository
 interface GroupStockRepository :
         JpaRepository<GroupStock, Long>,
         JpaSpecificationExecutor<GroupStock>,
-        PagingAndSortingRepository<GroupStock, Long>
+        PagingAndSortingRepository<GroupStock, Long>,
+        GroupStockDao

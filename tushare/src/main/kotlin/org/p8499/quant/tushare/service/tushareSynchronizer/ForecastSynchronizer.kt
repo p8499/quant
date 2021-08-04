@@ -34,8 +34,10 @@ class ForecastSynchronizer {
                         Calendar.getInstance().run {
                             time = it.value.endDate
                             val format = DecimalFormat("0.00")
-                            Forecast(stockId, get(Calendar.YEAR), get(Calendar.MONTH) / 3 + 1, it.value.annDate
-                                    ?: it.value.endDate, "${it.value.type} (${format.format(it.value.pChangeMin)} - ${format.format(it.value.pChangeMax)})", it.value.changeReason)
+                            Forecast(stockId, get(Calendar.YEAR), get(Calendar.MONTH) / 3 + 1,
+                                    it.value.annDate ?: it.value.endDate,
+                                    "${it.value.type} (${it.value.pChangeMin?.run(format::format) ?: "null"}% ~ ${it.value.pChangeMax?.run(format::format) ?: "null"}%)",
+                                    it.value.changeReason)
                         }
                     })
         log.info("Finish Synchronizing Forecast")

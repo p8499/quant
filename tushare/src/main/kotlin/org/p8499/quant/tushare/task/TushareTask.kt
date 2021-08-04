@@ -1,13 +1,21 @@
 package org.p8499.quant.tushare.task
 
 import org.p8499.quant.tushare.TushareApplication
+import org.p8499.quant.tushare.entity.Group
+import org.p8499.quant.tushare.entity.Stock
+import org.p8499.quant.tushare.service.GroupService
 import org.p8499.quant.tushare.service.StockService
-import org.p8499.quant.tushare.service.quantNotifier.QuantNotifierFactory
+import org.p8499.quant.tushare.service.quantAnalysis.GroupAnalysis
+import org.p8499.quant.tushare.service.quantAnalysis.QuantAnalysisFactory
+import org.p8499.quant.tushare.service.quantAnalysis.StockAnalysis
 import org.p8499.quant.tushare.service.tushareSynchronizer.*
 import org.slf4j.LoggerFactory
+import org.springframework.amqp.core.AmqpTemplate
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
+import java.util.concurrent.CompletableFuture
+import java.util.stream.Collectors
 
 @Component
 class TushareTask {
@@ -59,12 +67,16 @@ class TushareTask {
     protected lateinit var stockService: StockService
 
     @Autowired
-    protected lateinit var tushareNotifierFactory: QuantNotifierFactory
+    protected lateinit var groupService: GroupService
+
+    @Autowired
+    protected lateinit var quantAnalysisFactory: QuantAnalysisFactory
+
+    @Autowired
+    protected lateinit var amqpTemplate: AmqpTemplate
 
     @Scheduled(cron = "0 0 18 * * MON-FRI")
     fun syncAndNotify() {
-        expressSynchronizer.invoke()
-        forecastSynchronizer.invoke()
 //        val a = CompletableFuture.allOf(
 //                CompletableFuture.runAsync(exchangeSynchronizer::invoke).thenRunAsync(tradingDateSynchronizer::invoke),
 //                CompletableFuture.runAsync(stockSynchronizer::invoke))
@@ -83,5 +95,9 @@ class TushareTask {
 //        val d = CompletableFuture.runAsync(groupSynchronizer::invoke)
 //        val e = CompletableFuture.allOf(b, d).thenRunAsync(groupStockSynchronizer::invoke)
 //        CompletableFuture.allOf(c, e).join()
+        val stockAnalysisList = stockService.findAll().mapNotNull(Stock::id).parallelStream().map(quantAnalysisFactory::stockAnalysis).collect(Collectors.toList())
+        stockAnalysisList.map(StockAnalysis::dto).forEach { amqpTemplate.convertAndSend("stock", it) }
+        val groupAnalysisList = groupService.findAll().mapNotNull(Group::id).parallelStream().map { quantAnalysisFactory.groupAnalysis(it, stockAnalysisList) }.collect(Collectors.toList())
+        groupAnalysisList.map(GroupAnalysis::dto).forEach { amqpTemplate.convertAndSend("group", it) }
     }
 }

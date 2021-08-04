@@ -11,6 +11,8 @@ class GroupStockService {
     @Autowired
     lateinit var groupStockRepository: GroupStockRepository
 
+    fun findByGroupId(groupId: String) = groupStockRepository.findByGroupId(groupId)
+
     @Transactional
     fun deleteAndSaveAll(entityList: List<GroupStock>) = groupStockRepository.run {
         deleteAll()

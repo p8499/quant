@@ -14,5 +14,4 @@ class GroupRepositoryImpl : GroupDao {
     override fun findByType(type: Group.Type): List<Group> = em
             .createQuery("select t0 from Group as t0 where t0.type = :type", Group::class.java)
             .setParameter("type", type).resultList
-
 }

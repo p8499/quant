@@ -12,5 +12,7 @@ class GroupService {
 
     fun findByType(type: Group.Type) = groupRepository.findByType(type)
 
+    fun findAll() = groupRepository.findAll()
+
     fun saveAll(entityList: List<Group>) = groupRepository.saveAllAndFlush(entityList)
 }

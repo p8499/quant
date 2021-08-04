@@ -1,13 +1,15 @@
-package org.p8499.quant.tushare.service.quantNotifier
+package org.p8499.quant.tushare.service.quantAnalysis
 
+import org.p8499.quant.tushare.TushareApplication
 import org.p8499.quant.tushare.common.let2
 import org.p8499.quant.tushare.common.let3
+import org.p8499.quant.tushare.dto.StockDto
 import org.p8499.quant.tushare.entity.*
 import org.p8499.quant.tushare.service.*
-import org.springframework.amqp.core.AmqpTemplate
+import org.slf4j.LoggerFactory
 import java.util.*
 
-class StockNotifier(
+class StockAnalysis(
         val stockId: String,
         val exchangeService: ExchangeService,
         val tradingDateService: TradingDateService,
@@ -22,8 +24,8 @@ class StockNotifier(
         val incomeService: IncomeService,
         val cashflowService: CashflowService,
         val expressService: ExpressService,
-        val forecastService: ForecastService,
-        val amqpTemplate: AmqpTemplate) {
+        val forecastService: ForecastService) {
+    protected val logger by lazy { LoggerFactory.getLogger(TushareApplication::class.java) }
 
     private fun <T> mapOf(items: Iterable<T>, keyTransform: (T) -> Date?, valueTransform: (T) -> Double?): Map<Date, Double?> {
         val entryMap = mutableMapOf<Date, Double?>()
@@ -38,9 +40,13 @@ class StockNotifier(
             map[date] = null
         for (entry in entryMap)
             map[entry.key] = entry.value
-        for (entry in entryMap)
-            if (entry.value === null)
-                map[entry.key] = map.lowerEntry(entry.key)?.value
+        for (e in map)
+            if (e.value === null)
+                map[e.key] = map.lowerEntry(e.key)?.value
+        map.keys.iterator().apply {
+            while (hasNext())
+                if (!dateList.contains(next())) remove()
+        }
         return map
     }
 
@@ -76,6 +82,10 @@ class StockNotifier(
     val flowShareList by lazy { flatMapOf(level1BasicService.findByStockId(stockId), Level1Basic::date, Level1Basic::flowShare).values.toList() }
 
     val totalShareList by lazy { flatMapOf(level1BasicService.findByStockId(stockId), Level1Basic::date, Level1Basic::totalShare).values.toList() }
+
+    val flowValueList by lazy { flowShareList.mapIndexed { index, d -> let2(d, closeList[index]) { a, b -> a * b } } }
+
+    val totalValueList by lazy { totalShareList.mapIndexed { index, d -> let2(d, closeList[index]) { a, b -> a * b } } }
 
     private val balanceSheetList by lazy { balanceSheetService.findByStockId(stockId) }
 
@@ -140,24 +150,5 @@ class StockNotifier(
 
     val pcfList by lazy { closePreList.mapIndexed { index, d -> let2(d, opCashflowPerStockList[index]) { a, b -> a / b } } }
 
-    fun notifyAmqp() {
-        val message: (String, Date, String, Double?) -> Map<String, Any?> = { code, date, name, value ->
-            mutableMapOf<String, Any?>().also {
-                it["code"] = code
-                it["date"] = date
-                it["name"] = name
-                it["value"] = value
-            }
-        }
-        openPreList.mapIndexed { index, d -> message(stockId, dateList[index], "open", d) }.forEach { amqpTemplate.convertAndSend("data", it) }
-        closePreList.mapIndexed { index, d -> message(stockId, dateList[index], "close", d) }.forEach { amqpTemplate.convertAndSend("data", it) }
-        highPreList.mapIndexed { index, d -> message(stockId, dateList[index], "high", d) }.forEach { amqpTemplate.convertAndSend("data", it) }
-        lowPreList.mapIndexed { index, d -> message(stockId, dateList[index], "low", d) }.forEach { amqpTemplate.convertAndSend("data", it) }
-        volumePreList.mapIndexed { index, d -> message(stockId, dateList[index], "volume", d) }.forEach { amqpTemplate.convertAndSend("data", it) }
-        amountList.mapIndexed { index, d -> message(stockId, dateList[index], "amount", d) }.forEach { amqpTemplate.convertAndSend("data", it) }
-        pbList.mapIndexed { index, d -> message(stockId, dateList[index], "pb", d) }.forEach { amqpTemplate.convertAndSend("data", it) }
-        peList.mapIndexed { index, d -> message(stockId, dateList[index], "pe", d) }.forEach { amqpTemplate.convertAndSend("data", it) }
-        psList.mapIndexed { index, d -> message(stockId, dateList[index], "ps", d) }.forEach { amqpTemplate.convertAndSend("data", it) }
-        pcfList.mapIndexed { index, d -> message(stockId, dateList[index], "pcf", d) }.forEach { amqpTemplate.convertAndSend("data", it) }
-    }
+    val dto by lazy { StockDto(stockId, dateList, openPreList, closePreList, highPreList, lowPreList, volumePreList, amountList, pbList, peList, psList, pcfList) }
 }
