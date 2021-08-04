@@ -27,6 +27,6 @@ class Level1AdjFactorService {
     fun fillVacancies(stockId: String) {
         val dateList = tradingDateRepository.vacantForLevel1AdjFactor(stockId).mapNotNull(TradingDate::date)
         for (date in dateList)
-            level1AdjFactorRepository.previous(stockId, date)?.also { it.date = date }?.let(level1AdjFactorRepository::saveAndFlush)
+            level1AdjFactorRepository.previous(stockId, date)?.copy(date = date)?.let(level1AdjFactorRepository::saveAndFlush)
     }
 }

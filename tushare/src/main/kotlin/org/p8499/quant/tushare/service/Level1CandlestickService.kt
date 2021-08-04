@@ -29,6 +29,6 @@ class Level1CandlestickService {
     fun fillVacancies(stockId: String) {
         val dateList = tradingDateRepository.vacantForLevel1Candlestick(stockId).mapNotNull(TradingDate::date)
         for (date in dateList)
-            level1CandlestickRepository.previous(stockId, date)?.also { it.date = date }?.let(level1CandlestickRepository::saveAndFlush)
+            level1CandlestickRepository.previous(stockId, date)?.copy(date = date)?.let(level1CandlestickRepository::saveAndFlush)
     }
 }

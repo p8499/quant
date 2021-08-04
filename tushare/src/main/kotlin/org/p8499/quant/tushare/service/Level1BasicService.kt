@@ -27,6 +27,6 @@ class Level1BasicService {
     fun fillVacancies(stockId: String) {
         val dateList = tradingDateRepository.vacantForLevel1Basic(stockId).mapNotNull(TradingDate::date)
         for (date in dateList)
-            level1BasicRepository.previous(stockId, date)?.also { it.date = date }?.let(level1BasicRepository::saveAndFlush)
+            level1BasicRepository.previous(stockId, date)?.copy(date = date)?.let(level1BasicRepository::saveAndFlush)
     }
 }
