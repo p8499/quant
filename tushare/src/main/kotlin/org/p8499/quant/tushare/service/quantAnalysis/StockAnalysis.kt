@@ -55,6 +55,7 @@ class StockAnalysis(
     val dateList by lazy { tradingDateService.findByStockId(stockId).mapNotNull(TradingDate::date) }
 
     val factorList by lazy { flatMapOf(level1AdjFactorService.findByStockId(stockId), Level1AdjFactor::date, Level1AdjFactor::factor).values.toList() }
+
     val maxFactor by lazy { factorList.mapNotNull { it }.maxOrNull() }
 
     val openList by lazy { flatMapOf(level1CandlestickService.findByStockId(stockId), Level1Candlestick::date, Level1Candlestick::open).values.toList() }
@@ -150,5 +151,8 @@ class StockAnalysis(
 
     val pcfList by lazy { closePreList.mapIndexed { index, d -> let2(d, opCashflowPerStockList[index]) { a, b -> a / b } } }
 
-    val dto by lazy { StockDto(stockId, dateList, openPreList, closePreList, highPreList, lowPreList, volumePreList, amountList, pbList, peList, psList, pcfList) }
+    val dto by lazy {
+        logger.info("Constructing $stockId DTO")
+        StockDto(stockId, dateList, openPreList, closePreList, highPreList, lowPreList, volumePreList, amountList, pbList, peList, psList, pcfList)
+    }
 }

@@ -7,4 +7,6 @@ interface Level1CandlestickDao {
     fun get(stockId: String, date: Date): Level1Candlestick?
 
     fun findByStockId(stockId: String): List<Level1Candlestick>
+
+    fun previous(stockId: String, date: Date): Level1Candlestick?
 }

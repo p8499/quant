@@ -41,7 +41,10 @@ class Level1BasicSynchronizer {
                     .map { Level1Basic(tsCode, it.tradeDate, it.totalShare, it.floatShare) }
         }
         val stockIdList = stockService.findAll().mapNotNull(Stock::id)
-        stockIdList.forEach { level1BasicService.saveAll(level1BasicList(it)) }
+        stockIdList.forEach {
+            level1BasicService.saveAll(level1BasicList(it))
+            level1BasicService.fillVacancies(it)
+        }
         log.info("Finish Synchronizing Level1Basic")
     }
 }

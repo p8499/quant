@@ -12,6 +12,6 @@ class TushareApplicationTests {
 
     @Test
     fun contextLoads() {
-            tushareTask.syncAndNotify()
+        tushareTask.syncAndNotify()
     }
 }

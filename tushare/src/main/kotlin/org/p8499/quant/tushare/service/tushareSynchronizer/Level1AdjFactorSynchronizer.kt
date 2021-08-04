@@ -41,7 +41,10 @@ class Level1AdjFactorSynchronizer {
                     .map { Level1AdjFactor(tsCode, it.tradeDate, it.adjFactor) }
         }
         val stockIdList = stockService.findAll().mapNotNull(Stock::id)
-        stockIdList.forEach { level1AdjFactorService.saveAll(level1AdjFactorList(it)) }
+        stockIdList.forEach {
+            level1AdjFactorService.saveAll(level1AdjFactorList(it))
+            level1AdjFactorService.fillVacancies(it)
+        }
         log.info("Finish Synchronizing Level1AdjFactor")
     }
 }

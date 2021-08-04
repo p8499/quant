@@ -295,5 +295,10 @@ class GroupAnalysis(
 
     val pcfList by lazy { weightedCombine(pcfListBySh, flatFlowValueListBySh, pcfListBySz, flatFlowValueListBySz) }
 
-    val dto by lazy { GroupDto(groupId, dateList, openPreList, closePreList, highPreList, lowPreList, volumePreList, amountList, pbList, peList, psList, pcfList) }
+    val stockIdList by lazy { stockIdListBySh + stockIdListBySz }
+
+    val dto by lazy {
+        logger.info("Constructing $groupId DTO")
+        GroupDto(groupId, dateList, openPreList, closePreList, highPreList, lowPreList, volumePreList, amountList, pbList, peList, psList, pcfList, stockIdList)
+    }
 }

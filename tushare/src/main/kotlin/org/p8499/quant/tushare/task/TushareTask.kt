@@ -77,24 +77,24 @@ class TushareTask {
 
     @Scheduled(cron = "0 0 18 * * MON-FRI")
     fun syncAndNotify() {
-//        val a = CompletableFuture.allOf(
-//                CompletableFuture.runAsync(exchangeSynchronizer::invoke).thenRunAsync(tradingDateSynchronizer::invoke),
-//                CompletableFuture.runAsync(stockSynchronizer::invoke))
-//        val b = a.thenRunAsync(level1BasicSynchronizer::invoke)
-//        val c = a.thenComposeAsync {
-//            CompletableFuture.allOf(
-//                    CompletableFuture.runAsync(level1CandlestickSynchronizer::invoke),
-//                    CompletableFuture.runAsync(level1AdjFactorSynchronizer::invoke),
-//                    CompletableFuture.runAsync(level2Synchronizer::invoke),
-//                    CompletableFuture.runAsync(balanceSheetSynchronizer::invoke),
-//                    CompletableFuture.runAsync(incomeSynchronizer::invoke),
-//                    CompletableFuture.runAsync(cashflowSynchronizer::invoke),
-//                    CompletableFuture.runAsync(expressSynchronizer::invoke),
-//                    CompletableFuture.runAsync(forecastSynchronizer::invoke))
-//        }
-//        val d = CompletableFuture.runAsync(groupSynchronizer::invoke)
-//        val e = CompletableFuture.allOf(b, d).thenRunAsync(groupStockSynchronizer::invoke)
-//        CompletableFuture.allOf(c, e).join()
+        val a = CompletableFuture.allOf(
+                CompletableFuture.runAsync(exchangeSynchronizer::invoke).thenRunAsync(tradingDateSynchronizer::invoke),
+                CompletableFuture.runAsync(stockSynchronizer::invoke))
+        val b = a.thenRunAsync(level1BasicSynchronizer::invoke)
+        val c = a.thenComposeAsync {
+            CompletableFuture.allOf(
+                    CompletableFuture.runAsync(level1CandlestickSynchronizer::invoke),
+                    CompletableFuture.runAsync(level1AdjFactorSynchronizer::invoke),
+                    CompletableFuture.runAsync(level2Synchronizer::invoke),
+                    CompletableFuture.runAsync(balanceSheetSynchronizer::invoke),
+                    CompletableFuture.runAsync(incomeSynchronizer::invoke),
+                    CompletableFuture.runAsync(cashflowSynchronizer::invoke),
+                    CompletableFuture.runAsync(expressSynchronizer::invoke),
+                    CompletableFuture.runAsync(forecastSynchronizer::invoke))
+        }
+        val d = CompletableFuture.runAsync(groupSynchronizer::invoke)
+        val e = CompletableFuture.allOf(b, d).thenRunAsync(groupStockSynchronizer::invoke)
+        CompletableFuture.allOf(c, e).join()
         val stockAnalysisList = stockService.findAll().mapNotNull(Stock::id).parallelStream().map(quantAnalysisFactory::stockAnalysis).collect(Collectors.toList())
         stockAnalysisList.map(StockAnalysis::dto).forEach { amqpTemplate.convertAndSend("stock", it) }
         val groupAnalysisList = groupService.findAll().mapNotNull(Group::id).parallelStream().map { quantAnalysisFactory.groupAnalysis(it, stockAnalysisList) }.collect(Collectors.toList())

@@ -14,4 +14,6 @@ data class GroupDto(
         val pb: List<Double?>,
         val pe: List<Double?>,
         val ps: List<Double?>,
-        val pcf: List<Double?>)
+        val pcf: List<Double?>,
+        val stockIdList: List<String>
+)

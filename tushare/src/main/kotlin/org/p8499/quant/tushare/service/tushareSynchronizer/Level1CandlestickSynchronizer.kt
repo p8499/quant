@@ -41,7 +41,10 @@ class Level1CandlestickSynchronizer {
                     .map { Level1Candlestick(tsCode, it.tradeDate, it.open, it.close, it.high, it.low, it.vol, it.amount) }
         }
         val stockIdList = stockService.findAll().mapNotNull(Stock::id)
-        stockIdList.forEach { level1CandlestickService.saveAll(level1CandlestickList(it)) }
+        stockIdList.forEach {
+            level1CandlestickService.saveAll(level1CandlestickList(it))
+            level1CandlestickService.fillVacancies(it)
+        }
         log.info("Finish Synchronizing Level1Candlestick")
     }
 }
