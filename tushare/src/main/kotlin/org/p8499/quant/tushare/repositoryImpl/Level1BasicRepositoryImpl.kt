@@ -20,6 +20,6 @@ class Level1BasicRepositoryImpl : Level1BasicDao {
             .createQuery("select t0 from Level1Basic as t0 where t0.stockId = :stockId order by t0.date asc", Level1Basic::class.java)
             .setParameter("stockId", stockId).resultList
 
-    override fun previous(stockId: String, date: Date): Level1Basic? = em.createQuery("select t0 from Level1Basic as t0 where t0.stockId = :stockId and t0.date < :date and not exists (select 1 from Level1Basic as t1 where t1.stockId = :stockId and t1.date > t0.date)", Level1Basic::class.java)
+    override fun previous(stockId: String, date: Date): Level1Basic? = em.createQuery("select t0 from Level1Basic as t0 where t0.stockId = :stockId and t0.date < :date and not exists (select 1 from Level1Basic as t1 where t1.stockId = :stockId and t1.date < :date and t1.date > t0.date)", Level1Basic::class.java)
             .setParameter("stockId", stockId).setParameter("date", date).resultList.firstOrNull()
 }
