@@ -1,0 +1,37 @@
+server:
+  port: 8081
+spring:
+  application:
+    name: client
+  datasource:
+    url: jdbc:oracle:thin:@localhost1:1521:quant
+    username: tushare
+    password: tushare
+    driver-class-name: oracle.jdbc.OracleDriver
+  jpa:
+    database: oracle
+    #    show-sql: true
+    hibernate:
+      ddl-auto: update
+      naming:
+        physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
+        implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+tushare:
+  token: 38625237adbb054f362501dd9e8ebaa68e8406ac316e6c792ec41600
+
+feign:
+  client:
+    config:
+      default:
+        loggerLevel: full
+logging:
+  level:
+    org.hibernate.SQL: off
+    org.p8499.quant.tushare.feignClient.*: info
+    org.p8499.quant.tushare.service.*: info
