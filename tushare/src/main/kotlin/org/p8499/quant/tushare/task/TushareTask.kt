@@ -89,7 +89,7 @@ class TushareTask {
      *                             │ express
      *                             └ forecast
      */
-    @Scheduled(cron = "0 0 16 * * MON-FRI", zone = "Asia/Shanghai")
+    @Scheduled(cron = "0 20 16 * * MON-FRI", zone = "Asia/Shanghai")
     fun syncAndSend() {
         val executor = Executors.newCachedThreadPool()
         val a = CompletableFuture.allOf(
