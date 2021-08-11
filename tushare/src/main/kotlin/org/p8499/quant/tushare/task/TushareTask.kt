@@ -16,7 +16,6 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors
-import java.util.stream.Collectors
 
 @Component
 class TushareTask {
@@ -90,7 +89,7 @@ class TushareTask {
      *                             │ express
      *                             └ forecast
      */
-    @Scheduled(cron = "0 0 16 * * MON-FRI")
+    @Scheduled(cron = "0 0 16 * * MON-FRI", zone = "Asia/Shanghai")
     fun syncAndSend() {
         val executor = Executors.newCachedThreadPool()
         val a = CompletableFuture.allOf(
@@ -111,9 +110,9 @@ class TushareTask {
         val d = CompletableFuture.runAsync(groupSynchronizer::invoke, executor)
         val e = CompletableFuture.allOf(b, d).thenRunAsync(groupStockSynchronizer::invoke, executor)
         CompletableFuture.allOf(c, e).join()
-        val stockAnalysisList = stockService.findAll().mapNotNull(Stock::id).parallelStream().map(quantAnalysisFactory::stockAnalysis).collect(Collectors.toList())
+        val stockAnalysisList = stockService.findAll().mapNotNull(Stock::id).map(quantAnalysisFactory::stockAnalysis)
         stockAnalysisList.map(StockAnalysis::dto).forEach { amqpTemplate.convertAndSend("stock", it) }
-        val groupAnalysisList = groupService.findAll().mapNotNull(Group::id).parallelStream().map { quantAnalysisFactory.groupAnalysis(it, stockAnalysisList) }.collect(Collectors.toList())
+        val groupAnalysisList = groupService.findAll().mapNotNull(Group::id).map { quantAnalysisFactory.groupAnalysis(it, stockAnalysisList) }
         groupAnalysisList.map(GroupAnalysis::dto).forEach { amqpTemplate.convertAndSend("group", it) }
     }
 }
