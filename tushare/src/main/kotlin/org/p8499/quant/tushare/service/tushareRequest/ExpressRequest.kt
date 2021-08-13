@@ -27,7 +27,7 @@ class ExpressRequest : TushareRequest<ExpressRequest.InParams, ExpressRequest.Ou
     @Autowired
     override lateinit var tushareFeignClient: TushareFeignClient
 
-    @Retryable(maxAttempts = 20, backoff = Backoff(delay = 5000))
+    @Retryable(maxAttempts = 200, backoff = Backoff(delay = 5000))
     override fun invoke(inParams: InParams, outParamsClass: Class<OutParams>, fields: Array<String>): Array<OutParams> = super.invoke(inParams, outParamsClass, fields)
 
     class InParams(

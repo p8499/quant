@@ -27,7 +27,7 @@ class BalancesheetRequest : TushareRequest<BalancesheetRequest.InParams, Balance
     @Autowired
     override lateinit var tushareFeignClient: TushareFeignClient
 
-    @Retryable(maxAttempts = 20, backoff = Backoff(delay = 12000))
+    @Retryable(maxAttempts = 200, backoff = Backoff(delay = 12000))
     override fun invoke(inParams: InParams, outParamsClass: Class<OutParams>, fields: Array<String>): Array<OutParams> = super.invoke(inParams, outParamsClass, fields)
 
     class InParams(
