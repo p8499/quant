@@ -26,6 +26,13 @@ spring:
     port: 5672
     username: guest
     password: guest
+  data:
+    redis:
+      repositories:
+        enabled: false
+    elasticsearch:
+      repositories:
+        enabled: false
 
 tushare:
   token: 38625237adbb054f362501dd9e8ebaa68e8406ac316e6c792ec41600
