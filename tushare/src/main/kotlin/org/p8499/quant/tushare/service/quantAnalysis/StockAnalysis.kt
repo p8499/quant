@@ -153,6 +153,6 @@ class StockAnalysis(
 
     val dto by lazy {
         logger.info("Constructing $stockId DTO")
-        StockDto(stockId, dateList, openPreList, closePreList, highPreList, lowPreList, volumePreList, amountList, pbList, peList, psList, pcfList)
+        StockDto(stockId, dateList, openPreList, closePreList, highPreList, lowPreList, volumePreList, amountList, flowShareList, totalShareList, flowValueList, totalValueList, pbList, peList, psList, pcfList)
     }
 }

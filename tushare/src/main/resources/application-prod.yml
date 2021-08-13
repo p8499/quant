@@ -16,6 +16,11 @@ spring:
       naming:
         physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
         implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
+  redis:
+    host: 192.168.101.11
+    port: 6379
+    password:
+    database: 0
   rabbitmq:
     host: 192.168.101.11
     port: 5672

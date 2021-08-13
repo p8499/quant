@@ -1,6 +1,7 @@
 package org.p8499.quant.tushare.service.quantAnalysis
 
 import org.p8499.quant.tushare.TushareApplication
+import org.p8499.quant.tushare.dto.StockDto
 import org.p8499.quant.tushare.service.*
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -54,5 +55,5 @@ class QuantAnalysisFactory {
 
     fun stockAnalysis(stockId: String) = StockAnalysis(stockId, exchangeService, tradingDateService, stockService, groupService, level1CandlestickService, level1BasicService, level1AdjFactorService, level2Service, groupStockService, balanceSheetService, incomeService, cashflowService, expressService, forecastService)
 
-    fun groupAnalysis(groupId: String, stockAnalysisList: List<StockAnalysis>) = GroupAnalysis(groupId, stockAnalysisList, exchangeService, tradingDateService, stockService, groupService, level1CandlestickService, level1BasicService, level1AdjFactorService, level2Service, groupStockService, balanceSheetService, incomeService, cashflowService, expressService, forecastService)
+    fun groupAnalysis(groupId: String, stockDtoList: List<StockDto>) = GroupAnalysis(groupId, stockDtoList, exchangeService, tradingDateService, stockService, groupService, level1CandlestickService, level1BasicService, level1AdjFactorService, level2Service, groupStockService, balanceSheetService, incomeService, cashflowService, expressService, forecastService)
 }

@@ -34,6 +34,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-amqp")
     implementation("org.springframework.boot:spring-boot-starter-batch")
     implementation("org.apache.commons:commons-text:1.9")
+    implementation("org.springframework.boot:spring-boot-starter-data-redis")
     runtimeOnly("com.oracle.database.jdbc:ojdbc8")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
     testImplementation("org.springframework.boot:spring-boot-starter-test")

@@ -1,19 +1,23 @@
 package org.p8499.quant.tushare.dto
 
+import com.fasterxml.jackson.annotation.JsonFormat
+import com.fasterxml.jackson.annotation.JsonProperty
 import java.util.*
 
 data class GroupDto(
-        val id: String,
-        val date: List<Date>,
-        val open: List<Double?>,
-        val close: List<Double?>,
-        val high: List<Double?>,
-        val low: List<Double?>,
-        val volume: List<Double?>,
-        val amount: List<Double?>,
-        val pb: List<Double?>,
-        val pe: List<Double?>,
-        val ps: List<Double?>,
-        val pcf: List<Double?>,
-        val stockIdList: List<String>
+        var id: String,
+        @get:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
+        var date: List<Date> = listOf(),
+        var open: List<Double?> = listOf(),
+        var close: List<Double?> = listOf(),
+        var high: List<Double?> = listOf(),
+        var low: List<Double?> = listOf(),
+        var volume: List<Double?> = listOf(),
+        var amount: List<Double?> = listOf(),
+        var pb: List<Double?> = listOf(),
+        var pe: List<Double?> = listOf(),
+        var ps: List<Double?> = listOf(),
+        var pcf: List<Double?> = listOf(),
+        @JsonProperty("stock_id_list")
+        var stockIdList: List<String> = listOf()
 )
