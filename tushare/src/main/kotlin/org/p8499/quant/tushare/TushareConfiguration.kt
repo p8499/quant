@@ -16,10 +16,7 @@ class TushareConfiguration {
     val objectMapper = ObjectMapper()
 
     @get:Bean
-    val stockQueue = Queue("stock")
-
-    @get:Bean
-    val groupQueue = Queue("group")
+    val quantQueue = Queue("quant")
 
     @Bean
     fun tushareRequestBodyFactory() = TushareRequestBodyFactory(tushareProperties.token)

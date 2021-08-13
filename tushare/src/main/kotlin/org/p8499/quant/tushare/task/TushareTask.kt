@@ -125,8 +125,12 @@ class TushareTask {
          * Calculate from database and save into redis
          */
         stringRedisTemplate.keys("*").forEach { stringRedisTemplate.delete(it) }
-        stockService.findAll().mapNotNull(Stock::id).parallelStream().forEach { stringRedisTemplate.opsForValue().set("S-$it", objectMapper.writeValueAsString(quantAnalysisFactory.stockAnalysis(it).dto)) }
-        val stockDtoList = stringRedisTemplate.keys("S-*").map { objectMapper.readValue(stringRedisTemplate.opsForValue()[it], StockDto::class.java) }
-        groupService.findAll().mapNotNull(Group::id).parallelStream().forEach { stringRedisTemplate.opsForValue().set("G-$it", objectMapper.writeValueAsString(quantAnalysisFactory.groupAnalysis(it, stockDtoList))) }
+        stockService.findAll().mapNotNull(Stock::id).parallelStream().forEach { stringRedisTemplate.opsForValue().set("S01-$it", objectMapper.writeValueAsString(quantAnalysisFactory.stockAnalysis(it).dto)) }
+        val stockDtoList = stringRedisTemplate.keys("S01-*").map { objectMapper.readValue(stringRedisTemplate.opsForValue()[it], StockDto::class.java) }
+        groupService.findAll().mapNotNull(Group::id).parallelStream().forEach { stringRedisTemplate.opsForValue().set("G01-$it", objectMapper.writeValueAsString(quantAnalysisFactory.groupAnalysis(it, stockDtoList))) }
+        /**
+         * Notify ampq
+         */
+        amqpTemplate.convertAndSend("01")
     }
 }
