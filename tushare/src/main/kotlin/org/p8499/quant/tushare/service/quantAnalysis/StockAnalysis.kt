@@ -27,6 +27,8 @@ class StockAnalysis(
         val forecastService: ForecastService) {
     protected val logger by lazy { LoggerFactory.getLogger(TushareApplication::class.java) }
 
+    private val name by lazy { stockService[stockId]?.name ?: "" }
+
     private fun <T> mapOf(items: Iterable<T>, keyTransform: (T) -> Date?, valueTransform: (T) -> Double?): Map<Date, Double?> {
         val entryMap = mutableMapOf<Date, Double?>()
         for (item in items)
@@ -153,6 +155,6 @@ class StockAnalysis(
 
     val dto by lazy {
         logger.info("Constructing $stockId DTO")
-        StockDto(stockId, dateList, openPreList, closePreList, highPreList, lowPreList, volumePreList, amountList, flowShareList, totalShareList, flowValueList, totalValueList, pbList, peList, psList, pcfList)
+        StockDto(stockId, name, dateList, openPreList, closePreList, highPreList, lowPreList, volumePreList, amountList, flowShareList, totalShareList, flowValueList, totalValueList, pbList, peList, psList, pcfList)
     }
 }

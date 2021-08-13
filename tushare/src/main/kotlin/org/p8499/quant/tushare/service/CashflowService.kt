@@ -15,5 +15,5 @@ class CashflowService {
 
     fun findByStockId(stockId: String) = cashflowRepository.findByStockId(stockId)
 
-    fun saveAll(entityList: List<Cashflow>) = cashflowRepository.saveAllAndFlush(entityList)
+    fun saveAll(entityList: List<Cashflow>): List<Cashflow> = cashflowRepository.saveAllAndFlush(entityList)
 }

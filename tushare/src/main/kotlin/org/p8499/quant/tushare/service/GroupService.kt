@@ -10,9 +10,11 @@ class GroupService {
     @Autowired
     protected lateinit var groupRepository: GroupRepository
 
+    operator fun get(groupId: String): Group? = groupRepository.getById(groupId)
+
     fun findByType(type: Group.Type) = groupRepository.findByType(type)
 
-    fun findAll() = groupRepository.findAll()
+    fun findAll(): List<Group> = groupRepository.findAll()
 
-    fun saveAll(entityList: List<Group>) = groupRepository.saveAllAndFlush(entityList)
+    fun saveAll(entityList: List<Group>): List<Group> = groupRepository.saveAllAndFlush(entityList)
 }

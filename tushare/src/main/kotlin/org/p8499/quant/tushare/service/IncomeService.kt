@@ -15,5 +15,5 @@ class IncomeService {
 
     fun findByStockId(stockId: String) = incomeRepository.findByStockId(stockId)
 
-    fun saveAll(entityList: List<Income>) = incomeRepository.saveAllAndFlush(entityList)
+    fun saveAll(entityList: List<Income>): List<Income> = incomeRepository.saveAllAndFlush(entityList)
 }

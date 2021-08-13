@@ -88,14 +88,14 @@ class TushareTask {
      * exchange -> tradingDate ┐                   ├ b -> groupStock ┐
      *                         ├ a ┬-> level1Basic ┘                 │
      *                   stock ┘   │                                 │
-     *                             │  ┌ level1Candlestick            │
-     *                             │  │ level1AdjFactor              │
-     *                             │  │ level2                       ├ c -> Join
-     *                             └->┤ balanceSheet                 │
-     *                                │ income                       │
-     *                                │ cashflow                     │
-     *                                │ express                      │
-     *                                └ forecast                     ┘
+     *                             │             ┌ level1Candlestick │
+     *                             │             │ level1AdjFactor   │
+     *                             │             │ level2            ├ c -> Join
+     *                             └------------>┤ balanceSheet      │
+     *                                           │ income            │
+     *                                           │ cashflow          │
+     *                                           │ express           │
+     *                                           └ forecast          ┘
      */
     @Scheduled(cron = "0 45 15 * * MON-FRI")
     fun syncAndSend() {
@@ -125,12 +125,12 @@ class TushareTask {
          * Calculate from database and save into redis
          */
         stringRedisTemplate.keys("*").forEach { stringRedisTemplate.delete(it) }
-        stockService.findAll().mapNotNull(Stock::id).parallelStream().forEach { stringRedisTemplate.opsForValue().set("S01-$it", objectMapper.writeValueAsString(quantAnalysisFactory.stockAnalysis(it).dto)) }
-        val stockDtoList = stringRedisTemplate.keys("S01-*").map { objectMapper.readValue(stringRedisTemplate.opsForValue()[it], StockDto::class.java) }
-        groupService.findAll().mapNotNull(Group::id).parallelStream().forEach { stringRedisTemplate.opsForValue().set("G01-$it", objectMapper.writeValueAsString(quantAnalysisFactory.groupAnalysis(it, stockDtoList))) }
+        stockService.findAll().mapNotNull(Stock::id).parallelStream().forEach { stringRedisTemplate.opsForValue().set("CNS-$it", objectMapper.writeValueAsString(quantAnalysisFactory.stockAnalysis(it).dto)) }
+        val stockDtoList = stringRedisTemplate.keys("CNG-*").map { objectMapper.readValue(stringRedisTemplate.opsForValue()[it], StockDto::class.java) }
+        groupService.findAll().mapNotNull(Group::id).parallelStream().forEach { stringRedisTemplate.opsForValue().set("CNG-$it", objectMapper.writeValueAsString(quantAnalysisFactory.groupAnalysis(it, stockDtoList))) }
         /**
          * Notify ampq
          */
-        amqpTemplate.convertAndSend("01")
+        amqpTemplate.convertAndSend("CN")
     }
 }

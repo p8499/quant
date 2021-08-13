@@ -21,7 +21,7 @@ class Level1AdjFactorService {
 
     fun findByStockId(stockId: String) = level1AdjFactorRepository.findByStockId(stockId)
 
-    fun saveAll(entityList: List<Level1AdjFactor>) = level1AdjFactorRepository.saveAllAndFlush(entityList)
+    fun saveAll(entityList: List<Level1AdjFactor>): List<Level1AdjFactor> = level1AdjFactorRepository.saveAllAndFlush(entityList)
 
     @Transactional
     fun fillVacancies(stockId: String) {

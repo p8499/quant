@@ -10,7 +10,7 @@ class ExchangeService {
     @Autowired
     lateinit var exchangeRepository: ExchangeRepository
 
-    fun findAll() = exchangeRepository.findAll()
+    fun findAll(): List<Exchange> = exchangeRepository.findAll()
 
     fun save(entity: Exchange) = exchangeRepository.saveAndFlush(entity)
 }

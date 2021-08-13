@@ -10,7 +10,9 @@ class StockService {
     @Autowired
     protected lateinit var stockRepository: StockRepository
 
-    fun findAll() = stockRepository.findAll()
+    fun findAll(): List<Stock> = stockRepository.findAll()
+
+    operator fun get(stockId: String): Stock? = stockRepository.getById(stockId)
 
     fun findByStockIdList(stockIdList: List<String>) = stockRepository.findByStockIdList(stockIdList)
 
@@ -18,5 +20,5 @@ class StockService {
 
     fun findByGroupId(groupId: String) = stockRepository.findByGroupId(groupId)
 
-    fun saveAll(entityList: List<Stock>) = stockRepository.saveAllAndFlush(entityList)
+    fun saveAll(entityList: List<Stock>): List<Stock> = stockRepository.saveAllAndFlush(entityList)
 }

@@ -5,6 +5,7 @@ import java.util.*
 
 data class StockDto(
         var id: String = "",
+        var name: String = "",
         @get:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
         var date: List<Date> = listOf(),
         var open: List<Double?> = listOf(),

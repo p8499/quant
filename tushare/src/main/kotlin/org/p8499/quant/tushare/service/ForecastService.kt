@@ -10,5 +10,5 @@ class ForecastService {
     @Autowired
     lateinit var forecastRepository: ForecastRepository
 
-    fun saveAll(entityList: List<Forecast>) = forecastRepository.saveAllAndFlush(entityList)
+    fun saveAll(entityList: List<Forecast>): List<Forecast> = forecastRepository.saveAllAndFlush(entityList)
 }

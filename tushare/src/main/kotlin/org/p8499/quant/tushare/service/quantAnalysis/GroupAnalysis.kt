@@ -30,6 +30,8 @@ class GroupAnalysis(
         val forecastService: ForecastService) {
     protected val logger by lazy { LoggerFactory.getLogger(TushareApplication::class.java) }
 
+    private val name by lazy { groupService[groupId]?.name ?: "" }
+
     private fun stockIdListByExchange(exchangeId: String): List<String> = stockService.findByStockIdList(groupStockService.findByGroupId(groupId).mapNotNull(GroupStock::stockId)).filter { it.exchangeId == exchangeId }.mapNotNull(Stock::id)
 
     private val stockIdListBySh by lazy { stockIdListByExchange("SSE") }
@@ -300,6 +302,6 @@ class GroupAnalysis(
 
     val dto by lazy {
         logger.info("Constructing $groupId DTO")
-        GroupDto(groupId, dateList, openPreList, closePreList, highPreList, lowPreList, volumePreList, amountList, pbList, peList, psList, pcfList, stockIdList)
+        GroupDto(groupId, name, dateList, openPreList, closePreList, highPreList, lowPreList, volumePreList, amountList, pbList, peList, psList, pcfList, stockIdList)
     }
 }

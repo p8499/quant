@@ -15,5 +15,5 @@ class Level2Service {
 
     fun findByStockId(stockId: String) = level2Repository.findByStockId(stockId)
 
-    fun saveAll(entityList: List<Level2>) = level2Repository.saveAllAndFlush(entityList)
+    fun saveAll(entityList: List<Level2>): List<Level2> = level2Repository.saveAllAndFlush(entityList)
 }
