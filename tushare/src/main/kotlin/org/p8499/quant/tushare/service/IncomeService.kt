@@ -13,7 +13,9 @@ class IncomeService {
 
     operator fun get(stockId: String, date: Date) = incomeRepository.get(stockId, date)
 
+    fun last(stockId: String) = incomeRepository.last(stockId)
+
     fun findByStockId(stockId: String) = incomeRepository.findByStockId(stockId)
 
-    fun saveAll(entityList: List<Income>): List<Income> = incomeRepository.saveAllAndFlush(entityList)
+    fun saveAll(entityIterable: Iterable<Income>): List<Income> = incomeRepository.saveAllAndFlush(entityIterable)
 }

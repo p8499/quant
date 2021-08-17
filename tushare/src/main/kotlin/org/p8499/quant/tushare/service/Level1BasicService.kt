@@ -21,7 +21,7 @@ class Level1BasicService {
 
     fun findByStockId(stockId: String) = level1BasicRepository.findByStockId(stockId)
 
-    fun saveAll(entityList: List<Level1Basic>): List<Level1Basic> = level1BasicRepository.saveAllAndFlush(entityList)
+    fun saveAll(entityIterable: Iterable<Level1Basic>): List<Level1Basic> = level1BasicRepository.saveAllAndFlush(entityIterable)
 
     @Transactional
     fun fillVacancies(stockId: String) {

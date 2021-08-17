@@ -27,7 +27,7 @@ class ConceptDetailRequest : TushareRequest<ConceptDetailRequest.InParams, Conce
     @Autowired
     override lateinit var tushareFeignClient: TushareFeignClient
 
-    @Retryable(maxAttempts = 200, backoff = Backoff(delay = 5000))
+    @Retryable(maxAttempts = Int.MAX_VALUE, backoff = Backoff(delay = 1000))
     override fun invoke(inParams: InParams, outParamsClass: Class<OutParams>, fields: Array<String>): Array<OutParams> = super.invoke(inParams, outParamsClass, fields)
 
     class InParams(
@@ -51,10 +51,10 @@ class ConceptDetailRequest : TushareRequest<ConceptDetailRequest.InParams, Conce
             var name: String? = null,
 
             @set:JsonProperty("in_date")
-            @set:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
+            @set:JsonFormat(pattern = "yyyyMMdd")
             var inDate: Date? = null,
 
             @set:JsonProperty("out_date")
-            @set:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
+            @set:JsonFormat(pattern = "yyyyMMdd")
             var outDate: Date? = null)
 }

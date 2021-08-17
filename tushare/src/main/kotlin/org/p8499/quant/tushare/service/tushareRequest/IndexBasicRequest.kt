@@ -27,7 +27,7 @@ class IndexBasicRequest : TushareRequest<IndexBasicRequest.InParams, IndexBasicR
     @Autowired
     override lateinit var tushareFeignClient: TushareFeignClient
 
-    @Retryable(maxAttempts = 200, backoff = Backoff(delay = 5000))
+    @Retryable(maxAttempts = Int.MAX_VALUE, backoff = Backoff(delay = 1000))
     override fun invoke(inParams: InParams, outParamsClass: Class<OutParams>, fields: Array<String>): Array<OutParams> = super.invoke(inParams, outParamsClass, fields)
 
     class InParams(
@@ -66,14 +66,14 @@ class IndexBasicRequest : TushareRequest<IndexBasicRequest.InParams, IndexBasicR
             var category: String? = null,
 
             @set:JsonProperty("base_date")
-            @set:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
+            @set:JsonFormat(pattern = "yyyyMMdd")
             var baseDate: Date? = null,
 
             @set:JsonProperty("base_point")
             var basePoint: Double? = null,
 
             @set:JsonProperty("list_date")
-            @set:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
+            @set:JsonFormat(pattern = "yyyyMMdd")
             var listDate: Date? = null,
 
             @set:JsonProperty("weight_rule")
@@ -82,6 +82,6 @@ class IndexBasicRequest : TushareRequest<IndexBasicRequest.InParams, IndexBasicR
             var desc: String? = null,
 
             @set:JsonProperty("exp_date")
-            @set:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
+            @set:JsonFormat(pattern = "yyyyMMdd")
             var expDate: Date? = null)
 }

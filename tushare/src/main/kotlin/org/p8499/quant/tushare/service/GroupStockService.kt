@@ -14,8 +14,8 @@ class GroupStockService {
     fun findByGroupId(groupId: String) = groupStockRepository.findByGroupId(groupId)
 
     @Transactional
-    fun deleteAndSaveAll(entityList: List<GroupStock>): List<GroupStock> = groupStockRepository.run {
+    fun deleteAndSaveAll(entityIterable: Iterable<GroupStock>): List<GroupStock> = groupStockRepository.run {
         deleteAll()
-        saveAllAndFlush(entityList)
+        saveAllAndFlush(entityIterable)
     }
 }

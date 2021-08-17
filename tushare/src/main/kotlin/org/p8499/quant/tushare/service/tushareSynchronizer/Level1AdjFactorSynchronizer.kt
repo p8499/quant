@@ -1,5 +1,6 @@
 package org.p8499.quant.tushare.service.tushareSynchronizer
 
+import io.reactivex.Flowable
 import org.p8499.quant.tushare.TushareApplication
 import org.p8499.quant.tushare.entity.Level1AdjFactor
 import org.p8499.quant.tushare.entity.Stock
@@ -31,18 +32,21 @@ class Level1AdjFactorSynchronizer {
 
     fun invoke() {
         log.info("Start Synchronizing Level1AdjFactor")
-        val level1AdjFactorList: (String) -> List<Level1AdjFactor> = { tsCode ->
-            tradingDateService.unprocessedForLevel1AdjFactor(tsCode).mapNotNull(TradingDate::date).groupBy {
+        val level1AdjFactorIterable: (String) -> Iterable<Level1AdjFactor> = { tsCode ->
+            val datesCollection = tradingDateService.unprocessedForLevel1AdjFactor(tsCode).mapNotNull(TradingDate::date).groupBy {
                 Calendar.getInstance().run {
                     time = it
                     get(Calendar.YEAR)
                 }
-            }.flatMap { adjFactorRequest.invoke(AdjFactorRequest.InParams(tsCode = tsCode, startDate = it.value.minOrNull(), endDate = it.value.maxOrNull()), AdjFactorRequest.OutParams::class.java).asList() }
+            }.values
+            Flowable.fromIterable(datesCollection)
+                    .flatMap { Flowable.fromArray(*adjFactorRequest.invoke(AdjFactorRequest.InParams(tsCode = tsCode, startDate = it.minOrNull(), endDate = it.maxOrNull()), AdjFactorRequest.OutParams::class.java)) }
                     .map { Level1AdjFactor(tsCode, it.tradeDate, it.adjFactor) }
+                    .blockingIterable()
         }
         val stockIdList = stockService.findAll().mapNotNull(Stock::id)
         stockIdList.forEach {
-            level1AdjFactorService.saveAll(level1AdjFactorList(it))
+            level1AdjFactorService.saveAll(level1AdjFactorIterable(it))
             level1AdjFactorService.fillVacancies(it)
         }
         log.info("Finish Synchronizing Level1AdjFactor")

@@ -24,7 +24,7 @@ class ConceptRequest : TushareRequest<ConceptRequest.InParams, ConceptRequest.Ou
     @Autowired
     override lateinit var tushareFeignClient: TushareFeignClient
 
-    @Retryable(maxAttempts = 200, backoff = Backoff(delay = 5000))
+    @Retryable(maxAttempts = Int.MAX_VALUE, backoff = Backoff(delay = 1000))
     override fun invoke(inParams: InParams, outParamsClass: Class<OutParams>, fields: Array<String>): Array<OutParams> = super.invoke(inParams, outParamsClass, fields)
 
     class InParams(

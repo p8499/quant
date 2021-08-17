@@ -6,5 +6,7 @@ import java.util.*
 interface IncomeDao {
     fun get(stockId: String, date: Date): Income?
 
+    fun last(stockId: String): Income?
+
     fun findByStockId(stockId: String): List<Income>
 }

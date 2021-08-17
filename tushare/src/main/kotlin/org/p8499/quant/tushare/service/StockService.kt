@@ -20,5 +20,5 @@ class StockService {
 
     fun findByGroupId(groupId: String) = stockRepository.findByGroupId(groupId)
 
-    fun saveAll(entityList: List<Stock>): List<Stock> = stockRepository.saveAllAndFlush(entityList)
+    fun saveAll(entityIterable: Iterable<Stock>): List<Stock> = stockRepository.saveAllAndFlush(entityIterable)
 }

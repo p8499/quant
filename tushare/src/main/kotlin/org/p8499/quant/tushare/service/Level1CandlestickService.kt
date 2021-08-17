@@ -23,7 +23,7 @@ class Level1CandlestickService {
 
     fun previous(stockId: String, date: Date) = level1CandlestickRepository.previous(stockId, date)
 
-    fun saveAll(entityList: List<Level1Candlestick>): List<Level1Candlestick> = level1CandlestickRepository.saveAllAndFlush(entityList)
+    fun saveAll(entityIterable: Iterable<Level1Candlestick>): List<Level1Candlestick> = level1CandlestickRepository.saveAllAndFlush(entityIterable)
 
     @Transactional
     fun fillVacancies(stockId: String) {

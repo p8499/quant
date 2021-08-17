@@ -13,7 +13,9 @@ class CashflowService {
 
     operator fun get(stockId: String, date: Date) = cashflowRepository.get(stockId, date)
 
+    fun last(stockId: String) = cashflowRepository.last(stockId)
+
     fun findByStockId(stockId: String) = cashflowRepository.findByStockId(stockId)
 
-    fun saveAll(entityList: List<Cashflow>): List<Cashflow> = cashflowRepository.saveAllAndFlush(entityList)
+    fun saveAll(entityIterable: Iterable<Cashflow>): List<Cashflow> = cashflowRepository.saveAllAndFlush(entityIterable)
 }

@@ -1,8 +1,8 @@
 server:
-  port: 8081
+  port: 9002
 spring:
   application:
-    name: client
+    name: tushare
   datasource:
     url: jdbc:oracle:thin:@192.168.101.11:1521:quant
     username: tushare
@@ -33,15 +33,25 @@ spring:
     elasticsearch:
       repositories:
         enabled: false
+eureka:
+  client:
+    service-url:
+      defaultZone: http://192.168.101.11:9000/eureka/
 
 tushare:
   token: 38625237adbb054f362501dd9e8ebaa68e8406ac316e6c792ec41600
+
+analysis:
+  persistent:
+    url: http://192.168.101.11/analysis/persistent
 
 feign:
   client:
     config:
       default:
         loggerLevel: full
+        readTimeout: 300000
+
 logging:
   level:
     org.hibernate.SQL: off

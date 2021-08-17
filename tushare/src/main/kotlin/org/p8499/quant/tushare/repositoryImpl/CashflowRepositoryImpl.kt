@@ -16,6 +16,9 @@ class CashflowRepositoryImpl : CashflowDao {
             .createQuery("select t0 from Cashflow as t0 where t0.stockId = :stockId and t0.publish <= :date and not exists (select 1 from Cashflow as t1 where t1.stockId = :stockId and t1.publish = :date and t1.publish < t0.publish)", Cashflow::class.java)
             .setParameter("stockId", stockId).setParameter("date", date).resultList.firstOrNull()
 
+    override fun last(stockId: String): Cashflow? = em.createQuery("select t0 from Cashflow as t0 where t0.stockId = :stockId and not exists (select 1 from Cashflow as t1 where t1.stockId = :stockId and t1.publish > t0.publish)", Cashflow::class.java)
+            .setParameter("stockId", stockId).resultList.firstOrNull()
+
     override fun findByStockId(stockId: String): List<Cashflow> = em
             .createQuery("select t0 from Cashflow as t0 where t0.stockId = :stockId order by t0.publish asc", Cashflow::class.java)
             .setParameter("stockId", stockId).resultList

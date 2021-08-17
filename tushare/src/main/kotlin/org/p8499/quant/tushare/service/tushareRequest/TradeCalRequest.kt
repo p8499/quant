@@ -27,7 +27,7 @@ class TradeCalRequest : TushareRequest<TradeCalRequest.InParams, TradeCalRequest
     @Autowired
     override lateinit var tushareFeignClient: TushareFeignClient
 
-    @Retryable(maxAttempts = 200, backoff = Backoff(delay = 5000))
+    @Retryable(maxAttempts = Int.MAX_VALUE, backoff = Backoff(delay = 1000))
     override fun invoke(inParams: InParams, outParamsClass: Class<OutParams>, fields: Array<String>): Array<OutParams> = super.invoke(inParams, outParamsClass, fields)
 
     class InParams(
@@ -36,12 +36,12 @@ class TradeCalRequest : TushareRequest<TradeCalRequest.InParams, TradeCalRequest
 
             @get:JsonInclude(JsonInclude.Include.NON_NULL)
             @get:JsonProperty("start_date")
-            @get:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
+            @get:JsonFormat(pattern = "yyyyMMdd")
             var startDate: Date? = null,
 
             @get:JsonInclude(JsonInclude.Include.NON_NULL)
             @get:JsonProperty("end_date")
-            @get:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
+            @get:JsonFormat(pattern = "yyyyMMdd")
             var endDate: Date? = null,
 
             @get:JsonInclude(JsonInclude.Include.NON_NULL)
@@ -53,13 +53,13 @@ class TradeCalRequest : TushareRequest<TradeCalRequest.InParams, TradeCalRequest
             var exchange: String? = null,
 
             @set:JsonProperty("cal_date")
-            @set:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
+            @set:JsonFormat(pattern = "yyyyMMdd")
             var calDate: Date? = null,
 
             @set:JsonProperty("is_open")
             var isOpen: Int? = null,
 
             @set:JsonProperty("pretrade_date")
-            @set:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
+            @set:JsonFormat(pattern = "yyyyMMdd")
             var pretradeDate: Date? = null)
 }

@@ -13,7 +13,9 @@ class BalanceSheetService {
 
     operator fun get(stockId: String, date: Date) = balanceSheetRepository.get(stockId, date)
 
+    fun last(stockId: String) = balanceSheetRepository.last(stockId)
+
     fun findByStockId(stockId: String) = balanceSheetRepository.findByStockId(stockId)
 
-    fun saveAll(entityList: List<BalanceSheet>): List<BalanceSheet> = balanceSheetRepository.saveAllAndFlush(entityList)
+    fun saveAll(entityIterable: Iterable<BalanceSheet>): List<BalanceSheet> = balanceSheetRepository.saveAllAndFlush(entityIterable)
 }

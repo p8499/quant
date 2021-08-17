@@ -1,5 +1,6 @@
 package org.p8499.quant.tushare.service.tushareSynchronizer
 
+import io.reactivex.Flowable
 import org.p8499.quant.tushare.TushareApplication
 import org.p8499.quant.tushare.entity.Level1Candlestick
 import org.p8499.quant.tushare.entity.Stock
@@ -31,18 +32,21 @@ class Level1CandlestickSynchronizer {
 
     fun invoke() {
         log.info("Start Synchronizing Level1Candlestick")
-        val level1CandlestickList: (String) -> List<Level1Candlestick> = { tsCode ->
-            tradingDateService.unprocessedForLevel1Candlestick(tsCode).mapNotNull(TradingDate::date).groupBy {
+        val level1CandlestickIterable: (String) -> Iterable<Level1Candlestick> = { tsCode ->
+            val datesCollection = tradingDateService.unprocessedForLevel1Candlestick(tsCode).mapNotNull(TradingDate::date).groupBy {
                 Calendar.getInstance().run {
                     time = it
                     get(Calendar.YEAR)
                 }
-            }.flatMap { dailyRequest.invoke(DailyRequest.InParams(tsCode = tsCode, startDate = it.value.minOrNull(), endDate = it.value.maxOrNull()), DailyRequest.OutParams::class.java).asList() }
+            }.values
+            Flowable.fromIterable(datesCollection)
+                    .flatMap { Flowable.fromArray(*dailyRequest.invoke(DailyRequest.InParams(tsCode = tsCode, startDate = it.minOrNull(), endDate = it.maxOrNull()), DailyRequest.OutParams::class.java)) }
                     .map { Level1Candlestick(tsCode, it.tradeDate, it.open, it.close, it.high, it.low, it.vol, it.amount) }
+                    .blockingIterable()
         }
         val stockIdList = stockService.findAll().mapNotNull(Stock::id)
         stockIdList.forEach {
-            level1CandlestickService.saveAll(level1CandlestickList(it))
+            level1CandlestickService.saveAll(level1CandlestickIterable(it))
             level1CandlestickService.fillVacancies(it)
         }
         log.info("Finish Synchronizing Level1Candlestick")

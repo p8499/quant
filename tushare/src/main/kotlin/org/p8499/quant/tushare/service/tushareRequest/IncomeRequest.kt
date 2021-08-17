@@ -27,7 +27,7 @@ class IncomeRequest : TushareRequest<IncomeRequest.InParams, IncomeRequest.OutPa
     @Autowired
     override lateinit var tushareFeignClient: TushareFeignClient
 
-    @Retryable(maxAttempts = 200, backoff = Backoff(delay = 12000))
+    @Retryable(maxAttempts = Int.MAX_VALUE, backoff = Backoff(delay = 1000))
     override fun invoke(inParams: InParams, outParamsClass: Class<OutParams>, fields: Array<String>): Array<OutParams> = super.invoke(inParams, outParamsClass, fields)
 
     class InParams(
@@ -37,21 +37,21 @@ class IncomeRequest : TushareRequest<IncomeRequest.InParams, IncomeRequest.OutPa
 
             @get:JsonInclude(JsonInclude.Include.NON_NULL)
             @get:JsonProperty("ann_date")
-            @get:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
+            @get:JsonFormat(pattern = "yyyyMMdd")
             var annDate: Date? = null,
 
             @get:JsonInclude(JsonInclude.Include.NON_NULL)
             @get:JsonProperty("start_date")
-            @get:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
+            @get:JsonFormat(pattern = "yyyyMMdd")
             var startDate: Date? = null,
 
             @get:JsonInclude(JsonInclude.Include.NON_NULL)
             @get:JsonProperty("end_date")
-            @get:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
+            @get:JsonFormat(pattern = "yyyyMMdd")
             var endDate: Date? = null,
 
             @get:JsonInclude(JsonInclude.Include.NON_NULL)
-            @get:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
+            @get:JsonFormat(pattern = "yyyyMMdd")
             var period: Date? = null,
 
             @get:JsonInclude(JsonInclude.Include.NON_NULL)
@@ -68,15 +68,15 @@ class IncomeRequest : TushareRequest<IncomeRequest.InParams, IncomeRequest.OutPa
             var tsCode: String? = null,
 
             @set:JsonProperty("ann_date")
-            @set:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
+            @set:JsonFormat(pattern = "yyyyMMdd")
             var annDate: Date? = null,
 
             @set:JsonProperty("f_ann_date")
-            @set:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
+            @set:JsonFormat(pattern = "yyyyMMdd")
             var fAnnDate: Date? = null,
 
             @set:JsonProperty("end_date")
-            @set:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
+            @set:JsonFormat(pattern = "yyyyMMdd")
             var endDate: Date? = null,
 
             @set:JsonProperty("report_type")

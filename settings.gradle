@@ -1,1 +1,1 @@
-include ':tushare'
+include ':analysis', ':tushare'

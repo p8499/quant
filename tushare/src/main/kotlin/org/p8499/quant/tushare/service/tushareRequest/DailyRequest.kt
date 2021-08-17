@@ -27,7 +27,7 @@ class DailyRequest : TushareRequest<DailyRequest.InParams, DailyRequest.OutParam
     @Autowired
     override lateinit var tushareFeignClient: TushareFeignClient
 
-    @Retryable(maxAttempts = 200, backoff = Backoff(delay = 5000))
+    @Retryable(maxAttempts = Int.MAX_VALUE, backoff = Backoff(delay = 1000))
     override fun invoke(inParams: InParams, outParamsClass: Class<OutParams>, fields: Array<String>): Array<OutParams> = super.invoke(inParams, outParamsClass, fields)
 
     class InParams(
@@ -37,17 +37,17 @@ class DailyRequest : TushareRequest<DailyRequest.InParams, DailyRequest.OutParam
 
             @get:JsonInclude(JsonInclude.Include.NON_NULL)
             @get:JsonProperty("trade_date")
-            @get:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
+            @get:JsonFormat(pattern = "yyyyMMdd")
             var tradeDate: Date? = null,
 
             @get:JsonInclude(JsonInclude.Include.NON_NULL)
             @get:JsonProperty("start_date")
-            @get:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
+            @get:JsonFormat(pattern = "yyyyMMdd")
             var startDate: Date? = null,
 
             @get:JsonInclude(JsonInclude.Include.NON_NULL)
             @get:JsonProperty("end_date")
-            @get:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
+            @get:JsonFormat(pattern = "yyyyMMdd")
             var endDate: Date? = null)
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -56,7 +56,7 @@ class DailyRequest : TushareRequest<DailyRequest.InParams, DailyRequest.OutParam
             var tsCode: String? = null,
 
             @set:JsonProperty("trade_date")
-            @set:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
+            @set:JsonFormat(pattern = "yyyyMMdd")
             var tradeDate: Date? = null,
 
             var open: Double? = null,

@@ -16,5 +16,5 @@ class GroupService {
 
     fun findAll(): List<Group> = groupRepository.findAll()
 
-    fun saveAll(entityList: List<Group>): List<Group> = groupRepository.saveAllAndFlush(entityList)
+    fun saveAll(entityIterable: Iterable<Group>): List<Group> = groupRepository.saveAllAndFlush(entityIterable)
 }

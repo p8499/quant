@@ -27,7 +27,7 @@ class StockBasicRequest : TushareRequest<StockBasicRequest.InParams, StockBasicR
     @Autowired
     override lateinit var tushareFeignClient: TushareFeignClient
 
-    @Retryable(maxAttempts = 200, backoff = Backoff(delay = 5000))
+    @Retryable(maxAttempts = Int.MAX_VALUE, backoff = Backoff(delay = 1000))
     override fun invoke(inParams: InParams, outParamsClass: Class<OutParams>, fields: Array<String>): Array<OutParams> = super.invoke(inParams, outParamsClass, fields)
 
     class InParams(
@@ -88,11 +88,11 @@ class StockBasicRequest : TushareRequest<StockBasicRequest.InParams, StockBasicR
             var listStatus: Char? = null,
 
             @set:JsonProperty("list_date")
-            @set:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
+            @set:JsonFormat(pattern = "yyyyMMdd")
             var listDate: Date? = null,
 
             @set:JsonProperty("delist_date")
-            @set:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
+            @set:JsonFormat(pattern = "yyyyMMdd")
             var delistDate: Date? = null,
 
             @set:JsonProperty("is_hs")

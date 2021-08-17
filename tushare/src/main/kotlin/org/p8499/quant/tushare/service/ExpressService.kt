@@ -12,5 +12,7 @@ class ExpressService {
 
     fun findByStockId(stockId: String) = expressRepository.findByStockId(stockId)
 
-    fun saveAll(entityList: List<Express>): List<Express> = expressRepository.saveAllAndFlush(entityList)
+    fun last(stockId: String) = expressRepository.last(stockId)
+
+    fun saveAll(entityIterable: Iterable<Express>): List<Express> = expressRepository.saveAllAndFlush(entityIterable)
 }

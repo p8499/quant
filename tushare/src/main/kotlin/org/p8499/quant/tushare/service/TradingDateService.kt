@@ -40,5 +40,5 @@ class TradingDateService {
 
     fun findByExchangeId(exchangeId: String) = tradingDateRepository.findByExchangeId(exchangeId)
 
-    fun saveAll(entityList: List<TradingDate>): List<TradingDate> = tradingDateRepository.saveAllAndFlush(entityList)
+    fun saveAll(entityIterable: Iterable<TradingDate>): List<TradingDate> = tradingDateRepository.saveAllAndFlush(entityIterable)
 }

@@ -1,7 +1,8 @@
 package org.p8499.quant.tushare.service.tushareSynchronizer
 
+import io.reactivex.Flowable
 import org.p8499.quant.tushare.TushareApplication
-import org.p8499.quant.tushare.common.let2
+import org.p8499.quant.tushare.common.let
 import org.p8499.quant.tushare.entity.Group
 import org.p8499.quant.tushare.entity.GroupStock
 import org.p8499.quant.tushare.entity.Stock
@@ -13,34 +14,35 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 @Service
 class GroupStockSynchronizer {
     val log by lazy { LoggerFactory.getLogger(TushareApplication::class.java) }
 
     @Autowired
-    lateinit var tradingDateService: TradingDateService
+    protected lateinit var tradingDateService: TradingDateService
 
     @Autowired
-    lateinit var stockService: StockService
+    protected lateinit var stockService: StockService
 
     @Autowired
-    lateinit var groupService: GroupService
+    protected lateinit var groupService: GroupService
 
     @Autowired
-    lateinit var groupStockService: GroupStockService
+    protected lateinit var groupStockService: GroupStockService
 
     @Autowired
-    lateinit var level1BasicService: Level1BasicService
+    protected lateinit var level1BasicService: Level1BasicService
 
     @Autowired
-    lateinit var indexWeightRequest: IndexWeightRequest
+    protected lateinit var indexWeightRequest: IndexWeightRequest
 
     @Autowired
-    lateinit var indexMemberRequest: IndexMemberRequest
+    protected lateinit var indexMemberRequest: IndexMemberRequest
 
     @Autowired
-    lateinit var conceptDetailRequest: ConceptDetailRequest
+    protected lateinit var conceptDetailRequest: ConceptDetailRequest
 
     fun invoke() {
         log.info("Start Synchronizing GroupStock")
@@ -58,27 +60,23 @@ class GroupStockSynchronizer {
         val weightList: (Map<String, Double>, List<String>) -> List<Double> = { rsMap, stockIdList ->
             val flowShareList = stockIdList.map { stockId -> rsMap[stockId] }
             val maxFlowShare = flowShareList.mapNotNull { it }.maxOrNull()
-            flowShareList.map { let2(it, maxFlowShare) { a, b -> a * 1000 / b } ?: 0.0 }
+            flowShareList.map { let(it, maxFlowShare) { a, b -> a * 1000 / b } ?: 0.0 }
         }
-        val groupStockListOfIndustry: (Map<String, Double>) -> List<GroupStock> = { rsMap ->
+        val groupStockListOfTransform: (Map<String, Double>, Int, (String) -> List<String>) -> List<GroupStock> = { rsMap, times, transform ->
             val groupIdList = groupService.findByType(Group.Type.INDUSTRY).map(Group::id)
             val groupStockList = mutableListOf<GroupStock>()
-            for (groupId in groupIdList) {
-                val stockIdList = indexMemberRequest.invoke(IndexMemberRequest.InParams(indexCode = groupId), IndexMemberRequest.OutParams::class.java).map(IndexMemberRequest.OutParams::conCode).mapNotNull { it }
-                val wList = weightList(rsMap, stockIdList)
-                stockIdList.mapIndexedTo(groupStockList) { index, s -> GroupStock(groupId, s, wList[index]) }
-            }
+            val groupIdFlowable = Flowable.fromIterable(groupIdList)
+            val stockIdListFlowable = groupIdFlowable.map(transform).zipWith(Flowable.interval((60 * 1000 / times).toLong(), TimeUnit.MILLISECONDS)) { stockIdList, _ -> stockIdList }
+            val wListFlowable = stockIdListFlowable.map { weightList(rsMap, it) }
+            Flowable.zip(groupIdFlowable, stockIdListFlowable, wListFlowable) { groupId, stockIdList, wList -> Triple(groupId, stockIdList, wList) }
+                    .blockingSubscribe { it.second.mapIndexedTo(groupStockList) { index, s -> GroupStock(it.first, s, it.third[index]) } }
             groupStockList
         }
+        val groupStockListOfIndustry: (Map<String, Double>) -> List<GroupStock> = { rsMap ->
+            groupStockListOfTransform(rsMap, 200) { indexMemberRequest.invoke(IndexMemberRequest.InParams(indexCode = it), IndexMemberRequest.OutParams::class.java).mapNotNull(IndexMemberRequest.OutParams::conCode) }
+        }
         val groupStockListOfConcept: (Map<String, Double>) -> List<GroupStock> = { rsMap ->
-            val groupIdList = groupService.findByType(Group.Type.CONCEPT).map(Group::id)
-            val groupStockList = mutableListOf<GroupStock>()
-            for (groupId in groupIdList) {
-                val stockIdList = conceptDetailRequest.invoke(ConceptDetailRequest.InParams(id = groupId), ConceptDetailRequest.OutParams::class.java).map(ConceptDetailRequest.OutParams::tsCode).mapNotNull { it }
-                val wList = weightList(rsMap, stockIdList)
-                stockIdList.mapIndexedTo(groupStockList) { index, s -> GroupStock(groupId, s, wList[index]) }
-            }
-            groupStockList
+            groupStockListOfTransform(rsMap, 200) { conceptDetailRequest.invoke(ConceptDetailRequest.InParams(id = it), ConceptDetailRequest.OutParams::class.java).mapNotNull(ConceptDetailRequest.OutParams::tsCode) }
         }
         val date = tradingDateService.last("SSE")?.date ?: return
         val fsMap = flowShareMap(date)

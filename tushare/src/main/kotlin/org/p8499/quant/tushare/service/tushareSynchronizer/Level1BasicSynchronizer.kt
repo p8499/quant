@@ -1,5 +1,6 @@
 package org.p8499.quant.tushare.service.tushareSynchronizer
 
+import io.reactivex.Flowable
 import org.p8499.quant.tushare.TushareApplication
 import org.p8499.quant.tushare.entity.Level1Basic
 import org.p8499.quant.tushare.entity.Stock
@@ -12,6 +13,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 @Service
 class Level1BasicSynchronizer {
@@ -31,18 +33,21 @@ class Level1BasicSynchronizer {
 
     fun invoke() {
         log.info("Start Synchronizing Level1Basic")
-        val level1BasicList: (String) -> List<Level1Basic> = { tsCode ->
-            tradingDateService.unprocessedForLevel1Basic(tsCode).mapNotNull(TradingDate::date).groupBy {
+        val level1BasicIterable: (String) -> Iterable<Level1Basic> = { tsCode ->
+            val datesCollection = tradingDateService.unprocessedForLevel1Basic(tsCode).mapNotNull(TradingDate::date).groupBy {
                 Calendar.getInstance().run {
                     time = it
                     get(Calendar.YEAR)
                 }
-            }.flatMap { dailyBasicRequest.invoke(DailyBasicRequest.InParams(tsCode = tsCode, startDate = it.value.minOrNull(), endDate = it.value.maxOrNull()), DailyBasicRequest.OutParams::class.java).asList() }
+            }.values
+            Flowable.fromIterable(datesCollection).zipWith(Flowable.interval(150, TimeUnit.MILLISECONDS)) { dateList, _ -> dateList }
+                    .flatMap { Flowable.fromArray(*dailyBasicRequest.invoke(DailyBasicRequest.InParams(tsCode = tsCode, startDate = it.minOrNull(), endDate = it.maxOrNull()), DailyBasicRequest.OutParams::class.java)) }
                     .map { Level1Basic(tsCode, it.tradeDate, it.totalShare, it.floatShare) }
+                    .blockingIterable()
         }
         val stockIdList = stockService.findAll().mapNotNull(Stock::id)
         stockIdList.forEach {
-            level1BasicService.saveAll(level1BasicList(it))
+            level1BasicService.saveAll(level1BasicIterable(it))
             level1BasicService.fillVacancies(it)
         }
         log.info("Finish Synchronizing Level1Basic")
