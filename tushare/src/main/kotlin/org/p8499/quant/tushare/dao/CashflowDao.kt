@@ -1,6 +1,5 @@
 package org.p8499.quant.tushare.dao
 
-import org.p8499.quant.tushare.entity.BalanceSheet
 import org.p8499.quant.tushare.entity.Cashflow
 import java.util.*
 
@@ -10,4 +9,6 @@ interface CashflowDao {
     fun last(stockId: String): Cashflow?
 
     fun findByStockId(stockId: String): List<Cashflow>
+
+    fun findByStockIdBetween(stockId: String, from: Date, to: Date): List<Cashflow>
 }

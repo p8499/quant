@@ -36,12 +36,12 @@ class TradeCalRequest : TushareRequest<TradeCalRequest.InParams, TradeCalRequest
 
             @get:JsonInclude(JsonInclude.Include.NON_NULL)
             @get:JsonProperty("start_date")
-            @get:JsonFormat(pattern = "yyyyMMdd")
+            @get:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
             var startDate: Date? = null,
 
             @get:JsonInclude(JsonInclude.Include.NON_NULL)
             @get:JsonProperty("end_date")
-            @get:JsonFormat(pattern = "yyyyMMdd")
+            @get:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
             var endDate: Date? = null,
 
             @get:JsonInclude(JsonInclude.Include.NON_NULL)
@@ -53,13 +53,13 @@ class TradeCalRequest : TushareRequest<TradeCalRequest.InParams, TradeCalRequest
             var exchange: String? = null,
 
             @set:JsonProperty("cal_date")
-            @set:JsonFormat(pattern = "yyyyMMdd")
+            @set:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
             var calDate: Date? = null,
 
             @set:JsonProperty("is_open")
             var isOpen: Int? = null,
 
             @set:JsonProperty("pretrade_date")
-            @set:JsonFormat(pattern = "yyyyMMdd")
+            @set:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
             var pretradeDate: Date? = null)
 }

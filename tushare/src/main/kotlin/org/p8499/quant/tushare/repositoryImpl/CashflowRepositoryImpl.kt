@@ -22,4 +22,8 @@ class CashflowRepositoryImpl : CashflowDao {
     override fun findByStockId(stockId: String): List<Cashflow> = em
             .createQuery("select t0 from Cashflow as t0 where t0.stockId = :stockId order by t0.publish asc", Cashflow::class.java)
             .setParameter("stockId", stockId).resultList
+
+    override fun findByStockIdBetween(stockId: String, from: Date, to: Date): List<Cashflow> = em
+            .createQuery("select t0 from Cashflow as t0 where t0.stockId = :stockId and t0.publish between :from and :to order by t0.publish asc", Cashflow::class.java)
+            .setParameter("stockId", stockId).setParameter("from", from).setParameter("to", to).resultList
 }

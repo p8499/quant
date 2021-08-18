@@ -10,6 +10,8 @@ import java.util.*
 
 class StockDtoBuilder(
         val stockId: String,
+        from: Date,
+        to: Date,
         val exchangeService: ExchangeService,
         val tradingDateService: TradingDateService,
         val stockService: StockService,
@@ -68,49 +70,49 @@ class StockDtoBuilder(
 
     private fun <T> flatMapOf(items: Iterable<T>, keyTransform: (T) -> Date?, valueTransform: (T) -> Double?): Map<Date, Double?> = flatten(mapOf(items, keyTransform, valueTransform))
 
-    val dateList by lazy { tradingDateService.findByStockId(stockId).mapNotNull(TradingDate::date) }
+    val dateList by lazy { tradingDateService.findByStockIdBetween(stockId, from, to).mapNotNull(TradingDate::date) }
 
-    val factorList by lazy { flatMapOf(level1AdjFactorService.findByStockId(stockId), Level1AdjFactor::date, Level1AdjFactor::factor).values.toList() }
+    val factorList by lazy { flatMapOf(level1AdjFactorService.findByStockIdBetween(stockId, from, to), Level1AdjFactor::date, Level1AdjFactor::factor).values.toList() }
 
     val maxFactor by lazy { factorList.mapNotNull { it }.maxOrNull() }
 
-    val openList by lazy { flatMapOf(level1CandlestickService.findByStockId(stockId), Level1Candlestick::date, Level1Candlestick::open).values.toList() }
+    val openList by lazy { flatMapOf(level1CandlestickService.findByStockIdBetween(stockId, from, to), Level1Candlestick::date, Level1Candlestick::open).values.toList() }
 
     val openPreList by lazy { openList.mapIndexed { index, d -> let(d, factorList[index], maxFactor) { a, b, c -> a * b / c } } }
 
-    val closeList by lazy { flatMapOf(level1CandlestickService.findByStockId(stockId), Level1Candlestick::date, Level1Candlestick::close).values.toList() }
+    val closeList by lazy { flatMapOf(level1CandlestickService.findByStockIdBetween(stockId, from, to), Level1Candlestick::date, Level1Candlestick::close).values.toList() }
 
     val closePreList by lazy { closeList.mapIndexed { index, d -> let(d, factorList[index], maxFactor) { a, b, c -> a * b / c } } }
 
-    val highList by lazy { flatMapOf(level1CandlestickService.findByStockId(stockId), Level1Candlestick::date, Level1Candlestick::high).values.toList() }
+    val highList by lazy { flatMapOf(level1CandlestickService.findByStockIdBetween(stockId, from, to), Level1Candlestick::date, Level1Candlestick::high).values.toList() }
 
     val highPreList by lazy { highList.mapIndexed { index, d -> let(d, factorList[index], maxFactor) { a, b, c -> a * b / c } } }
 
-    val lowList by lazy { flatMapOf(level1CandlestickService.findByStockId(stockId), Level1Candlestick::date, Level1Candlestick::low).values.toList() }
+    val lowList by lazy { flatMapOf(level1CandlestickService.findByStockIdBetween(stockId, from, to), Level1Candlestick::date, Level1Candlestick::low).values.toList() }
 
     val lowPreList by lazy { lowList.mapIndexed { index, d -> let(d, factorList[index], maxFactor) { a, b, c -> a * b / c } } }
 
-    val volumeList by lazy { flatMapOf(level1CandlestickService.findByStockId(stockId), Level1Candlestick::date, Level1Candlestick::volume).values.toList() }
+    val volumeList by lazy { flatMapOf(level1CandlestickService.findByStockIdBetween(stockId, from, to), Level1Candlestick::date, Level1Candlestick::volume).values.toList() }
 
     val volumePreList by lazy { volumeList.mapIndexed { index, d -> let(d, factorList[index], maxFactor) { a, b, c -> a * b / c } } }
 
-    val amountList by lazy { flatMapOf(level1CandlestickService.findByStockId(stockId), Level1Candlestick::date, Level1Candlestick::amount).values.toList() }
+    val amountList by lazy { flatMapOf(level1CandlestickService.findByStockIdBetween(stockId, from, to), Level1Candlestick::date, Level1Candlestick::amount).values.toList() }
 
-    val flowShareList by lazy { flatMapOf(level1BasicService.findByStockId(stockId), Level1Basic::date, Level1Basic::flowShare).values.toList() }
+    val flowShareList by lazy { flatMapOf(level1BasicService.findByStockIdBetween(stockId, from, to), Level1Basic::date, Level1Basic::flowShare).values.toList() }
 
-    val totalShareList by lazy { flatMapOf(level1BasicService.findByStockId(stockId), Level1Basic::date, Level1Basic::totalShare).values.toList() }
+    val totalShareList by lazy { flatMapOf(level1BasicService.findByStockIdBetween(stockId, from, to), Level1Basic::date, Level1Basic::totalShare).values.toList() }
 
     val flowValueList by lazy { flowShareList.mapIndexed { index, d -> let(d, closeList[index]) { a, b -> a * b } } }
 
     val totalValueList by lazy { totalShareList.mapIndexed { index, d -> let(d, closeList[index]) { a, b -> a * b } } }
 
-    private val balanceSheetList by lazy { balanceSheetService.findByStockId(stockId) }
+    private val balanceSheetList by lazy { balanceSheetService.findByStockIdBetween(stockId, from, to) }
 
-    private val incomeList by lazy { incomeService.findByStockId(stockId) }
+    private val incomeList by lazy { incomeService.findByStockIdBetween(stockId, from, to) }
 
-    private val cashflowList by lazy { cashflowService.findByStockId(stockId) }
+    private val cashflowList by lazy { cashflowService.findByStockIdBetween(stockId, from, to) }
 
-    private val expressList by lazy { expressService.findByStockId(stockId) }
+    private val expressList by lazy { expressService.findByStockIdBetween(stockId, from, to) }
 
     private fun <T> multiplierOf(items: Iterable<T>, dateTransform: (T) -> Date?, yearTransform: (T) -> Int?, periodTransform: (T) -> Int?, valueTransform: (T) -> Double?, date: Date, period: Int): Double? {
         val periodItemList = items.filter { item -> dateTransform(item)?.let { it < date } ?: false && periodTransform(item) == period }

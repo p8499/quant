@@ -41,7 +41,7 @@ class PersistentController {
 //                indexList.parallelStream().map { StockIndexDaily(stockDto.region, stockDto.id, "ps", stockDto.date[it], stockDto.ps[it]) }.collect(Collectors.toList()),
 //                indexList.parallelStream().map { StockIndexDaily(stockDto.region, stockDto.id, "pcf", stockDto.date[it], stockDto.pcf[it]) }.collect(Collectors.toList()))
 
-        logger.info("${stockDto.id} Received")
+        logger.info("${stockDto.id} Received, size = ${stockDto.date.size}")
         persistentService.save(
                 stockDto.id,
                 Stock(stockDto.region, stockDto.id, stockDto.name, stockDto.message),

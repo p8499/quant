@@ -21,6 +21,8 @@ class Level1CandlestickService {
 
     fun findByStockId(stockId: String) = level1CandlestickRepository.findByStockId(stockId)
 
+    fun findByStockIdBetween(stockId: String, from: Date, to: Date) = level1CandlestickRepository.findByStockIdBetween(stockId, from, to)
+
     fun previous(stockId: String, date: Date) = level1CandlestickRepository.previous(stockId, date)
 
     fun saveAll(entityIterable: Iterable<Level1Candlestick>): List<Level1Candlestick> = level1CandlestickRepository.saveAllAndFlush(entityIterable)

@@ -17,5 +17,7 @@ class BalanceSheetService {
 
     fun findByStockId(stockId: String) = balanceSheetRepository.findByStockId(stockId)
 
+    fun findByStockIdBetween(stockId: String, from: Date, to: Date) = balanceSheetRepository.findByStockIdBetween(stockId, from, to)
+
     fun saveAll(entityIterable: Iterable<BalanceSheet>): List<BalanceSheet> = balanceSheetRepository.saveAllAndFlush(entityIterable)
 }

@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
+import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors
 
@@ -100,7 +101,7 @@ class TushareTask {
      *                                           │ express           │
      *                                           └ forecast          ┘
      */
-    @Scheduled(cron = "0 25 12 * * MON-FRI")
+    @Scheduled(cron = "00 45 16 * * MON-FRI")
     fun syncAndSend() {
         /**
          * Download from tushare.pro and save the data into database
@@ -127,7 +128,14 @@ class TushareTask {
         /**
          * Calculate from database and call analysis persistent function
          */
-        stockService.findAll().mapNotNull(Stock::id).parallelStream().map(dtoBuilderFactory::newStockBuilder).map(StockDtoBuilder::build).forEach(persistentFeignClient::stock)
+        val from = Calendar.getInstance().apply { set(2007, 0, 1, 0, 0, 0) }.time
+        val to = Calendar.getInstance().apply {
+            add(Calendar.DATE, -1)
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+        }.time
+        stockService.findAll().mapNotNull(Stock::id).parallelStream().map { dtoBuilderFactory.newStockBuilder(it, from, to) }.map(StockDtoBuilder::build).forEach(persistentFeignClient::stock)
 //        stringRedisTemplate.keys("*").forEach { stringRedisTemplate.delete(it) }
 //        stockService.findAll().mapNotNull(Stock::id).parallelStream().forEach { stringRedisTemplate.opsForValue().set("CNS-$it", objectMapper.writeValueAsString(dtoBuilderFactory.newStockBuilder(it).build())) }
 //        val stockDtoList = stringRedisTemplate.keys("CNG-*").map { objectMapper.readValue(stringRedisTemplate.opsForValue()[it], StockDto::class.java) }

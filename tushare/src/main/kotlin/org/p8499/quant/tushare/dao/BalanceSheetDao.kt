@@ -1,7 +1,6 @@
 package org.p8499.quant.tushare.dao
 
 import org.p8499.quant.tushare.entity.BalanceSheet
-import org.p8499.quant.tushare.entity.Forecast
 import java.util.*
 
 interface BalanceSheetDao {
@@ -10,4 +9,6 @@ interface BalanceSheetDao {
     fun last(stockId: String): BalanceSheet?
 
     fun findByStockId(stockId: String): List<BalanceSheet>
+
+    fun findByStockIdBetween(stockId: String, from: Date, to: Date): List<BalanceSheet>
 }

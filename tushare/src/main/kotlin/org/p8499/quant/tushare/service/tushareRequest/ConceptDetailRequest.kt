@@ -51,10 +51,10 @@ class ConceptDetailRequest : TushareRequest<ConceptDetailRequest.InParams, Conce
             var name: String? = null,
 
             @set:JsonProperty("in_date")
-            @set:JsonFormat(pattern = "yyyyMMdd")
+            @set:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
             var inDate: Date? = null,
 
             @set:JsonProperty("out_date")
-            @set:JsonFormat(pattern = "yyyyMMdd")
+            @set:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
             var outDate: Date? = null)
 }

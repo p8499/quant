@@ -22,4 +22,8 @@ class BalanceSheetRepositoryImpl : BalanceSheetDao {
     override fun findByStockId(stockId: String): List<BalanceSheet> = em
             .createQuery("select t0 from BalanceSheet as t0 where t0.stockId = :stockId order by t0.publish asc", BalanceSheet::class.java)
             .setParameter("stockId", stockId).resultList
+
+    override fun findByStockIdBetween(stockId: String, from: Date, to: Date): List<BalanceSheet> = em
+            .createQuery("select t0 from BalanceSheet as t0 where t0.stockId = :stockId and t0.publish between :from and :to order by t0.publish asc", BalanceSheet::class.java)
+            .setParameter("stockId", stockId).setParameter("from", from).setParameter("to", to).resultList
 }

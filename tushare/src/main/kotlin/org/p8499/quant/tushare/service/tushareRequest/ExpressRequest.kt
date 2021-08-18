@@ -37,21 +37,21 @@ class ExpressRequest : TushareRequest<ExpressRequest.InParams, ExpressRequest.Ou
 
             @get:JsonInclude(JsonInclude.Include.NON_NULL)
             @get:JsonProperty("ann_date")
-            @get:JsonFormat(pattern = "yyyyMMdd")
+            @get:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
             var annDate: Date? = null,
 
             @get:JsonInclude(JsonInclude.Include.NON_NULL)
             @get:JsonProperty("start_date")
-            @get:JsonFormat(pattern = "yyyyMMdd")
+            @get:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
             var startDate: Date? = null,
 
             @get:JsonInclude(JsonInclude.Include.NON_NULL)
             @get:JsonProperty("end_date")
-            @get:JsonFormat(pattern = "yyyyMMdd")
+            @get:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
             var endDate: Date? = null,
 
             @get:JsonInclude(JsonInclude.Include.NON_NULL)
-            @get:JsonFormat(pattern = "yyyyMMdd")
+            @get:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
             var period: Date? = null)
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -60,11 +60,11 @@ class ExpressRequest : TushareRequest<ExpressRequest.InParams, ExpressRequest.Ou
             var tsCode: String? = null,
 
             @set:JsonProperty("ann_date")
-            @set:JsonFormat(pattern = "yyyyMMdd")
+            @set:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
             var annDate: Date? = null,
 
             @set:JsonProperty("end_date")
-            @set:JsonFormat(pattern = "yyyyMMdd")
+            @set:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
             var endDate: Date? = null,
 
             @set:JsonProperty("total_hldr_eqy_exc_min_int")

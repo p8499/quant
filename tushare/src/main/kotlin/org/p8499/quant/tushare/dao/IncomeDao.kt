@@ -9,4 +9,6 @@ interface IncomeDao {
     fun last(stockId: String): Income?
 
     fun findByStockId(stockId: String): List<Income>
+
+    fun findByStockIdBetween(stockId: String, from: Date, to: Date): List<Income>
 }

@@ -6,6 +6,7 @@ import org.p8499.quant.tushare.service.*
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+import java.util.*
 
 @Component
 class DtoBuilderFactory {
@@ -53,7 +54,7 @@ class DtoBuilderFactory {
     @Autowired
     protected lateinit var forecastService: ForecastService
 
-    fun newStockBuilder(stockId: String) = StockDtoBuilder(stockId, exchangeService, tradingDateService, stockService, groupService, level1CandlestickService, level1BasicService, level1AdjFactorService, level2Service, groupStockService, balanceSheetService, incomeService, cashflowService, expressService, forecastService)
+    fun newStockBuilder(stockId: String, from: Date, to: Date) = StockDtoBuilder(stockId, from, to, exchangeService, tradingDateService, stockService, groupService, level1CandlestickService, level1BasicService, level1AdjFactorService, level2Service, groupStockService, balanceSheetService, incomeService, cashflowService, expressService, forecastService)
 
     fun newGroupBuilder(groupId: String, stockDtoList: List<StockDto>) = GroupDtoBuilder(groupId, stockDtoList, exchangeService, tradingDateService, stockService, groupService, level1CandlestickService, level1BasicService, level1AdjFactorService, level2Service, groupStockService, balanceSheetService, incomeService, cashflowService, expressService, forecastService)
 }

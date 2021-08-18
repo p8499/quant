@@ -21,6 +21,8 @@ class Level1AdjFactorService {
 
     fun findByStockId(stockId: String) = level1AdjFactorRepository.findByStockId(stockId)
 
+    fun findByStockIdBetween(stockId: String, from: Date, to: Date) = level1AdjFactorRepository.findByStockIdBetween(stockId, from, to)
+
     fun saveAll(entityIterable: Iterable<Level1AdjFactor>): List<Level1AdjFactor> = level1AdjFactorRepository.saveAllAndFlush(entityIterable)
 
     @Transactional

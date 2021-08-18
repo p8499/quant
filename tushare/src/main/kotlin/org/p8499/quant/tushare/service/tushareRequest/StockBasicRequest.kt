@@ -88,11 +88,11 @@ class StockBasicRequest : TushareRequest<StockBasicRequest.InParams, StockBasicR
             var listStatus: Char? = null,
 
             @set:JsonProperty("list_date")
-            @set:JsonFormat(pattern = "yyyyMMdd")
+            @set:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
             var listDate: Date? = null,
 
             @set:JsonProperty("delist_date")
-            @set:JsonFormat(pattern = "yyyyMMdd")
+            @set:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
             var delistDate: Date? = null,
 
             @set:JsonProperty("is_hs")

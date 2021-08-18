@@ -37,17 +37,17 @@ class MoneyflowRequest : TushareRequest<MoneyflowRequest.InParams, MoneyflowRequ
 
             @get:JsonInclude(JsonInclude.Include.NON_NULL)
             @get:JsonProperty("trade_date")
-            @get:JsonFormat(pattern = "yyyyMMdd")
+            @get:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
             var tradeDate: Date? = null,
 
             @get:JsonInclude(JsonInclude.Include.NON_NULL)
             @get:JsonProperty("start_date")
-            @get:JsonFormat(pattern = "yyyyMMdd")
+            @get:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
             var startDate: Date? = null,
 
             @get:JsonInclude(JsonInclude.Include.NON_NULL)
             @get:JsonProperty("end_date")
-            @get:JsonFormat(pattern = "yyyyMMdd")
+            @get:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
             var endDate: Date? = null)
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -56,7 +56,7 @@ class MoneyflowRequest : TushareRequest<MoneyflowRequest.InParams, MoneyflowRequ
             var tsCode: String? = null,
 
             @set:JsonProperty("trade_date")
-            @set:JsonFormat(pattern = "yyyyMMdd")
+            @set:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
             var tradeDate: Date? = null,
 
             @set:JsonProperty("buy_sm_vol")

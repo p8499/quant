@@ -17,5 +17,7 @@ class IncomeService {
 
     fun findByStockId(stockId: String) = incomeRepository.findByStockId(stockId)
 
+    fun findByStockIdBetween(stockId: String, from: Date, to: Date) = incomeRepository.findByStockIdBetween(stockId, from, to)
+
     fun saveAll(entityIterable: Iterable<Income>): List<Income> = incomeRepository.saveAllAndFlush(entityIterable)
 }

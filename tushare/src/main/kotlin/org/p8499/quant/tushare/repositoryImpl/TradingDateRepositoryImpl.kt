@@ -3,6 +3,7 @@ package org.p8499.quant.tushare.repositoryImpl
 import org.p8499.quant.tushare.dao.TradingDateDao
 import org.p8499.quant.tushare.entity.TradingDate
 import org.springframework.stereotype.Repository
+import java.util.*
 import javax.persistence.EntityManager
 import javax.persistence.PersistenceContext
 
@@ -66,6 +67,10 @@ class TradingDateRepositoryImpl : TradingDateDao {
     override fun findByStockId(stockId: String): List<TradingDate> = em
             .createQuery("select t0 from TradingDate as t0 inner join Stock as t1 on t1.exchangeId = t0.exchangeId and t1.id = :stockId where t1.listed <= t0.date and t0.date <= coalesce(t1.delisted, t0.date) order by t0.date asc", TradingDate::class.java)
             .setParameter("stockId", stockId).resultList
+
+    override fun findByStockIdBetween(stockId: String, from: Date, to: Date): List<TradingDate> = em
+            .createQuery("select t0 from TradingDate as t0 inner join Stock as t1 on t1.exchangeId = t0.exchangeId and t1.id = :stockId where t1.listed <= t0.date and :from <= t0.date and t0.date <= coalesce(t1.delisted, t0.date) and t0.date <= :to order by t0.date asc", TradingDate::class.java)
+            .setParameter("stockId", stockId).setParameter("from", from).setParameter("to", to).resultList
 
     override fun findByExchangeId(exchangeId: String): List<TradingDate> = em
             .createQuery("select t0 from TradingDate as t0 where t0.exchangeId = :exchangeId order by t0.date asc", TradingDate::class.java)

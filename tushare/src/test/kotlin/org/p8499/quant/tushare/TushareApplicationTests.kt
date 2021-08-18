@@ -1,9 +1,10 @@
 package org.p8499.quant.tushare
 
 import org.junit.jupiter.api.Test
+import org.p8499.quant.tushare.dtoBuilder.DtoBuilderFactory
+import org.p8499.quant.tushare.service.task.TushareTask
 import org.p8499.quant.tushare.service.tushareRequest.*
 import org.p8499.quant.tushare.service.tushareSynchronizer.*
-import org.p8499.quant.tushare.service.task.TushareTask
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import java.util.*
@@ -79,9 +80,14 @@ class TushareApplicationTests {
     @Autowired
     protected lateinit var tushareTask: TushareTask
 
+    @Autowired
+    protected lateinit var dtoBuilderFactory: DtoBuilderFactory
+
     @Test
     fun contextLoads() {
-        while (true)
-            moneyflowRequest.invoke(MoneyflowRequest.InParams(tsCode = "", tradeDate = Date()), MoneyflowRequest.OutParams::class.java)
+        val from = Calendar.getInstance().apply { set(2007, 0, 1) }.time
+        val to = Calendar.getInstance().apply { add(Calendar.DATE, -1) }.time
+        val x = dtoBuilderFactory.newStockBuilder("605090.SH", from, to).build()
+        print(x)
     }
 }

@@ -21,6 +21,8 @@ class Level1BasicService {
 
     fun findByStockId(stockId: String) = level1BasicRepository.findByStockId(stockId)
 
+    fun findByStockIdBetween(stockId: String, from: Date, to: Date) = level1BasicRepository.findByStockIdBetween(stockId, from, to)
+
     fun saveAll(entityIterable: Iterable<Level1Basic>): List<Level1Basic> = level1BasicRepository.saveAllAndFlush(entityIterable)
 
     @Transactional

@@ -15,5 +15,7 @@ class Level2Service {
 
     fun findByStockId(stockId: String) = level2Repository.findByStockId(stockId)
 
+    fun findByStockIdBetween(stockId: String, from: Date, to: Date) = level2Repository.findByStockIdBetween(stockId, from, to)
+
     fun saveAll(entityIterable: Iterable<Level2>): List<Level2> = level2Repository.saveAllAndFlush(entityIterable)
 }

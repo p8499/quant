@@ -17,5 +17,7 @@ class CashflowService {
 
     fun findByStockId(stockId: String) = cashflowRepository.findByStockId(stockId)
 
+    fun findByStockIdBetween(stockId: String, from: Date, to: Date) = cashflowRepository.findByStockIdBetween(stockId, from, to)
+
     fun saveAll(entityIterable: Iterable<Cashflow>): List<Cashflow> = cashflowRepository.saveAllAndFlush(entityIterable)
 }

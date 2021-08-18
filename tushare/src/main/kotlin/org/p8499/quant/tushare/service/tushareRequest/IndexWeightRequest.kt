@@ -37,17 +37,17 @@ class IndexWeightRequest : TushareRequest<IndexWeightRequest.InParams, IndexWeig
 
             @get:JsonInclude(JsonInclude.Include.NON_NULL)
             @get:JsonProperty("trade_date")
-            @get:JsonFormat(pattern = "yyyyMMdd")
+            @get:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
             var tradeDate: Date? = null,
 
             @get:JsonInclude(JsonInclude.Include.NON_NULL)
             @get:JsonProperty("start_date")
-            @get:JsonFormat(pattern = "yyyyMMdd")
+            @get:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
             var startDate: Date? = null,
 
             @get:JsonInclude(JsonInclude.Include.NON_NULL)
             @get:JsonProperty("end_date")
-            @get:JsonFormat(pattern = "yyyyMMdd")
+            @get:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
             var endDate: Date? = null)
 
 
@@ -60,7 +60,7 @@ class IndexWeightRequest : TushareRequest<IndexWeightRequest.InParams, IndexWeig
             var conCode: String? = null,
 
             @set:JsonProperty("trade_date")
-            @set:JsonFormat(pattern = "yyyyMMdd")
+            @set:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
             var tradeDate: Date? = null,
 
             var weight: Double? = null)

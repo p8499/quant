@@ -18,5 +18,4 @@ class ForecastRepositoryImpl : ForecastDao {
     override fun findByStockId(stockId: String): List<Forecast> = em
             .createQuery("select t0 from Forecast as t0 where t0.stockId = :stockId order by t0.publish asc", Forecast::class.java)
             .setParameter("stockId", stockId).resultList
-
 }

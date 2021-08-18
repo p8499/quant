@@ -66,14 +66,14 @@ class IndexBasicRequest : TushareRequest<IndexBasicRequest.InParams, IndexBasicR
             var category: String? = null,
 
             @set:JsonProperty("base_date")
-            @set:JsonFormat(pattern = "yyyyMMdd")
+            @set:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
             var baseDate: Date? = null,
 
             @set:JsonProperty("base_point")
             var basePoint: Double? = null,
 
             @set:JsonProperty("list_date")
-            @set:JsonFormat(pattern = "yyyyMMdd")
+            @set:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
             var listDate: Date? = null,
 
             @set:JsonProperty("weight_rule")
@@ -82,6 +82,6 @@ class IndexBasicRequest : TushareRequest<IndexBasicRequest.InParams, IndexBasicR
             var desc: String? = null,
 
             @set:JsonProperty("exp_date")
-            @set:JsonFormat(pattern = "yyyyMMdd")
+            @set:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
             var expDate: Date? = null)
 }

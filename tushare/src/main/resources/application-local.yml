@@ -33,6 +33,7 @@ spring:
     elasticsearch:
       repositories:
         enabled: false
+
 eureka:
   client:
     service-url:

@@ -4,15 +4,18 @@ import org.p8499.quant.tushare.entity.Express
 import org.p8499.quant.tushare.repository.ExpressRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import java.util.*
 
 @Service
 class ExpressService {
     @Autowired
     protected lateinit var expressRepository: ExpressRepository
 
+    fun last(stockId: String) = expressRepository.last(stockId)
+
     fun findByStockId(stockId: String) = expressRepository.findByStockId(stockId)
 
-    fun last(stockId: String) = expressRepository.last(stockId)
+    fun findByStockIdBetween(stockId: String, from: Date, to: Date) = expressRepository.findByStockIdBetween(stockId, from, to)
 
     fun saveAll(entityIterable: Iterable<Express>): List<Express> = expressRepository.saveAllAndFlush(entityIterable)
 }
