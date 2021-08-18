@@ -1,12 +1,15 @@
 package org.p8499.quant.analysis.service
 
 import org.p8499.quant.analysis.entity.*
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
 class PersistentService {
+    protected val logger by lazy { LoggerFactory.getLogger(javaClass) }
+
     @Autowired
     protected lateinit var stockService: StockService
 
@@ -39,6 +42,8 @@ class PersistentService {
              peDailyIterable: Iterable<StockIndexDaily>,
              psDailyIterable: Iterable<StockIndexDaily>,
              pcfDailyIterable: Iterable<StockIndexDaily>) {
+        logger.info("${stock.id} Saving Start")
+        val time0 = System.currentTimeMillis()
         stockService.deleteById(id)
         stockIndexDailyService.deleteById(id)
         stockService.save(stock)
@@ -56,6 +61,8 @@ class PersistentService {
         stockIndexDailyService.saveAll(peDailyIterable)
         stockIndexDailyService.saveAll(psDailyIterable)
         stockIndexDailyService.saveAll(pcfDailyIterable)
+        val time1 = System.currentTimeMillis()
+        logger.info("${stock.id} Saving Finish, time = ${time1 - time0} milliseconds")
     }
 
     @Transactional

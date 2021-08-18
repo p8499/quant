@@ -100,12 +100,11 @@ class TushareTask {
      *                                           │ express           │
      *                                           └ forecast          ┘
      */
-    @Scheduled(cron = "0 00 18 * * MON-FRI")
+    @Scheduled(cron = "0 10 12 * * MON-FRI")
     fun syncAndSend() {
         /**
          * Download from tushare.pro and save the data into database
          */
-/*
         val executor = Executors.newCachedThreadPool()
         val syncExchange = CompletableFuture.runAsync(exchangeSynchronizer::invoke, executor)
         val syncTradingDate = syncExchange.thenRunAsync(tradingDateSynchronizer::invoke, executor)
@@ -125,7 +124,6 @@ class TushareTask {
         val syncForecast = syncA.thenRunAsync(forecastSynchronizer::invoke, executor)
         val syncC = CompletableFuture.allOf(syncGroupStock, syncLevel1Candlestick, syncLevel1AdjFactor, syncLevel2, syncBalanceSheet, syncIncome, syncCashflow, syncExpress, syncForecast)
         syncC.join()
-*/
         /**
          * Calculate from database and call analysis persistent function
          */

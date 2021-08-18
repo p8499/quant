@@ -1,1 +1,1 @@
-include ':analysis', ':tushare'
+include ':server', ':gateway', ':analysis', ':tushare'
