@@ -10,7 +10,9 @@ class GroupIndexDailyService {
     @Autowired
     protected lateinit var groupIndexDailyRepository: GroupIndexDailyRepository
 
+    fun find(region: String, id: String, kpi: String) = groupIndexDailyRepository.find(region, id, kpi)
+
     fun saveAll(entityIterable: Iterable<GroupIndexDaily>): List<GroupIndexDaily> = groupIndexDailyRepository.saveAllAndFlush(entityIterable)
 
-    fun deleteById(id: String): Int = groupIndexDailyRepository.deleteById(id)
+    fun delete(region: String, id: String) = groupIndexDailyRepository.delete(region, id)
 }

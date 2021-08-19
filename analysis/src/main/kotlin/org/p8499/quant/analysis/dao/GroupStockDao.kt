@@ -3,7 +3,7 @@ package org.p8499.quant.analysis.dao
 import org.p8499.quant.analysis.entity.GroupStock
 
 interface GroupStockDao {
-    fun findByGroupId(groupId: String): List<GroupStock>
+    fun findByGroup(region: String, groupId: String): List<GroupStock>
 
-    fun deleteByGroupId(groupId: String): Int
+    fun deleteByGroup(region: String, groupId: String): Int
 }

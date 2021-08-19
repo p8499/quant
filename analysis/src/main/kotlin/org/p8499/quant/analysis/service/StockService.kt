@@ -10,7 +10,9 @@ class StockService {
     @Autowired
     protected lateinit var stockRepository: StockRepository
 
+    fun findByGroup(region: String, groupId: String) = stockRepository.findByGroup(region, groupId)
+
     fun save(entity: Stock): Stock = stockRepository.save(entity)
 
-    fun deleteById(id: String): Int = stockRepository.deleteById(id)
+    fun delete(region: String, id: String) = stockRepository.delete(region, id)
 }

@@ -25,7 +25,7 @@ data class StockIndexDaily(
         @Temporal(TemporalType.DATE)
         var date: Date? = null,
 
-        @Column(nullable = true, precision = 24, scale = 12)
+        @Column(nullable = true, precision = 28, scale = 4)
         var value: Double? = null) {
     data class StockIndexDailyId(
             var region: String? = null,

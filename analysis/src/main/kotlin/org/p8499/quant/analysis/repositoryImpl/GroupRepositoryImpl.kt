@@ -10,7 +10,7 @@ class GroupRepositoryImpl : GroupDao {
     @PersistenceContext
     protected lateinit var em: EntityManager
 
-    override fun deleteById(id: String): Int = em
-            .createQuery("delete from Group as t0 where t0.id = :id")
-            .setParameter("id", id).executeUpdate()
+    override fun delete(region: String, id: String): Int = em
+            .createQuery("delete from Group as t0 where t0.region = :region and t0.id = :id")
+            .setParameter("region", region).setParameter("id", id).executeUpdate()
 }

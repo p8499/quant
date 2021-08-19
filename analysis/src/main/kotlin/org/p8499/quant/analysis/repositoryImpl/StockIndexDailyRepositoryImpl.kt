@@ -10,10 +10,10 @@ class StockIndexDailyRepositoryImpl : StockIndexDailyDao {
     protected lateinit var em: EntityManager
 
     override fun find(region: String, id: String, kpi: String): List<StockIndexDaily> = em
-            .createQuery("select t0 from StockIndexDaily as t0 where t0.region = :region and t0.id = :id and t0.kpi = :kpi", StockIndexDaily::class.java)
+            .createQuery("select t0 from StockIndexDaily as t0 where t0.region = :region and t0.id = :id and t0.kpi = :kpi order by t0.date asc", StockIndexDaily::class.java)
             .setParameter("region", region).setParameter("id", id).setParameter("kpi", kpi).resultList
 
-    override fun deleteById(id: String): Int = em
-            .createQuery("delete from StockIndexDaily as t0 where t0.id = :id")
-            .setParameter("id", id).executeUpdate()
+    override fun delete(region: String, id: String): Int = em
+            .createQuery("delete from StockIndexDaily as t0 where t0.region = :region and t0.id = :id")
+            .setParameter("region", region).setParameter("id", id).executeUpdate()
 }

@@ -5,5 +5,5 @@ import org.p8499.quant.analysis.entity.StockIndexDaily
 interface StockIndexDailyDao {
     fun find(region: String, id: String, kpi: String): List<StockIndexDaily>
 
-    fun deleteById(id: String): Int
+    fun delete(region: String, id: String): Int
 }

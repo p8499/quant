@@ -10,7 +10,9 @@ class GroupStockService {
     @Autowired
     protected lateinit var groupStockRepository: GroupStockRepository
 
+    fun findByGroup(region: String, groupId: String) = groupStockRepository.findByGroup(region, groupId)
+
     fun saveAll(entityIterable: Iterable<GroupStock>): List<GroupStock> = groupStockRepository.saveAllAndFlush(entityIterable)
 
-    fun deleteByGroupId(groupId: String): Int = groupStockRepository.deleteByGroupId(groupId)
+    fun deleteByGroup(region: String, groupId: String): Int = groupStockRepository.deleteByGroup(region, groupId)
 }

@@ -25,27 +25,31 @@ class PersistentService {
     @Autowired
     protected lateinit var groupStockService: GroupStockService
 
+    fun findStockByGroup(region: String, groupId: String) = stockService.findByGroup(region, groupId)
+
+    fun findStockIndexDaily(region: String, id: String, kpi: String) = stockIndexDailyService.find(region, id, kpi)
+
     @Transactional
-    fun save(id: String,
-             stock: Stock,
-             openDailyIterable: Iterable<StockIndexDaily>,
-             closeDailyIterable: Iterable<StockIndexDaily>,
-             highDailyIterable: Iterable<StockIndexDaily>,
-             lowDailyIterable: Iterable<StockIndexDaily>,
-             volumeDailyIterable: Iterable<StockIndexDaily>,
-             amountDailyIterable: Iterable<StockIndexDaily>,
-             flowShareDailyIterable: Iterable<StockIndexDaily>,
-             totalShareDailyIterable: Iterable<StockIndexDaily>,
-             flowValueDailyIterable: Iterable<StockIndexDaily>,
-             totalValueDailyIterable: Iterable<StockIndexDaily>,
-             pbDailyIterable: Iterable<StockIndexDaily>,
-             peDailyIterable: Iterable<StockIndexDaily>,
-             psDailyIterable: Iterable<StockIndexDaily>,
-             pcfDailyIterable: Iterable<StockIndexDaily>) {
+    fun saveStock(region: String, id: String,
+                  stock: Stock,
+                  openDailyIterable: Iterable<StockIndexDaily>,
+                  closeDailyIterable: Iterable<StockIndexDaily>,
+                  highDailyIterable: Iterable<StockIndexDaily>,
+                  lowDailyIterable: Iterable<StockIndexDaily>,
+                  volumeDailyIterable: Iterable<StockIndexDaily>,
+                  amountDailyIterable: Iterable<StockIndexDaily>,
+                  flowShareDailyIterable: Iterable<StockIndexDaily>,
+                  totalShareDailyIterable: Iterable<StockIndexDaily>,
+                  flowValueDailyIterable: Iterable<StockIndexDaily>,
+                  totalValueDailyIterable: Iterable<StockIndexDaily>,
+                  pbDailyIterable: Iterable<StockIndexDaily>,
+                  peDailyIterable: Iterable<StockIndexDaily>,
+                  psDailyIterable: Iterable<StockIndexDaily>,
+                  pcfDailyIterable: Iterable<StockIndexDaily>) {
         logger.info("${stock.id} Saving Start")
         val time0 = System.currentTimeMillis()
-        stockService.deleteById(id)
-        stockIndexDailyService.deleteById(id)
+        stockService.delete(region, id)
+        stockIndexDailyService.delete(region, id)
         stockService.save(stock)
         stockIndexDailyService.saveAll(openDailyIterable)
         stockIndexDailyService.saveAll(closeDailyIterable)
@@ -66,26 +70,26 @@ class PersistentService {
     }
 
     @Transactional
-    fun save(id: String,
-             group: Group,
-             groupStockIterable: Iterable<GroupStock>,
-             openDailyIterable: Iterable<GroupIndexDaily>,
-             closeDailyIterable: Iterable<GroupIndexDaily>,
-             highDailyIterable: Iterable<GroupIndexDaily>,
-             lowDailyIterable: Iterable<GroupIndexDaily>,
-             volumeDailyIterable: Iterable<GroupIndexDaily>,
-             amountDailyIterable: Iterable<GroupIndexDaily>,
-             flowShareDailyIterable: Iterable<GroupIndexDaily>,
-             totalShareDailyIterable: Iterable<GroupIndexDaily>,
-             flowValueDailyIterable: Iterable<GroupIndexDaily>,
-             totalValueDailyIterable: Iterable<GroupIndexDaily>,
-             pbDailyIterable: Iterable<GroupIndexDaily>,
-             peDailyIterable: Iterable<GroupIndexDaily>,
-             psDailyIterable: Iterable<GroupIndexDaily>,
-             pcfDailyIterable: Iterable<GroupIndexDaily>) {
-        groupService.deleteById(id)
-        groupStockService.deleteByGroupId(id)
-        groupIndexDailyService.deleteById(id)
+    fun saveGroup(region: String, id: String,
+                  group: Group,
+                  groupStockIterable: Iterable<GroupStock>,
+                  openDailyIterable: Iterable<GroupIndexDaily>,
+                  closeDailyIterable: Iterable<GroupIndexDaily>,
+                  highDailyIterable: Iterable<GroupIndexDaily>,
+                  lowDailyIterable: Iterable<GroupIndexDaily>,
+                  volumeDailyIterable: Iterable<GroupIndexDaily>,
+                  amountDailyIterable: Iterable<GroupIndexDaily>,
+                  flowShareDailyIterable: Iterable<GroupIndexDaily>,
+                  totalShareDailyIterable: Iterable<GroupIndexDaily>,
+                  flowValueDailyIterable: Iterable<GroupIndexDaily>,
+                  totalValueDailyIterable: Iterable<GroupIndexDaily>,
+                  pbDailyIterable: Iterable<GroupIndexDaily>,
+                  peDailyIterable: Iterable<GroupIndexDaily>,
+                  psDailyIterable: Iterable<GroupIndexDaily>,
+                  pcfDailyIterable: Iterable<GroupIndexDaily>) {
+        groupService.delete(region, id)
+        groupStockService.deleteByGroup(region, id)
+        groupIndexDailyService.delete(region, id)
         groupService.save(group)
         groupStockService.saveAll(groupStockIterable)
         groupIndexDailyService.saveAll(openDailyIterable)

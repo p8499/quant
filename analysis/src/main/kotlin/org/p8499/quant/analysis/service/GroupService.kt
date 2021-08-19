@@ -12,5 +12,5 @@ class GroupService {
 
     fun save(entity: Group): Group = groupRepository.save(entity)
 
-    fun deleteById(id: String): Int = groupRepository.deleteById(id)
+    fun delete(region: String, id: String): Int = groupRepository.delete(region, id)
 }

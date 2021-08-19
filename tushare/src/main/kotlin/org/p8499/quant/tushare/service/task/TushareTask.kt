@@ -3,7 +3,9 @@ package org.p8499.quant.tushare.service.task
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.p8499.quant.tushare.TushareApplication
 import org.p8499.quant.tushare.dtoBuilder.DtoBuilderFactory
+import org.p8499.quant.tushare.dtoBuilder.GroupDtoBuilder
 import org.p8499.quant.tushare.dtoBuilder.StockDtoBuilder
+import org.p8499.quant.tushare.entity.Group
 import org.p8499.quant.tushare.entity.Stock
 import org.p8499.quant.tushare.feignClient.PersistentFeignClient
 import org.p8499.quant.tushare.service.GroupService
@@ -15,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
+import java.time.LocalDate
+import java.time.ZoneId
 import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors
@@ -101,8 +105,11 @@ class TushareTask {
      *                                           │ express           │
      *                                           └ forecast          ┘
      */
-    @Scheduled(cron = "00 45 16 * * MON-FRI")
+    @Scheduled(cron = "00 30 16 * * MON-FRI")
     fun syncAndSend() {
+        val startDate = GregorianCalendar(2007, 0, 1).time
+        val today = Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant())
+
         /**
          * Download from tushare.pro and save the data into database
          */
@@ -128,14 +135,8 @@ class TushareTask {
         /**
          * Calculate from database and call analysis persistent function
          */
-        val from = Calendar.getInstance().apply { set(2007, 0, 1, 0, 0, 0) }.time
-        val to = Calendar.getInstance().apply {
-            add(Calendar.DATE, -1)
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-        }.time
-        stockService.findAll().mapNotNull(Stock::id).parallelStream().map { dtoBuilderFactory.newStockBuilder(it, from, to) }.map(StockDtoBuilder::build).forEach(persistentFeignClient::stock)
+        stockService.findAll().mapNotNull(Stock::id).parallelStream().map { dtoBuilderFactory.newStockBuilder(it, startDate, today) }.map(StockDtoBuilder::build).forEach(persistentFeignClient::saveStock)
+        groupService.findAll().mapNotNull(Group::id).parallelStream().map { dtoBuilderFactory.newGroupBuilder(it, persistentFeignClient.findStock(groupId = it)) }.map(GroupDtoBuilder::build).forEach(persistentFeignClient::saveGroup)
 //        stringRedisTemplate.keys("*").forEach { stringRedisTemplate.delete(it) }
 //        stockService.findAll().mapNotNull(Stock::id).parallelStream().forEach { stringRedisTemplate.opsForValue().set("CNS-$it", objectMapper.writeValueAsString(dtoBuilderFactory.newStockBuilder(it).build())) }
 //        val stockDtoList = stringRedisTemplate.keys("CNG-*").map { objectMapper.readValue(stringRedisTemplate.opsForValue()[it], StockDto::class.java) }
@@ -143,6 +144,6 @@ class TushareTask {
         /**
          * Notify ampq
          */
-        amqpTemplate.convertAndSend("quant", "CN")
+//        amqpTemplate.convertAndSend("quant", "CN")
     }
 }

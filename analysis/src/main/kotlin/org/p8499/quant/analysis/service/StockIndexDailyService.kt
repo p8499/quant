@@ -10,7 +10,9 @@ class StockIndexDailyService {
     @Autowired
     protected lateinit var stockIndexDailyRepository: StockIndexDailyRepository
 
+    fun find(region: String, id: String, kpi: String) = stockIndexDailyRepository.find(region, id, kpi)
+
     fun saveAll(entityIterable: Iterable<StockIndexDaily>): List<StockIndexDaily> = stockIndexDailyRepository.saveAllAndFlush(entityIterable)
 
-    fun deleteById(id: String): Int = stockIndexDailyRepository.deleteById(id)
+    fun delete(region: String, id: String) = stockIndexDailyRepository.delete(region, id)
 }
