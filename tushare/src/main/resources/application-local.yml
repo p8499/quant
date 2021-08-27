@@ -44,7 +44,7 @@ tushare:
 
 analysis:
   persistent:
-    url: http://localhost/analysis/persistent
+    url: http://localhost:88/analysis/persistent
 
 feign:
   client:
