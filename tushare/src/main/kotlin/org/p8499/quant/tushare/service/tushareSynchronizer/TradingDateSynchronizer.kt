@@ -2,6 +2,7 @@ package org.p8499.quant.tushare.service.tushareSynchronizer
 
 import org.p8499.quant.tushare.TushareApplication
 import org.p8499.quant.tushare.entity.TradingDate
+import org.p8499.quant.tushare.service.ControllerService
 import org.p8499.quant.tushare.service.TradingDateService
 import org.p8499.quant.tushare.service.tushareRequest.TradeCalRequest
 import org.slf4j.LoggerFactory
@@ -11,16 +12,19 @@ import java.util.*
 
 @Service
 class TradingDateSynchronizer {
-    val log by lazy { LoggerFactory.getLogger(TushareApplication::class.java) }
+    val logger by lazy { LoggerFactory.getLogger(TushareApplication::class.java) }
 
     @Autowired
     protected lateinit var tradingDateService: TradingDateService
 
     @Autowired
+    protected lateinit var controllerService: ControllerService
+
+    @Autowired
     protected lateinit var tradeCalRequest: TradeCalRequest
 
     fun invoke() {
-        log.info("Start Synchronizing TradingDate")
+        logger.info("Start Synchronizing TradingDate")
         val unprocessedTradingDateList: (String) -> List<TradingDate> = { exchange ->
             val lastDate = tradingDateService.last(exchange)?.date
             val startDate = lastDate?.let {
@@ -32,6 +36,7 @@ class TradingDateSynchronizer {
             tradeCalRequest.invoke(TradeCalRequest.InParams(exchange = exchange, startDate = startDate, endDate = Date(), isOpen = 1), TradeCalRequest.OutParams::class.java).map { TradingDate(it.exchange, it.calDate) }
         }
         tradingDateService.saveAll(unprocessedTradingDateList("SSE") + unprocessedTradingDateList("SZSE"))
-        log.info("Finish Synchronizing TradingDate")
+        controllerService.complete("TradingDate")
+        logger.info("Finish Synchronizing TradingDate")
     }
 }

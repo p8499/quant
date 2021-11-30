@@ -25,7 +25,7 @@ data class GroupIndexDaily(
         @Temporal(TemporalType.DATE)
         var date: Date? = null,
 
-        @Column(nullable = true, precision = 28, scale = 4)
+        @Column(nullable = true, columnDefinition = "NUMBER(32, 16)", precision = 32, scale = 16)
         var value: Double? = null) {
     data class GroupIndexDailyId(
             var region: String? = null,

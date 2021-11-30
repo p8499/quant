@@ -17,7 +17,7 @@ data class Level1AdjFactor(
         @Temporal(TemporalType.DATE)
         var date: Date? = null,
 
-        @Column(nullable = false, precision = 24, scale = 12)
+        @Column(nullable = false, columnDefinition = "NUMBER(24, 12)", precision = 24, scale = 12)
         var factor: Double? = null) {
     data class Level1AdjFactorId(
             var stockId: String? = null,

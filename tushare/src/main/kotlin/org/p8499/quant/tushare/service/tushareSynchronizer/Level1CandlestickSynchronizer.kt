@@ -5,6 +5,7 @@ import org.p8499.quant.tushare.TushareApplication
 import org.p8499.quant.tushare.entity.Level1Candlestick
 import org.p8499.quant.tushare.entity.Stock
 import org.p8499.quant.tushare.entity.TradingDate
+import org.p8499.quant.tushare.service.ControllerService
 import org.p8499.quant.tushare.service.Level1CandlestickService
 import org.p8499.quant.tushare.service.StockService
 import org.p8499.quant.tushare.service.TradingDateService
@@ -16,7 +17,7 @@ import java.util.*
 
 @Service
 class Level1CandlestickSynchronizer {
-    val log by lazy { LoggerFactory.getLogger(TushareApplication::class.java) }
+    val logger by lazy { LoggerFactory.getLogger(TushareApplication::class.java) }
 
     @Autowired
     protected lateinit var tradingDateService: TradingDateService
@@ -28,10 +29,13 @@ class Level1CandlestickSynchronizer {
     protected lateinit var level1CandlestickService: Level1CandlestickService
 
     @Autowired
+    protected lateinit var controllerService: ControllerService
+
+    @Autowired
     protected lateinit var dailyRequest: DailyRequest
 
     fun invoke() {
-        log.info("Start Synchronizing Level1Candlestick")
+        logger.info("Start Synchronizing Level1Candlestick")
         val level1CandlestickIterable: (String) -> Iterable<Level1Candlestick> = { tsCode ->
             val datesCollection = tradingDateService.unprocessedForLevel1Candlestick(tsCode).mapNotNull(TradingDate::date).groupBy {
                 Calendar.getInstance().run {
@@ -49,6 +53,7 @@ class Level1CandlestickSynchronizer {
             level1CandlestickService.saveAll(level1CandlestickIterable(it))
             level1CandlestickService.fillVacancies(it)
         }
-        log.info("Finish Synchronizing Level1Candlestick")
+        controllerService.complete("Level1Candlestick")
+        logger.info("Finish Synchronizing Level1Candlestick")
     }
 }

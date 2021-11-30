@@ -5,6 +5,7 @@ import org.p8499.quant.tushare.TushareApplication
 import org.p8499.quant.tushare.entity.Level2
 import org.p8499.quant.tushare.entity.Stock
 import org.p8499.quant.tushare.entity.TradingDate
+import org.p8499.quant.tushare.service.ControllerService
 import org.p8499.quant.tushare.service.Level2Service
 import org.p8499.quant.tushare.service.StockService
 import org.p8499.quant.tushare.service.TradingDateService
@@ -17,7 +18,7 @@ import java.util.concurrent.TimeUnit
 
 @Service
 class Level2Synchronizer {
-    val log by lazy { LoggerFactory.getLogger(TushareApplication::class.java) }
+    val logger by lazy { LoggerFactory.getLogger(TushareApplication::class.java) }
 
     @Autowired
     protected lateinit var tradingDateService: TradingDateService
@@ -29,10 +30,13 @@ class Level2Synchronizer {
     protected lateinit var level2Service: Level2Service
 
     @Autowired
+    protected lateinit var controllerService: ControllerService
+
+    @Autowired
     protected lateinit var moneyflowRequest: MoneyflowRequest
 
     fun invoke() {
-        log.info("Start Synchronizing Level2")
+        logger.info("Start Synchronizing Level2")
         val level2Iterable: (String) -> Iterable<Level2> = { tsCode ->
             val datesCollection = tradingDateService.unprocessedForLevel2(tsCode).mapNotNull(TradingDate::date).groupBy {
                 Calendar.getInstance().run {
@@ -47,6 +51,7 @@ class Level2Synchronizer {
         }
         val stockIdList = stockService.findAll().mapNotNull(Stock::id)
         stockIdList.forEach { level2Service.saveAll(level2Iterable(it)) }
-        log.info("Finish Synchronizing Level2")
+        controllerService.complete("Level2")
+        logger.info("Finish Synchronizing Level2")
     }
 }

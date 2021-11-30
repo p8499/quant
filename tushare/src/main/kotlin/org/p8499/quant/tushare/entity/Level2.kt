@@ -17,28 +17,28 @@ data class Level2(
         @Temporal(TemporalType.DATE)
         var date: Date? = null,
 
-        @Column(nullable = true, precision = 18, scale = 2)
+        @Column(nullable = true, columnDefinition = "NUMBER(18, 2)", precision = 18, scale = 2)
         var buy1: Double? = null,
 
-        @Column(nullable = true, precision = 18, scale = 2)
+        @Column(nullable = true, columnDefinition = "NUMBER(18, 2)", precision = 18, scale = 2)
         var sell1: Double? = null,
 
-        @Column(nullable = true, precision = 18, scale = 2)
+        @Column(nullable = true, columnDefinition = "NUMBER(18, 2)", precision = 18, scale = 2)
         var buy2: Double? = null,
 
-        @Column(nullable = true, precision = 18, scale = 2)
+        @Column(nullable = true, columnDefinition = "NUMBER(18, 2)", precision = 18, scale = 2)
         var sell2: Double? = null,
 
-        @Column(nullable = true, precision = 18, scale = 2)
+        @Column(nullable = true, columnDefinition = "NUMBER(18, 2)", precision = 18, scale = 2)
         var buy3: Double? = null,
 
-        @Column(nullable = true, precision = 18, scale = 2)
+        @Column(nullable = true, columnDefinition = "NUMBER(18, 2)", precision = 18, scale = 2)
         var sell3: Double? = null,
 
-        @Column(nullable = true, precision = 18, scale = 2)
+        @Column(nullable = true, columnDefinition = "NUMBER(18, 2)", precision = 18, scale = 2)
         var buy4: Double? = null,
 
-        @Column(nullable = true, precision = 18, scale = 2)
+        @Column(nullable = true, columnDefinition = "NUMBER(18, 2)", precision = 18, scale = 2)
         var sell4: Double? = null) {
     data class Level2Id(
             var stockId: String? = null,

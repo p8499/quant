@@ -12,6 +12,8 @@ class StockIndexDailyService {
 
     fun find(region: String, id: String, kpi: String) = stockIndexDailyRepository.find(region, id, kpi)
 
+    fun save(entity: StockIndexDaily): StockIndexDaily = stockIndexDailyRepository.saveAndFlush(entity)
+
     fun saveAll(entityIterable: Iterable<StockIndexDaily>): List<StockIndexDaily> = stockIndexDailyRepository.saveAllAndFlush(entityIterable)
 
     fun delete(region: String, id: String) = stockIndexDailyRepository.delete(region, id)

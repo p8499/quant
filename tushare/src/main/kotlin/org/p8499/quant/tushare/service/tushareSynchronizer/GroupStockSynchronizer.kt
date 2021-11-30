@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit
 
 @Service
 class GroupStockSynchronizer {
-    val log by lazy { LoggerFactory.getLogger(TushareApplication::class.java) }
+    val logger by lazy { LoggerFactory.getLogger(TushareApplication::class.java) }
 
     @Autowired
     protected lateinit var tradingDateService: TradingDateService
@@ -36,6 +36,9 @@ class GroupStockSynchronizer {
     protected lateinit var level1BasicService: Level1BasicService
 
     @Autowired
+    protected lateinit var controllerService: ControllerService
+
+    @Autowired
     protected lateinit var indexWeightRequest: IndexWeightRequest
 
     @Autowired
@@ -45,7 +48,7 @@ class GroupStockSynchronizer {
     protected lateinit var conceptDetailRequest: ConceptDetailRequest
 
     fun invoke() {
-        log.info("Start Synchronizing GroupStock")
+        logger.info("Start Synchronizing GroupStock")
         val groupStockListOfIndex: (Date) -> List<GroupStock> = { tradeDate ->
             val groupStockList = indexWeightRequest.invoke(IndexWeightRequest.InParams(tradeDate = tradeDate), IndexWeightRequest.OutParams::class.java).map { GroupStock(it.indexCode, it.conCode, it.weight) }
             val stockIdList = groupStockList.mapNotNull(GroupStock::stockId).let(stockService::findByStockIdList).map(Stock::id)
@@ -69,7 +72,9 @@ class GroupStockSynchronizer {
             val stockIdListFlowable = groupIdFlowable.map(transform).zipWith(Flowable.interval((60 * 1000 / times).toLong(), TimeUnit.MILLISECONDS)) { stockIdList, _ -> stockIdList }
             val wListFlowable = stockIdListFlowable.map { weightList(rsMap, it) }
             Flowable.zip(groupIdFlowable, stockIdListFlowable, wListFlowable) { groupId, stockIdList, wList -> Triple(groupId, stockIdList, wList) }
-                    .blockingSubscribe { it.second.mapIndexedTo(groupStockList) { index, s -> GroupStock(it.first, s, it.third[index]) } }
+                    .blockingSubscribe(
+                            { it.second.mapIndexedTo(groupStockList) { index, s -> GroupStock(it.first, s, it.third[index]) } },
+                            { logger.error(it.message) })
             groupStockList
         }
         val groupStockListOfIndustry: (Map<String, Double>) -> List<GroupStock> = { rsMap ->
@@ -81,6 +86,7 @@ class GroupStockSynchronizer {
         val date = tradingDateService.last("SSE")?.date ?: return
         val fsMap = flowShareMap(date)
         groupStockService.deleteAndSaveAll(groupStockListOfIndex(date) + groupStockListOfIndustry(fsMap) + groupStockListOfConcept(fsMap))
-        log.info("Finish Synchronizing GroupStock")
+        controllerService.complete("GroupStock")
+        logger.info("Finish Synchronizing GroupStock")
     }
 }

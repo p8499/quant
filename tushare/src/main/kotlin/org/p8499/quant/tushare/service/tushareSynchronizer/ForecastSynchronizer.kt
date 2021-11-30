@@ -4,6 +4,7 @@ import io.reactivex.Flowable
 import org.p8499.quant.tushare.TushareApplication
 import org.p8499.quant.tushare.entity.Forecast
 import org.p8499.quant.tushare.entity.Stock
+import org.p8499.quant.tushare.service.ControllerService
 import org.p8499.quant.tushare.service.ForecastService
 import org.p8499.quant.tushare.service.StockService
 import org.p8499.quant.tushare.service.tushareRequest.ForecastRequest
@@ -16,7 +17,7 @@ import java.util.concurrent.TimeUnit
 
 @Service
 class ForecastSynchronizer {
-    val log by lazy { LoggerFactory.getLogger(TushareApplication::class.java) }
+    val logger by lazy { LoggerFactory.getLogger(TushareApplication::class.java) }
 
     @Autowired
     lateinit var stockService: StockService
@@ -25,10 +26,13 @@ class ForecastSynchronizer {
     lateinit var forecastService: ForecastService
 
     @Autowired
+    protected lateinit var controllerService: ControllerService
+
+    @Autowired
     lateinit var forecastRequest: ForecastRequest
 
     fun invoke() {
-        log.info("Start Synchronizing Forecast")
+        logger.info("Start Synchronizing Forecast")
         val format = DecimalFormat("0.00")
         val stockIdList = stockService.findAll().map(Stock::id)
         Flowable.fromIterable(stockIdList).zipWith(Flowable.interval(1200, TimeUnit.MILLISECONDS)) { stockId, _ -> stockId }
@@ -44,6 +48,7 @@ class ForecastSynchronizer {
                                 }
                             })
                 }
-        log.info("Finish Synchronizing Forecast")
+        controllerService.complete("Forecast")
+        logger.info("Finish Synchronizing Forecast")
     }
 }

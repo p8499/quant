@@ -5,6 +5,7 @@ import org.p8499.quant.tushare.TushareApplication
 import org.p8499.quant.tushare.entity.Level1AdjFactor
 import org.p8499.quant.tushare.entity.Stock
 import org.p8499.quant.tushare.entity.TradingDate
+import org.p8499.quant.tushare.service.ControllerService
 import org.p8499.quant.tushare.service.Level1AdjFactorService
 import org.p8499.quant.tushare.service.StockService
 import org.p8499.quant.tushare.service.TradingDateService
@@ -16,7 +17,7 @@ import java.util.*
 
 @Service
 class Level1AdjFactorSynchronizer {
-    val log by lazy { LoggerFactory.getLogger(TushareApplication::class.java) }
+    val logger by lazy { LoggerFactory.getLogger(TushareApplication::class.java) }
 
     @Autowired
     protected lateinit var tradingDateService: TradingDateService
@@ -28,10 +29,13 @@ class Level1AdjFactorSynchronizer {
     protected lateinit var level1AdjFactorService: Level1AdjFactorService
 
     @Autowired
+    protected lateinit var controllerService: ControllerService
+
+    @Autowired
     protected lateinit var adjFactorRequest: AdjFactorRequest
 
     fun invoke() {
-        log.info("Start Synchronizing Level1AdjFactor")
+        logger.info("Start Synchronizing Level1AdjFactor")
         val level1AdjFactorIterable: (String) -> Iterable<Level1AdjFactor> = { tsCode ->
             val datesCollection = tradingDateService.unprocessedForLevel1AdjFactor(tsCode).mapNotNull(TradingDate::date).groupBy {
                 Calendar.getInstance().run {
@@ -49,6 +53,7 @@ class Level1AdjFactorSynchronizer {
             level1AdjFactorService.saveAll(level1AdjFactorIterable(it))
             level1AdjFactorService.fillVacancies(it)
         }
-        log.info("Finish Synchronizing Level1AdjFactor")
+        controllerService.complete("Level1AdjFactor")
+        logger.info("Finish Synchronizing Level1AdjFactor")
     }
 }

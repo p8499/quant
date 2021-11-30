@@ -14,6 +14,9 @@ interface PersistentFeignClient {
     @GetMapping(path = ["/find_stock"], consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun findStock(@RequestParam region: String = "CN", @RequestParam groupId: String): List<StockDto>
 
+    @PostMapping(path = ["/complete"], consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun complete(@RequestParam region: String = "CN")
+
     @PostMapping(path = ["/save_stock"], consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun saveStock(@RequestBody stockDto: StockDto)
 

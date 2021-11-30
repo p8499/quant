@@ -25,6 +25,9 @@ class PersistentService {
     @Autowired
     protected lateinit var groupStockService: GroupStockService
 
+    @Autowired
+    protected lateinit var controllerService: ControllerService
+
     fun findStockByGroup(region: String, groupId: String) = stockService.findByGroup(region, groupId)
 
     fun findStockIndexDaily(region: String, id: String, kpi: String) = stockIndexDailyService.find(region, id, kpi)
@@ -106,5 +109,9 @@ class PersistentService {
         groupIndexDailyService.saveAll(peDailyIterable)
         groupIndexDailyService.saveAll(psDailyIterable)
         groupIndexDailyService.saveAll(pcfDailyIterable)
+    }
+
+    fun complete(region: String) {
+        controllerService.complete(region)
     }
 }

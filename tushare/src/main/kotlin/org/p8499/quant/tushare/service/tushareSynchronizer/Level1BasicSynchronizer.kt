@@ -5,6 +5,7 @@ import org.p8499.quant.tushare.TushareApplication
 import org.p8499.quant.tushare.entity.Level1Basic
 import org.p8499.quant.tushare.entity.Stock
 import org.p8499.quant.tushare.entity.TradingDate
+import org.p8499.quant.tushare.service.ControllerService
 import org.p8499.quant.tushare.service.Level1BasicService
 import org.p8499.quant.tushare.service.StockService
 import org.p8499.quant.tushare.service.TradingDateService
@@ -17,7 +18,7 @@ import java.util.concurrent.TimeUnit
 
 @Service
 class Level1BasicSynchronizer {
-    val log by lazy { LoggerFactory.getLogger(TushareApplication::class.java) }
+    val logger by lazy { LoggerFactory.getLogger(TushareApplication::class.java) }
 
     @Autowired
     protected lateinit var tradingDateService: TradingDateService
@@ -29,10 +30,13 @@ class Level1BasicSynchronizer {
     protected lateinit var level1BasicService: Level1BasicService
 
     @Autowired
+    protected lateinit var controllerService: ControllerService
+
+    @Autowired
     protected lateinit var dailyBasicRequest: DailyBasicRequest
 
     fun invoke() {
-        log.info("Start Synchronizing Level1Basic")
+        logger.info("Start Synchronizing Level1Basic")
         val level1BasicIterable: (String) -> Iterable<Level1Basic> = { tsCode ->
             val datesCollection = tradingDateService.unprocessedForLevel1Basic(tsCode).mapNotNull(TradingDate::date).groupBy {
                 Calendar.getInstance().run {
@@ -50,6 +54,7 @@ class Level1BasicSynchronizer {
             level1BasicService.saveAll(level1BasicIterable(it))
             level1BasicService.fillVacancies(it)
         }
-        log.info("Finish Synchronizing Level1Basic")
+        controllerService.complete("Level1Basic")
+        logger.info("Finish Synchronizing Level1Basic")
     }
 }

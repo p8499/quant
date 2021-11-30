@@ -4,6 +4,7 @@ import io.reactivex.Flowable
 import org.p8499.quant.tushare.TushareApplication
 import org.p8499.quant.tushare.entity.Express
 import org.p8499.quant.tushare.entity.Stock
+import org.p8499.quant.tushare.service.ControllerService
 import org.p8499.quant.tushare.service.ExpressService
 import org.p8499.quant.tushare.service.StockService
 import org.p8499.quant.tushare.service.tushareRequest.ExpressRequest
@@ -15,7 +16,7 @@ import java.util.concurrent.TimeUnit
 
 @Service
 class ExpressSynchronizer {
-    val log by lazy { LoggerFactory.getLogger(TushareApplication::class.java) }
+    val logger by lazy { LoggerFactory.getLogger(TushareApplication::class.java) }
 
     @Autowired
     protected lateinit var stockService: StockService
@@ -24,10 +25,13 @@ class ExpressSynchronizer {
     protected lateinit var expressService: ExpressService
 
     @Autowired
+    protected lateinit var controllerService: ControllerService
+
+    @Autowired
     protected lateinit var expressRequest: ExpressRequest
 
     fun invoke() {
-        log.info("Start Synchronizing Express")
+        logger.info("Start Synchronizing Express")
         val stockIdList = stockService.findAll().map(Stock::id)
         Flowable.fromIterable(stockIdList).zipWith(Flowable.interval(1200, TimeUnit.MILLISECONDS)) { stockId, _ -> stockId }
                 .blockingSubscribe { stockId ->
@@ -40,6 +44,7 @@ class ExpressSynchronizer {
                                 }
                             })
                 }
-        log.info("Finish Synchronizing Express")
+        controllerService.complete("Express")
+        logger.info("Finish Synchronizing Express")
     }
 }

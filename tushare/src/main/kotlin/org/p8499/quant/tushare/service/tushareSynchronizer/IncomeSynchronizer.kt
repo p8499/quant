@@ -4,6 +4,7 @@ import io.reactivex.Flowable
 import org.p8499.quant.tushare.TushareApplication
 import org.p8499.quant.tushare.entity.Income
 import org.p8499.quant.tushare.entity.Stock
+import org.p8499.quant.tushare.service.ControllerService
 import org.p8499.quant.tushare.service.IncomeService
 import org.p8499.quant.tushare.service.StockService
 import org.p8499.quant.tushare.service.tushareRequest.IncomeRequest
@@ -15,7 +16,7 @@ import java.util.concurrent.TimeUnit
 
 @Service
 class IncomeSynchronizer {
-    val log by lazy { LoggerFactory.getLogger(TushareApplication::class.java) }
+    val logger by lazy { LoggerFactory.getLogger(TushareApplication::class.java) }
 
     @Autowired
     protected lateinit var stockService: StockService
@@ -24,10 +25,13 @@ class IncomeSynchronizer {
     protected lateinit var incomeService: IncomeService
 
     @Autowired
+    protected lateinit var controllerService: ControllerService
+
+    @Autowired
     protected lateinit var incomeRequest: IncomeRequest
 
     fun invoke() {
-        log.info("Start Synchronizing Income")
+        logger.info("Start Synchronizing Income")
         val stockIdList = stockService.findAll().map(Stock::id)
         Flowable.fromIterable(stockIdList).zipWith(Flowable.interval(1200, TimeUnit.MILLISECONDS)) { stockId, _ -> stockId }
                 .blockingSubscribe { stockId ->
@@ -40,6 +44,7 @@ class IncomeSynchronizer {
                                 }
                             })
                 }
-        log.info("Finish Synchronizing Income")
+        controllerService.complete("Income")
+        logger.info("Finish Synchronizing Income")
     }
 }

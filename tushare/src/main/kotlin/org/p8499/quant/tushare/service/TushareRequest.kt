@@ -30,8 +30,8 @@ abstract class TushareRequest<I, O> {
             val responseBody = objectMapper.readValue(responseStr, TushareResponseBody::class.java)
             return objectMapper.convertValue(responseBody.data, objectMapper.typeFactory.constructArrayType(outParamsClass))
         } catch (e: Throwable) {
-            logger.info("requestBody: ${objectMapper.writeValueAsString(requestBody)}")
-            logger.info("responseStr: ${StringEscapeUtils.unescapeJava(responseStr)}")
+            logger.debug("requestBody: ${objectMapper.writeValueAsString(requestBody)}")
+            logger.debug("responseStr: ${StringEscapeUtils.unescapeJava(responseStr)}")
             throw e
         }
     }

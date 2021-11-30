@@ -51,10 +51,10 @@ feign:
     config:
       default:
         loggerLevel: full
-        readTimeout: 300000
+        readTimeout: 600000
 
 logging:
   level:
     org.hibernate.SQL: off
     org.p8499.quant.tushare.feignClient.*: info
-    org.p8499.quant.tushare.service.*: debug
+    org.p8499.quant.tushare.service.*: info

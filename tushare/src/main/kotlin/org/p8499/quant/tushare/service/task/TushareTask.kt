@@ -107,7 +107,7 @@ class TushareTask {
      */
     @Scheduled(cron = "00 30 16 * * MON-FRI")
     fun syncAndSend() {
-        val startDate = GregorianCalendar(2007, 0, 1).time
+        val startDate = GregorianCalendar(2015, 0, 1).time
         val today = Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant())
 
         /**
@@ -137,6 +137,7 @@ class TushareTask {
          */
         stockService.findAll().mapNotNull(Stock::id).parallelStream().map { dtoBuilderFactory.newStockBuilder(it, startDate, today) }.map(StockDtoBuilder::build).forEach(persistentFeignClient::saveStock)
         groupService.findAll().mapNotNull(Group::id).parallelStream().map { dtoBuilderFactory.newGroupBuilder(it, persistentFeignClient.findStock(groupId = it)) }.map(GroupDtoBuilder::build).forEach(persistentFeignClient::saveGroup)
+        persistentFeignClient.complete()
 //        stringRedisTemplate.keys("*").forEach { stringRedisTemplate.delete(it) }
 //        stockService.findAll().mapNotNull(Stock::id).parallelStream().forEach { stringRedisTemplate.opsForValue().set("CNS-$it", objectMapper.writeValueAsString(dtoBuilderFactory.newStockBuilder(it).build())) }
 //        val stockDtoList = stringRedisTemplate.keys("CNG-*").map { objectMapper.readValue(stringRedisTemplate.opsForValue()[it], StockDto::class.java) }

@@ -2,12 +2,12 @@ package org.p8499.quant.tushare
 
 import org.junit.jupiter.api.Test
 import org.p8499.quant.tushare.dtoBuilder.DtoBuilderFactory
+import org.p8499.quant.tushare.feignClient.PersistentFeignClient
 import org.p8499.quant.tushare.service.task.TushareTask
 import org.p8499.quant.tushare.service.tushareRequest.*
 import org.p8499.quant.tushare.service.tushareSynchronizer.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import java.util.*
 
 @SpringBootTest
 class TushareApplicationTests {
@@ -83,11 +83,14 @@ class TushareApplicationTests {
     @Autowired
     protected lateinit var dtoBuilderFactory: DtoBuilderFactory
 
+    @Autowired
+    protected lateinit var balancesheetRequest: BalancesheetRequest
+
+    @Autowired
+    protected lateinit var persistentFeignClient: PersistentFeignClient
+
     @Test
     fun contextLoads() {
-        val from = Calendar.getInstance().apply { set(2007, 0, 1) }.time
-        val to = Calendar.getInstance().apply { add(Calendar.DATE, -1) }.time
-        val x = dtoBuilderFactory.newStockBuilder("605090.SH", from, to).build()
-        print(x)
+        persistentFeignClient.complete()
     }
 }

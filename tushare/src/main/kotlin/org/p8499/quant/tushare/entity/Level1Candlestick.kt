@@ -17,22 +17,22 @@ data class Level1Candlestick(
         @Temporal(TemporalType.DATE)
         var date: Date? = null,
 
-        @Column(nullable = false, precision = 10, scale = 2)
+        @Column(nullable = false, columnDefinition = "NUMBER(10, 2)", precision = 10, scale = 2)
         var open: Double? = null,
 
-        @Column(nullable = false, precision = 10, scale = 2)
+        @Column(nullable = false, columnDefinition = "NUMBER(10, 2)", precision = 10, scale = 2)
         var close: Double? = null,
 
-        @Column(nullable = false, precision = 10, scale = 2)
+        @Column(nullable = false, columnDefinition = "NUMBER(10, 2)", precision = 10, scale = 2)
         var high: Double? = null,
 
-        @Column(nullable = false, precision = 10, scale = 2)
+        @Column(nullable = false, columnDefinition = "NUMBER(10, 2)", precision = 10, scale = 2)
         var low: Double? = null,
 
-        @Column(nullable = false, precision = 18, scale = 2)
+        @Column(nullable = false, columnDefinition = "NUMBER(18, 2)", precision = 18, scale = 2)
         var volume: Double? = null,
 
-        @Column(nullable = false, precision = 26, scale = 2)
+        @Column(nullable = false, columnDefinition = "NUMBER(26, 2)", precision = 26, scale = 2)
         var amount: Double? = null) {
     data class Level1CandlestickId(
             var stockId: String? = null,

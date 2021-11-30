@@ -12,6 +12,8 @@ class GroupIndexDailyService {
 
     fun find(region: String, id: String, kpi: String) = groupIndexDailyRepository.find(region, id, kpi)
 
+    fun save(entity: GroupIndexDaily): GroupIndexDaily = groupIndexDailyRepository.saveAndFlush(entity)
+
     fun saveAll(entityIterable: Iterable<GroupIndexDaily>): List<GroupIndexDaily> = groupIndexDailyRepository.saveAllAndFlush(entityIterable)
 
     fun delete(region: String, id: String) = groupIndexDailyRepository.delete(region, id)

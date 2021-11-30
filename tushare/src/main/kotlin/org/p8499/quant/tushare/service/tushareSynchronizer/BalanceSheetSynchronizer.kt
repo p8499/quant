@@ -5,6 +5,7 @@ import org.p8499.quant.tushare.TushareApplication
 import org.p8499.quant.tushare.entity.BalanceSheet
 import org.p8499.quant.tushare.entity.Stock
 import org.p8499.quant.tushare.service.BalanceSheetService
+import org.p8499.quant.tushare.service.ControllerService
 import org.p8499.quant.tushare.service.StockService
 import org.p8499.quant.tushare.service.tushareRequest.BalancesheetRequest
 import org.slf4j.LoggerFactory
@@ -15,7 +16,7 @@ import java.util.concurrent.TimeUnit
 
 @Service
 class BalanceSheetSynchronizer {
-    val log by lazy { LoggerFactory.getLogger(TushareApplication::class.java) }
+    val logger by lazy { LoggerFactory.getLogger(TushareApplication::class.java) }
 
     @Autowired
     protected lateinit var stockService: StockService
@@ -24,10 +25,13 @@ class BalanceSheetSynchronizer {
     protected lateinit var balanceSheetService: BalanceSheetService
 
     @Autowired
+    protected lateinit var controllerService: ControllerService
+
+    @Autowired
     protected lateinit var balancesheetRequest: BalancesheetRequest
 
     fun invoke() {
-        log.info("Start Synchronizing BalanceSheet")
+        logger.info("Start Synchronizing BalanceSheet")
         val stockIdList = stockService.findAll().map(Stock::id)
         Flowable.fromIterable(stockIdList).zipWith(Flowable.interval(1200, TimeUnit.MILLISECONDS)) { stockId, _ -> stockId }
                 .blockingSubscribe { stockId ->
@@ -40,6 +44,7 @@ class BalanceSheetSynchronizer {
                                 }
                             })
                 }
-        log.info("Finish Synchronizing BalanceSheet")
+        controllerService.complete("BalanceSheet")
+        logger.info("Finish Synchronizing BalanceSheet")
     }
 }

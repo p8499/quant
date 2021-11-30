@@ -15,7 +15,7 @@ data class GroupStock(
         @Column(nullable = false, length = 16)
         var stockId: String? = null,
 
-        @Column(nullable = false, precision = 8, scale = 4)
+        @Column(nullable = false, columnDefinition = "NUMBER(8, 4)", precision = 8, scale = 4)
         var weight: Double? = null) {
     data class GroupStockId(
             var groupId: String? = null,

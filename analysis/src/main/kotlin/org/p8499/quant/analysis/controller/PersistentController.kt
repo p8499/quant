@@ -44,6 +44,9 @@ class PersistentController {
         return stockDtoList
     }
 
+    @RequestMapping(method = [RequestMethod.POST, RequestMethod.PUT], path = ["/complete"])
+    fun complete(@RequestParam region: String) = persistentService.complete(region)
+
     @RequestMapping(method = [RequestMethod.POST, RequestMethod.PUT], path = ["/save_stock"])
     fun saveStock(@RequestBody stockDto: StockDto) = persistentService.saveStock(
             stockDto.region, stockDto.id,

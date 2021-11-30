@@ -20,7 +20,7 @@ data class GroupStock(
         var stockId: String? = null,
 
         @Id
-        @Column(nullable = false, precision = 5, scale = 4)
+        @Column(nullable = false, columnDefinition = "NUMBER(5, 4)", precision = 5, scale = 4)
         var percent: Double? = null) {
     data class GroupStockId(
             var region: String? = null,

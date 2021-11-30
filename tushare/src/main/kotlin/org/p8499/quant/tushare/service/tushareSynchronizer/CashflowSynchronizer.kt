@@ -5,6 +5,7 @@ import org.p8499.quant.tushare.TushareApplication
 import org.p8499.quant.tushare.entity.Cashflow
 import org.p8499.quant.tushare.entity.Stock
 import org.p8499.quant.tushare.service.CashflowService
+import org.p8499.quant.tushare.service.ControllerService
 import org.p8499.quant.tushare.service.StockService
 import org.p8499.quant.tushare.service.tushareRequest.CashflowRequest
 import org.slf4j.LoggerFactory
@@ -15,7 +16,7 @@ import java.util.concurrent.TimeUnit
 
 @Service
 class CashflowSynchronizer {
-    val log by lazy { LoggerFactory.getLogger(TushareApplication::class.java) }
+    val logger by lazy { LoggerFactory.getLogger(TushareApplication::class.java) }
 
     @Autowired
     protected lateinit var stockService: StockService
@@ -24,10 +25,13 @@ class CashflowSynchronizer {
     protected lateinit var cashflowService: CashflowService
 
     @Autowired
+    protected lateinit var controllerService: ControllerService
+
+    @Autowired
     protected lateinit var cashflowRequest: CashflowRequest
 
     fun invoke() {
-        log.info("Start Synchronizing Cashflow")
+        logger.info("Start Synchronizing Cashflow")
         val stockIdList = stockService.findAll().map(Stock::id)
         Flowable.fromIterable(stockIdList).zipWith(Flowable.interval(1200, TimeUnit.MILLISECONDS)) { stockId, _ -> stockId }
                 .blockingSubscribe { stockId ->
@@ -40,6 +44,7 @@ class CashflowSynchronizer {
                                 }
                             })
                 }
-        log.info("Finish Synchronizing Cashflow")
+        controllerService.complete("Cashflow")
+        logger.info("Finish Synchronizing Cashflow")
     }
 }

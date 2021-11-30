@@ -27,7 +27,7 @@ data class Cashflow(
         /**
          * 经营活动产生的现金流量净额 -> 经营现金(年初至今)
          */
-        @Column(nullable = true, precision = 26, scale = 2)
+        @Column(nullable = true, columnDefinition = "NUMBER(26, 2)", precision = 26, scale = 2)
         var nCashflowAct: Double? = null) {
     data class CashflowId(
             var stockId: String? = null,
