@@ -60,8 +60,8 @@ class DailyBasicRequest : TushareRequest<DailyBasicRequest.InParams, DailyBasicR
             var tradeDate: Date? = null,
 
             @set:JsonProperty("float_share")
-            var floatShare: Double? = null,
+            var floatShare: Double? = null/*wan stocks*/,
 
             @set:JsonProperty("total_share")
-            var totalShare: Double? = null)
+            var totalShare: Double? = null)/*wan stocks*/
 }

@@ -1,6 +1,7 @@
 package org.p8499.quant.tushare.dtoBuilder
 
 import org.p8499.quant.tushare.TushareApplication
+import org.p8499.quant.tushare.common.finiteOrNull
 import org.p8499.quant.tushare.common.let
 import org.p8499.quant.tushare.dto.StockDto
 import org.p8499.quant.tushare.entity.*
@@ -78,23 +79,23 @@ class StockDtoBuilder(
 
     val openList by lazy { flatMapOf(level1CandlestickService.findByStockIdBetween(stockId, from, to), Level1Candlestick::date, Level1Candlestick::open).values.toList() }
 
-    val openPreList by lazy { openList.mapIndexed { index, d -> let(d, factorList[index], maxFactor) { a, b, c -> a * b / c } } }
+    val openPreList by lazy { openList.mapIndexed { index, d -> let(d, factorList[index], maxFactor) { a, b, c -> (a * b / c).finiteOrNull() } } }
 
     val closeList by lazy { flatMapOf(level1CandlestickService.findByStockIdBetween(stockId, from, to), Level1Candlestick::date, Level1Candlestick::close).values.toList() }
 
-    val closePreList by lazy { closeList.mapIndexed { index, d -> let(d, factorList[index], maxFactor) { a, b, c -> a * b / c } } }
+    val closePreList by lazy { closeList.mapIndexed { index, d -> let(d, factorList[index], maxFactor) { a, b, c -> (a * b / c).finiteOrNull() } } }
 
     val highList by lazy { flatMapOf(level1CandlestickService.findByStockIdBetween(stockId, from, to), Level1Candlestick::date, Level1Candlestick::high).values.toList() }
 
-    val highPreList by lazy { highList.mapIndexed { index, d -> let(d, factorList[index], maxFactor) { a, b, c -> a * b / c } } }
+    val highPreList by lazy { highList.mapIndexed { index, d -> let(d, factorList[index], maxFactor) { a, b, c -> (a * b / c).finiteOrNull() } } }
 
     val lowList by lazy { flatMapOf(level1CandlestickService.findByStockIdBetween(stockId, from, to), Level1Candlestick::date, Level1Candlestick::low).values.toList() }
 
-    val lowPreList by lazy { lowList.mapIndexed { index, d -> let(d, factorList[index], maxFactor) { a, b, c -> a * b / c } } }
+    val lowPreList by lazy { lowList.mapIndexed { index, d -> let(d, factorList[index], maxFactor) { a, b, c -> (a * b / c).finiteOrNull() } } }
 
     val volumeList by lazy { flatMapOf(level1CandlestickService.findByStockIdBetween(stockId, from, to), Level1Candlestick::date, Level1Candlestick::volume).values.toList() }
 
-    val volumePreList by lazy { volumeList.mapIndexed { index, d -> let(d, factorList[index], maxFactor) { a, b, c -> a * b / c } } }
+    val volumePreList by lazy { volumeList.mapIndexed { index, d -> let(d, factorList[index], maxFactor) { a, b, c -> (a * b / c).finiteOrNull() } } }
 
     val amountList by lazy { flatMapOf(level1CandlestickService.findByStockIdBetween(stockId, from, to), Level1Candlestick::date, Level1Candlestick::amount).values.toList() }
 
@@ -150,24 +151,24 @@ class StockDtoBuilder(
     val netAssetPerStockList by lazy {
         netAssetList.mapIndexed { index, d ->
             let(d, totalShareList[index]) { a, b ->
-                a / b
+                (a / b).finiteOrNull()
             }
         }
     }
 
-    val netProfitPerStockList by lazy { netProfitList.mapIndexed { index, d -> let(d, totalShareList[index]) { a, b -> a / b } } }
+    val netProfitPerStockList by lazy { netProfitList.mapIndexed { index, d -> let(d, totalShareList[index]) { a, b -> (a / b).finiteOrNull() } } }
 
-    val revenuePerStockList by lazy { revenueList.mapIndexed { index, d -> let(d, totalShareList[index]) { a, b -> a / b } } }
+    val revenuePerStockList by lazy { revenueList.mapIndexed { index, d -> let(d, totalShareList[index]) { a, b -> (a / b).finiteOrNull() } } }
 
-    val opCashflowPerStockList by lazy { opCashflowList.mapIndexed { index, d -> let(d, totalShareList[index]) { a, b -> a / b } } }
+    val opCashflowPerStockList by lazy { opCashflowList.mapIndexed { index, d -> let(d, totalShareList[index]) { a, b -> (a / b).finiteOrNull() } } }
 
-    val pbList by lazy { closePreList.mapIndexed { index, d -> let(d, netAssetPerStockList[index]) { a, b -> a / b } } }
+    val pbList by lazy { closePreList.mapIndexed { index, d -> let(d, netAssetPerStockList[index]) { a, b -> (a / b).finiteOrNull() } } }
 
-    val peList by lazy { closePreList.mapIndexed { index, d -> let(d, netProfitPerStockList[index]) { a, b -> a / b } } }
+    val peList by lazy { closePreList.mapIndexed { index, d -> let(d, netProfitPerStockList[index]) { a, b -> (a / b).finiteOrNull() } } }
 
-    val psList by lazy { closePreList.mapIndexed { index, d -> let(d, revenuePerStockList[index]) { a, b -> a / b } } }
+    val psList by lazy { closePreList.mapIndexed { index, d -> let(d, revenuePerStockList[index]) { a, b -> (a / b).finiteOrNull() } } }
 
-    val pcfList by lazy { closePreList.mapIndexed { index, d -> let(d, opCashflowPerStockList[index]) { a, b -> a / b } } }
+    val pcfList by lazy { closePreList.mapIndexed { index, d -> let(d, opCashflowPerStockList[index]) { a, b -> (a / b).finiteOrNull() } } }
 
     fun build(): StockDto {
         logger.info("Constructing $stockId DTO")

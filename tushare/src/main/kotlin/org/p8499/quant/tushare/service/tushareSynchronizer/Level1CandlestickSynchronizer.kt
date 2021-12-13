@@ -45,7 +45,7 @@ class Level1CandlestickSynchronizer {
             }.values
             Flowable.fromIterable(datesCollection)
                     .flatMap { Flowable.fromArray(*dailyRequest.invoke(DailyRequest.InParams(tsCode = tsCode, startDate = it.minOrNull(), endDate = it.maxOrNull()), DailyRequest.OutParams::class.java)) }
-                    .map { Level1Candlestick(tsCode, it.tradeDate, it.open, it.close, it.high, it.low, it.vol, it.amount) }
+                    .map { Level1Candlestick(tsCode, it.tradeDate, it.open, it.close, it.high, it.low, it.vol?.times(100), it.amount?.times(1000)) }
                     .blockingIterable()
         }
         val stockIdList = stockService.findAll().mapNotNull(Stock::id)

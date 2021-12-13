@@ -1,8 +1,10 @@
 package org.p8499.quant.tushare.service.tushareSynchronizer
 
 import io.reactivex.Flowable
+import io.reactivex.schedulers.Schedulers
 import org.p8499.quant.tushare.TushareApplication
 import org.p8499.quant.tushare.common.let
+import org.p8499.quant.tushare.common.mapNotNull
 import org.p8499.quant.tushare.entity.Group
 import org.p8499.quant.tushare.entity.GroupStock
 import org.p8499.quant.tushare.entity.Stock
@@ -51,14 +53,14 @@ class GroupStockSynchronizer {
         logger.info("Start Synchronizing GroupStock")
         val groupStockListOfIndex: (Date) -> List<GroupStock> = { tradeDate ->
             val groupStockList = indexWeightRequest.invoke(IndexWeightRequest.InParams(tradeDate = tradeDate), IndexWeightRequest.OutParams::class.java).map { GroupStock(it.indexCode, it.conCode, it.weight) }
-            val stockIdList = groupStockList.mapNotNull(GroupStock::stockId).let(stockService::findByStockIdList).map(Stock::id)
-            groupStockList.filter { stockIdList.contains(it.groupId) }
+            val stockIdList = stockService.findAll().map(Stock::id)
+            groupStockList.filter { stockIdList.contains(it.stockId) }
         }
         val flowShareMap: (Date) -> Map<String, Double> = { tradeDate ->
-            val map = mutableMapOf<String, Double>()
-            for (stockId in stockService.findAll().mapNotNull(Stock::id))
-                level1BasicService[stockId, tradeDate]?.flowShare?.also { map[stockId] = it }
-            map
+            val stockIdFlowable = Flowable.fromIterable(stockService.findAll()).mapNotNull(Stock::id)
+            val flowShareFlowable = stockIdFlowable.parallel(3).runOn(Schedulers.io()).mapNotNull { level1BasicService[it, tradeDate]?.flowShare }.sequential()
+            Flowable.zip(stockIdFlowable, flowShareFlowable) { stockId, flowShare -> Pair(stockId, flowShare) }
+                    .collect({ mutableMapOf<String, Double>() }, { map, pair -> map[pair.first] = pair.second }).blockingGet()
         }
         val weightList: (Map<String, Double>, List<String>) -> List<Double> = { rsMap, stockIdList ->
             val flowShareList = stockIdList.map { stockId -> rsMap[stockId] }
@@ -66,16 +68,14 @@ class GroupStockSynchronizer {
             flowShareList.map { let(it, maxFlowShare) { a, b -> a * 1000 / b } ?: 0.0 }
         }
         val groupStockListOfTransform: (Map<String, Double>, Int, (String) -> List<String>) -> List<GroupStock> = { rsMap, times, transform ->
+            val start = System.currentTimeMillis()
             val groupIdList = groupService.findByType(Group.Type.INDUSTRY).map(Group::id)
-            val groupStockList = mutableListOf<GroupStock>()
             val groupIdFlowable = Flowable.fromIterable(groupIdList)
-            val stockIdListFlowable = groupIdFlowable.map(transform).zipWith(Flowable.interval((60 * 1000 / times).toLong(), TimeUnit.MILLISECONDS)) { stockIdList, _ -> stockIdList }
-            val wListFlowable = stockIdListFlowable.map { weightList(rsMap, it) }
+            val stockIdListFlowable = groupIdFlowable.map(transform).zipWith(Flowable.interval((60 * 1000 / times).toLong(), TimeUnit.MILLISECONDS)) { stockIdList, _ -> stockIdList }.onBackpressureBuffer(8192)
+            val wListFlowable = stockIdListFlowable.map { ;weightList(rsMap, it) }
             Flowable.zip(groupIdFlowable, stockIdListFlowable, wListFlowable) { groupId, stockIdList, wList -> Triple(groupId, stockIdList, wList) }
-                    .blockingSubscribe(
-                            { it.second.mapIndexedTo(groupStockList) { index, s -> GroupStock(it.first, s, it.third[index]) } },
-                            { logger.error(it.message) })
-            groupStockList
+                    .map { it.second.mapIndexed { index, s -> GroupStock(it.first, s, it.third[index]) } }
+                    .collect({ mutableListOf<GroupStock>() }, { all, group -> all += group }).blockingGet()
         }
         val groupStockListOfIndustry: (Map<String, Double>) -> List<GroupStock> = { rsMap ->
             groupStockListOfTransform(rsMap, 200) { indexMemberRequest.invoke(IndexMemberRequest.InParams(indexCode = it), IndexMemberRequest.OutParams::class.java).mapNotNull(IndexMemberRequest.OutParams::conCode) }

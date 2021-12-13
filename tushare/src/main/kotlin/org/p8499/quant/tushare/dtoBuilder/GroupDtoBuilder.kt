@@ -1,6 +1,7 @@
 package org.p8499.quant.tushare.dtoBuilder
 
 import org.p8499.quant.tushare.TushareApplication
+import org.p8499.quant.tushare.common.finiteOrNull
 import org.p8499.quant.tushare.common.let
 import org.p8499.quant.tushare.dto.GroupDto
 import org.p8499.quant.tushare.dto.StockDto
@@ -95,25 +96,32 @@ class GroupDtoBuilder(
 
     private fun flatMapOf(dateListByExchange: List<Date>, valueListByExchange: List<Double?>): Map<Date, Double?> = flatten(mapOf(dateListByExchange, valueListByExchange))
 
-    private fun weightedRateListByExchange(dateListByExchange: List<Date>, effStockIdsListByExchange: List<List<String>>, stockDtoMapByExchange: Map<String, StockDto>, offsetMapByExchange: Map<String, Int?>, valueListTransform: (StockDto) -> List<Double?>, weightListTransform: (StockDto) -> List<Double?>) =
-            dateListByExchange.indices.map { index ->
-                if (index > 0) {
-                    var numerator = 0.0
-                    var denominator = 0.0
-                    effStockIdsListByExchange[index].forEach { effStockId ->
-                        val offset = offsetMapByExchange[effStockId]
-                        if (offset !== null)
-                            stockDtoMapByExchange[effStockId]?.let {
-                                let(valueListTransform(it)[index - offset], valueListTransform(it)[index - offset - 1], weightListTransform(it)[index - offset]) { a, b, c ->
+    private fun weightedRateListByExchange(dateListByExchange: List<Date>, effStockIdsListByExchange: List<List<String>>, stockDtoMapByExchange: Map<String, StockDto>, offsetMapByExchange: Map<String, Int?>, valueListTransform: (StockDto) -> List<Double?>, weightListTransform: (StockDto) -> List<Double?>): List<Double> {
+        val weightedRateList = mutableListOf<Double>()
+        dateListByExchange.indices.forEach { index ->
+            if (index > 0) {
+                var numerator = 0.0
+                var denominator = 0.0
+                effStockIdsListByExchange[index].forEach { effStockId ->
+                    val offset = offsetMapByExchange[effStockId]
+                    if (offset !== null)
+                        stockDtoMapByExchange[effStockId]?.let {
+                            val valueList = valueListTransform(it)
+                            val weightList = weightListTransform(it)
+                            let(valueList[index - offset], valueList[index - offset - 1], weightList[index - offset]) { a, b, c ->
+                                if (b != 0.0) {
                                     numerator += a / b * c
                                     denominator += c
                                 }
                             }
-                    }
-                    numerator / denominator
-                } else
-                    1.0
-            }
+                        }
+                }
+                weightedRateList.add((numerator / denominator).finiteOrNull() ?: weightedRateList[index - 1])
+            } else
+                weightedRateList.add(1.0)
+        }
+        return weightedRateList
+    }
 
     private fun cumprod(eleList: List<Double?>): List<Double?> {
         val cumList = mutableListOf<Double?>()
@@ -239,41 +247,41 @@ class GroupDtoBuilder(
 
     private val pbListBySh by lazy { pbListByExchange(dateListBySh, effStockIdsListBySh, stockDtoMapBySh, offsetMapBySh) }
 
-    private val flatpbListBySh by lazy { flatMapOf(dateListBySh, pbListBySh).values.toList() }
+    private val flatPbListBySh by lazy { flatMapOf(dateListBySh, pbListBySh).values.toList() }
 
     private val pbListBySz by lazy { pbListByExchange(dateListBySz, effStockIdsListBySz, stockDtoMapBySz, offsetMapBySz) }
 
-    private val flatpbListBySz by lazy { flatMapOf(dateListBySz, pbListBySz).values.toList() }
+    private val flatPbListBySz by lazy { flatMapOf(dateListBySz, pbListBySz).values.toList() }
 
     private fun peListByExchange(dateListByExchange: List<Date>, effStockIdsListByExchange: List<List<String>>, stockDtoMapByExchange: Map<String, StockDto>, offsetMapByExchange: Map<String, Int?>) = cumprod(weightedRateListByExchange(dateListByExchange, effStockIdsListByExchange, stockDtoMapByExchange, offsetMapByExchange, StockDto::pe, StockDto::totalShare))
 
     private val peListBySh by lazy { peListByExchange(dateListBySh, effStockIdsListBySh, stockDtoMapBySh, offsetMapBySh) }
 
-    private val flatpeListBySh by lazy { flatMapOf(dateListBySh, peListBySh).values.toList() }
+    private val flatPeListBySh by lazy { flatMapOf(dateListBySh, peListBySh).values.toList() }
 
     private val peListBySz by lazy { peListByExchange(dateListBySz, effStockIdsListBySz, stockDtoMapBySz, offsetMapBySz) }
 
-    private val flatpeListBySz by lazy { flatMapOf(dateListBySz, peListBySz).values.toList() }
+    private val flatPeListBySz by lazy { flatMapOf(dateListBySz, peListBySz).values.toList() }
 
     private fun psListByExchange(dateListByExchange: List<Date>, effStockIdsListByExchange: List<List<String>>, stockDtoMapByExchange: Map<String, StockDto>, offsetMapByExchange: Map<String, Int?>) = cumprod(weightedRateListByExchange(dateListByExchange, effStockIdsListByExchange, stockDtoMapByExchange, offsetMapByExchange, StockDto::ps, StockDto::totalShare))
 
     private val psListBySh by lazy { psListByExchange(dateListBySh, effStockIdsListBySh, stockDtoMapBySh, offsetMapBySh) }
 
-    private val flatpsListBySh by lazy { flatMapOf(dateListBySh, psListBySh).values.toList() }
+    private val flatPsListBySh by lazy { flatMapOf(dateListBySh, psListBySh).values.toList() }
 
     private val psListBySz by lazy { psListByExchange(dateListBySz, effStockIdsListBySz, stockDtoMapBySz, offsetMapBySz) }
 
-    private val flatpsListBySz by lazy { flatMapOf(dateListBySz, psListBySz).values.toList() }
+    private val flatPsListBySz by lazy { flatMapOf(dateListBySz, psListBySz).values.toList() }
 
     private fun pcfListByExchange(dateListByExchange: List<Date>, effStockIdsListByExchange: List<List<String>>, stockDtoMapByExchange: Map<String, StockDto>, offsetMapByExchange: Map<String, Int?>) = cumprod(weightedRateListByExchange(dateListByExchange, effStockIdsListByExchange, stockDtoMapByExchange, offsetMapByExchange, StockDto::pcf, StockDto::totalShare))
 
     private val pcfListBySh by lazy { pcfListByExchange(dateListBySh, effStockIdsListBySh, stockDtoMapBySh, offsetMapBySh) }
 
-    private val flatpcfListBySh by lazy { flatMapOf(dateListBySh, pcfListBySh).values.toList() }
+    private val flatPcfListBySh by lazy { flatMapOf(dateListBySh, pcfListBySh).values.toList() }
 
     private val pcfListBySz by lazy { pcfListByExchange(dateListBySz, effStockIdsListBySz, stockDtoMapBySz, offsetMapBySz) }
 
-    private val flatpcfListBySz by lazy { flatMapOf(dateListBySz, pcfListBySz).values.toList() }
+    private val flatPcfListBySz by lazy { flatMapOf(dateListBySz, pcfListBySz).values.toList() }
 
     private fun weightedCombine(valueListBySh: List<Double?>, weightListBySh: List<Double?>, valueListBySz: List<Double?>, weightListBySz: List<Double?>) =
             dateList.indices.map {
@@ -287,10 +295,7 @@ class GroupDtoBuilder(
                     numerator += a * b
                     denominator += b
                 }
-                if (denominator > 0)
-                    numerator / denominator
-                else
-                    null
+                (numerator / denominator).finiteOrNull()
             }
 
     private fun sumCombine(valueListBySh: List<Double?>, valueListBySz: List<Double?>): List<Double?> = dateList.indices.map { let(valueListBySh[it], valueListBySz[it]) { a, b -> a + b } }
@@ -315,13 +320,13 @@ class GroupDtoBuilder(
 
     val totalValueList by lazy { sumCombine(flatTotalValueListBySh, flatTotalValueListBySz) }
 
-    val pbList by lazy { weightedCombine(pbListBySh, flatFlowValueListBySh, pbListBySz, flatFlowValueListBySz) }
+    val pbList by lazy { weightedCombine(flatPbListBySh, flatFlowValueListBySh, flatPbListBySz, flatFlowValueListBySz) }
 
-    val peList by lazy { weightedCombine(peListBySh, flatFlowValueListBySh, peListBySz, flatFlowValueListBySz) }
+    val peList by lazy { weightedCombine(flatPeListBySh, flatFlowValueListBySh, flatPeListBySz, flatFlowValueListBySz) }
 
-    val psList by lazy { weightedCombine(psListBySh, flatFlowValueListBySh, psListBySz, flatFlowValueListBySz) }
+    val psList by lazy { weightedCombine(flatPsListBySh, flatFlowValueListBySh, flatPsListBySz, flatFlowValueListBySz) }
 
-    val pcfList by lazy { weightedCombine(pcfListBySh, flatFlowValueListBySh, pcfListBySz, flatFlowValueListBySz) }
+    val pcfList by lazy { weightedCombine(flatPcfListBySh, flatFlowValueListBySh, flatPcfListBySz, flatFlowValueListBySz) }
 
     val stockIdList by lazy { stockIdListBySh + stockIdListBySz }
 
@@ -336,6 +341,9 @@ class GroupDtoBuilder(
 
     fun build(): GroupDto {
         logger.info("Constructing $groupId DTO")
-        return GroupDto("CN", groupId, name, message, stockIdList, percentList, dateList, openPreList, closePreList, highPreList, lowPreList, volumePreList, amountList, flowShareList, totalShareList, flowValueList, totalValueList, pbList, peList, psList, pcfList)
+        /*
+           TODO cumprod(weightedRateListByExchange) is not applicable to pcf
+        */
+        return GroupDto("CN", groupId, name, message, stockIdList, percentList, dateList, openPreList, closePreList, highPreList, lowPreList, volumePreList, amountList, flowShareList, totalShareList, flowValueList, totalValueList, pbList, peList, psList, dateList.map { 0.0 }/*pcfList*/)
     }
 }

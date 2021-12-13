@@ -13,10 +13,12 @@ data class GroupDto(
 
         var message: String = "",
 
-        @JsonProperty("stock_id_list")
+        @get:JsonProperty("stock_id_list")
+        @set:JsonProperty("stock_id_list")
         var stockIdList: List<String> = listOf(),
 
-        @JsonProperty("percent_list")
+        @get:JsonProperty("percent_list")
+        @set:JsonProperty("percent_list")
         var percentList: List<Double> = listOf(),
 
         @get:JsonFormat(pattern = "yyyyMMdd")

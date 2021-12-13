@@ -67,7 +67,7 @@ class DailyRequest : TushareRequest<DailyRequest.InParams, DailyRequest.OutParam
 
             var close: Double? = null,
 
-            var vol: Double? = null,
+            var vol: Double? = null/*hands*/,
 
-            var amount: Double? = null)
+            var amount: Double? = null/*thousand yuan*/)
 }

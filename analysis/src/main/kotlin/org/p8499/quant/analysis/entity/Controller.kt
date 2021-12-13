@@ -11,6 +11,6 @@ class Controller(
         var region: String? = null,
 
         @Column(nullable = false, name = "dte")
-        @Temporal(TemporalType.DATE)
+        @Temporal(TemporalType.TIMESTAMP)
         var date: Date? = null
 )

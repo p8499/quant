@@ -44,9 +44,6 @@ class PersistentController {
         return stockDtoList
     }
 
-    @RequestMapping(method = [RequestMethod.POST, RequestMethod.PUT], path = ["/complete"])
-    fun complete(@RequestParam region: String) = persistentService.complete(region)
-
     @RequestMapping(method = [RequestMethod.POST, RequestMethod.PUT], path = ["/save_stock"])
     fun saveStock(@RequestBody stockDto: StockDto) = persistentService.saveStock(
             stockDto.region, stockDto.id,
@@ -85,4 +82,7 @@ class PersistentController {
             groupDto.date.mapIndexed { index, date -> GroupIndexDaily(groupDto.region, groupDto.id, "pe", date, groupDto.pe[index]) },
             groupDto.date.mapIndexed { index, date -> GroupIndexDaily(groupDto.region, groupDto.id, "ps", date, groupDto.ps[index]) },
             groupDto.date.mapIndexed { index, date -> GroupIndexDaily(groupDto.region, groupDto.id, "pcf", date, groupDto.pcf[index]) })
+
+    @RequestMapping(method = [RequestMethod.POST, RequestMethod.PUT], path = ["/complete"])
+    fun complete(@RequestParam region: String) = persistentService.complete(region)
 }

@@ -1,14 +1,19 @@
 package org.p8499.quant.tushare.service.task
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.reactivex.Flowable
+import io.reactivex.schedulers.Schedulers
 import org.p8499.quant.tushare.TushareApplication
+import org.p8499.quant.tushare.dto.StockDto
 import org.p8499.quant.tushare.dtoBuilder.DtoBuilderFactory
 import org.p8499.quant.tushare.dtoBuilder.GroupDtoBuilder
 import org.p8499.quant.tushare.dtoBuilder.StockDtoBuilder
 import org.p8499.quant.tushare.entity.Group
+import org.p8499.quant.tushare.entity.GroupStock
 import org.p8499.quant.tushare.entity.Stock
 import org.p8499.quant.tushare.feignClient.PersistentFeignClient
 import org.p8499.quant.tushare.service.GroupService
+import org.p8499.quant.tushare.service.GroupStockService
 import org.p8499.quant.tushare.service.StockService
 import org.p8499.quant.tushare.service.tushareSynchronizer.*
 import org.slf4j.LoggerFactory
@@ -77,6 +82,9 @@ class TushareTask {
     protected lateinit var groupService: GroupService
 
     @Autowired
+    protected lateinit var groupStockService: GroupStockService
+
+    @Autowired
     protected lateinit var dtoBuilderFactory: DtoBuilderFactory
 
     @Autowired
@@ -105,7 +113,7 @@ class TushareTask {
      *                                           │ express           │
      *                                           └ forecast          ┘
      */
-    @Scheduled(cron = "00 30 16 * * MON-FRI")
+    @Scheduled(cron = "00 00 18 * * MON-SAT")
     fun syncAndSend() {
         val startDate = GregorianCalendar(2015, 0, 1).time
         val today = Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant())
@@ -135,13 +143,29 @@ class TushareTask {
         /**
          * Calculate from database and call analysis persistent function
          */
-        stockService.findAll().mapNotNull(Stock::id).parallelStream().map { dtoBuilderFactory.newStockBuilder(it, startDate, today) }.map(StockDtoBuilder::build).forEach(persistentFeignClient::saveStock)
-        groupService.findAll().mapNotNull(Group::id).parallelStream().map { dtoBuilderFactory.newGroupBuilder(it, persistentFeignClient.findStock(groupId = it)) }.map(GroupDtoBuilder::build).forEach(persistentFeignClient::saveGroup)
-        persistentFeignClient.complete()
-//        stringRedisTemplate.keys("*").forEach { stringRedisTemplate.delete(it) }
-//        stockService.findAll().mapNotNull(Stock::id).parallelStream().forEach { stringRedisTemplate.opsForValue().set("CNS-$it", objectMapper.writeValueAsString(dtoBuilderFactory.newStockBuilder(it).build())) }
-//        val stockDtoList = stringRedisTemplate.keys("CNG-*").map { objectMapper.readValue(stringRedisTemplate.opsForValue()[it], StockDto::class.java) }
-//        groupService.findAll().mapNotNull(Group::id).parallelStream().forEach { stringRedisTemplate.opsForValue().set("CNG-$it", objectMapper.writeValueAsString(dtoBuilderFactory.newGroupBuilder(it, stockDtoList).build())) }
+        stringRedisTemplate.keys("*").forEach { stringRedisTemplate.delete(it) }
+        stockService.findAll().mapNotNull(Stock::id)
+                .parallelStream()
+                .map { dtoBuilderFactory.newStockBuilder(it, startDate, today) }
+                .map(StockDtoBuilder::build)
+                .forEach {
+                    stringRedisTemplate.opsForValue().set(it.id, objectMapper.writeValueAsString(it))
+                    persistentFeignClient.saveStock(it)
+                }
+
+        val groupIdFlowable = Flowable.fromIterable(groupService.findAll().mapNotNull(Group::id))
+        val stockIdListFlowable = groupIdFlowable.map { groupStockService.findByGroupId(it).mapNotNull(GroupStock::stockId) }
+        Flowable.zip(groupIdFlowable, stockIdListFlowable) { groupId, stockIdList -> groupId to stockIdList }
+                .filter { it.second.isNotEmpty() }.doOnNext { print("Emitting ${it.first}") }
+                .parallel(3).runOn(Schedulers.io()).map { pair ->
+                    pair.second
+                            .map(stringRedisTemplate.opsForValue()::get)
+                            .map { json -> objectMapper.readValue(json, StockDto::class.java) }
+                            .let { dtoBuilderFactory.newGroupBuilder(pair.first, it) }
+                            .let(GroupDtoBuilder::build)
+                            .run(persistentFeignClient::saveGroup)
+                }.sequential().subscribe()
+
         /**
          * Notify ampq
          */

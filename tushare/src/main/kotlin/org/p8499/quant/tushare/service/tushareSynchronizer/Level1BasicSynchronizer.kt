@@ -46,7 +46,7 @@ class Level1BasicSynchronizer {
             }.values
             Flowable.fromIterable(datesCollection).zipWith(Flowable.interval(150, TimeUnit.MILLISECONDS)) { dateList, _ -> dateList }
                     .flatMap { Flowable.fromArray(*dailyBasicRequest.invoke(DailyBasicRequest.InParams(tsCode = tsCode, startDate = it.minOrNull(), endDate = it.maxOrNull()), DailyBasicRequest.OutParams::class.java)) }
-                    .map { Level1Basic(tsCode, it.tradeDate, it.totalShare, it.floatShare) }
+                    .map { Level1Basic(tsCode, it.tradeDate, it.totalShare?.times(10000), it.floatShare?.times(10000)) }
                     .blockingIterable()
         }
         val stockIdList = stockService.findAll().mapNotNull(Stock::id)

@@ -85,6 +85,8 @@ class IncomeRequest : TushareRequest<IncomeRequest.InParams, IncomeRequest.OutPa
             @set:JsonProperty("comp_type")
             var compType: String? = null,
 
+            var revenue: Double? = null,
+
             @set:JsonProperty("n_income_attr_p")
             var nIncomeAttrP: Double? = null,
 

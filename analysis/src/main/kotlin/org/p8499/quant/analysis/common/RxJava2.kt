@@ -1,4 +1,4 @@
-package org.p8499.quant.tushare.common
+package org.p8499.quant.analysis.common
 
 import io.reactivex.Flowable
 import io.reactivex.Observable
