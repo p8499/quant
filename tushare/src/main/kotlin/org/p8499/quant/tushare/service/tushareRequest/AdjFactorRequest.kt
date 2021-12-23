@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.retry.annotation.Backoff
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Service
-import java.util.*
+import java.time.LocalDate
 
 @Service
 class AdjFactorRequest : TushareRequest<AdjFactorRequest.InParams, AdjFactorRequest.OutParams>() {
@@ -37,18 +37,18 @@ class AdjFactorRequest : TushareRequest<AdjFactorRequest.InParams, AdjFactorRequ
 
             @get:JsonInclude(JsonInclude.Include.NON_NULL)
             @get:JsonProperty("trade_date")
-            @get:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
-            var tradeDate: Date? = null,
+            @get:JsonFormat(pattern = "yyyyMMdd")
+            var tradeDate: LocalDate? = null,
 
             @get:JsonInclude(JsonInclude.Include.NON_NULL)
             @get:JsonProperty("start_date")
-            @get:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
-            var startDate: Date? = null,
+            @get:JsonFormat(pattern = "yyyyMMdd")
+            var startDate: LocalDate? = null,
 
             @get:JsonInclude(JsonInclude.Include.NON_NULL)
             @get:JsonProperty("end_date")
-            @get:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
-            var endDate: Date? = null)
+            @get:JsonFormat(pattern = "yyyyMMdd")
+            var endDate: LocalDate? = null)
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     class OutParams(
@@ -56,8 +56,8 @@ class AdjFactorRequest : TushareRequest<AdjFactorRequest.InParams, AdjFactorRequ
             var tsCode: String? = null,
 
             @set:JsonProperty("trade_date")
-            @set:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
-            var tradeDate: Date? = null,
+            @set:JsonFormat(pattern = "yyyyMMdd")
+            var tradeDate: LocalDate? = null,
 
             @set:JsonProperty("adj_factor")
             var adjFactor: Double? = null)
