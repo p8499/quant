@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface IncomeRepository :
-        JpaRepository<Income, Long>,
+        JpaRepository<Income, Income.IncomeId>,
         JpaSpecificationExecutor<Income>,
-        PagingAndSortingRepository<Income, Long>,
+        PagingAndSortingRepository<Income, Income.IncomeId>,
         IncomeDao

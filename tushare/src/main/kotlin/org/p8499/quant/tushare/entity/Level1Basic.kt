@@ -1,28 +1,32 @@
 package org.p8499.quant.tushare.entity
 
 import java.io.Serializable
+import java.time.LocalDate
 import java.util.*
 import javax.persistence.*
 
 @Entity
 @Table(name = "F1502")
 @IdClass(Level1Basic.Level1BasicId::class)
-data class Level1Basic(
+open class Level1Basic(
         @Id
         @Column(nullable = false, length = 16)
-        var stockId: String? = null,
+        open var stockId: String? = null,
 
         @Id
         @Column(nullable = false, name = "dte")
-        @Temporal(TemporalType.DATE)
-        var date: Date? = null,
+//        @Temporal(TemporalType.DATE)
+        open var date: LocalDate? = null,
 
         @Column(nullable = false, columnDefinition = "NUMBER(18, 2)", precision = 18, scale = 2)
-        var totalShare: Double? = null,
+        open var totalShare: Double? = null,
 
         @Column(nullable = false, columnDefinition = "NUMBER(18, 2)", precision = 18, scale = 2)
-        var flowShare: Double? = null) {
-    data class Level1BasicId(
-            var stockId: String? = null,
-            var date: Date? = null) : Serializable
+        open var flowShare: Double? = null) {
+    open class Level1BasicId(
+            open var stockId: String? = null,
+            open var date: LocalDate? = null) : Serializable {
+        override fun hashCode(): Int = Objects.hash(stockId, date)
+        override fun equals(other: Any?): Boolean = other is Level1BasicId && other.stockId == stockId && other.date == date
+    }
 }

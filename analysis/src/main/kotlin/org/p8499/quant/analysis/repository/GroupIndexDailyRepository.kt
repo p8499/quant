@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface GroupIndexDailyRepository :
-        JpaRepository<GroupIndexDaily, Long>,
+        JpaRepository<GroupIndexDaily, GroupIndexDaily.GroupIndexDailyId>,
         JpaSpecificationExecutor<GroupIndexDaily>,
-        PagingAndSortingRepository<GroupIndexDaily, Long>,
+        PagingAndSortingRepository<GroupIndexDaily, GroupIndexDaily.GroupIndexDailyId>,
         GroupIndexDailyDao

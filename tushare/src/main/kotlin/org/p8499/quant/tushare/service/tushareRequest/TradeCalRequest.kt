@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.retry.annotation.Backoff
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 import java.util.*
 
 @Service
@@ -36,13 +37,13 @@ class TradeCalRequest : TushareRequest<TradeCalRequest.InParams, TradeCalRequest
 
             @get:JsonInclude(JsonInclude.Include.NON_NULL)
             @get:JsonProperty("start_date")
-            @get:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
-            var startDate: Date? = null,
+            @get:JsonFormat(pattern = "yyyyMMdd")
+            var startDate: LocalDate? = null,
 
             @get:JsonInclude(JsonInclude.Include.NON_NULL)
             @get:JsonProperty("end_date")
-            @get:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
-            var endDate: Date? = null,
+            @get:JsonFormat(pattern = "yyyyMMdd")
+            var endDate: LocalDate? = null,
 
             @get:JsonInclude(JsonInclude.Include.NON_NULL)
             @get:JsonProperty("is_open")
@@ -53,13 +54,13 @@ class TradeCalRequest : TushareRequest<TradeCalRequest.InParams, TradeCalRequest
             var exchange: String? = null,
 
             @set:JsonProperty("cal_date")
-            @set:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
-            var calDate: Date? = null,
+            @set:JsonFormat(pattern = "yyyyMMdd")
+            var calDate: LocalDate? = null,
 
             @set:JsonProperty("is_open")
             var isOpen: Int? = null,
 
             @set:JsonProperty("pretrade_date")
-            @set:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
-            var pretradeDate: Date? = null)
+            @set:JsonFormat(pattern = "yyyyMMdd")
+            var pretradeDate: LocalDate? = null)
 }

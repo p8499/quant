@@ -11,7 +11,6 @@ import org.p8499.quant.tushare.service.tushareRequest.IncomeRequest
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import java.util.*
 import java.util.concurrent.TimeUnit
 
 @Service
@@ -36,11 +35,10 @@ class IncomeSynchronizer {
         Flowable.fromIterable(stockIdList).zipWith(Flowable.interval(1200, TimeUnit.MILLISECONDS)) { stockId, _ -> stockId }
                 .blockingSubscribe { stockId ->
                     incomeService.saveAll(incomeRequest.invoke(IncomeRequest.InParams(tsCode = stockId), IncomeRequest.OutParams::class.java, arrayOf("ann_date", "end_date", "revenue", "n_income_attr_p", "update_flag"))
-                            .groupBy(IncomeRequest.OutParams::endDate).mapValues { it.value.sortedWith(compareBy(IncomeRequest.OutParams::updateFlag)).last() }.map {
-                                Calendar.getInstance().run {
-                                    time = it.value.endDate
-                                    Income(stockId, get(Calendar.YEAR), get(Calendar.MONTH) / 3 + 1, it.value.annDate
-                                            ?: it.value.endDate, it.value.revenue, it.value.nIncomeAttrP)
+                            .groupBy(IncomeRequest.OutParams::endDate).mapValues { it.value.sortedWith(compareBy(IncomeRequest.OutParams::updateFlag)).last() }.mapNotNull {
+                                it.value.endDate?.run {
+                                    Income(stockId, year, (monthValue - 1) / 3 + 1, it.value.annDate
+                                            ?: this, it.value.revenue, it.value.nIncomeAttrP)
                                 }
                             })
                 }

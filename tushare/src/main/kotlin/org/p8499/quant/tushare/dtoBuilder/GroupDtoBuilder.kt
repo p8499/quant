@@ -9,6 +9,7 @@ import org.p8499.quant.tushare.entity.GroupStock
 import org.p8499.quant.tushare.entity.Stock
 import org.p8499.quant.tushare.service.*
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 import java.util.*
 
 class GroupDtoBuilder(
@@ -30,9 +31,9 @@ class GroupDtoBuilder(
         val forecastService: ForecastService) {
     protected val logger by lazy { LoggerFactory.getLogger(TushareApplication::class.java) }
 
-    private val name by lazy { groupService[groupId]?.name ?: "" }
+    val name by lazy { groupService[groupId]?.name ?: "" }
 
-    private val message by lazy { "" }
+//    val message by lazy { "" }
 
     private fun stockIdListByExchange(exchangeId: String): List<String> = stockService.findByStockIdList(groupStockService.findByGroupId(groupId).mapNotNull(GroupStock::stockId)).filter { it.exchangeId == exchangeId }.mapNotNull(Stock::id)
 
@@ -54,7 +55,7 @@ class GroupDtoBuilder(
 
     val dateList by lazy { (dateListBySh + dateListBySz).distinct().sorted() }
 
-    private fun stockIdsListByExchange(dateListByExchange: List<Date>, stockDtoMapByExchange: Map<String, StockDto>) = dateListByExchange.map { date -> stockDtoMapByExchange.filter { it.value.date.isNotEmpty() && it.value.date.first() <= date && it.value.date.last() >= date }.mapNotNull { it.value.id } }
+    private fun stockIdsListByExchange(dateListByExchange: List<LocalDate>, stockDtoMapByExchange: Map<String, StockDto>) = dateListByExchange.map { date -> stockDtoMapByExchange.filter { it.value.date.isNotEmpty() && it.value.date.first() <= date && it.value.date.last() >= date }.mapNotNull { it.value.id } }
 
     private val stockIdsListBySh by lazy { stockIdsListByExchange(dateListBySh, stockDtoMapBySh) }
 
@@ -66,20 +67,20 @@ class GroupDtoBuilder(
 
     private val effStockIdsListBySz by lazy { effStockIdsListByExchange(stockIdsListBySz) }
 
-    private fun offsetMapByExchange(dateListByExchange: List<Date>, stockDtoMapByExchange: Map<String, StockDto>) = stockDtoMapByExchange.mapValues { it.value.date.firstOrNull()?.let(dateListByExchange::indexOf) }
+    private fun offsetMapByExchange(dateListByExchange: List<LocalDate>, stockDtoMapByExchange: Map<String, StockDto>) = stockDtoMapByExchange.mapValues { it.value.date.firstOrNull()?.let(dateListByExchange::indexOf) }
 
     private val offsetMapBySh by lazy { offsetMapByExchange(dateListBySh, stockDtoMapBySh) }
 
     private val offsetMapBySz by lazy { offsetMapByExchange(dateListBySz, stockDtoMapBySz) }
 
-    private fun mapOf(dateListByExchange: List<Date>, valueListByExchange: List<Double?>): Map<Date, Double?> {
-        val map = mutableMapOf<Date, Double?>()
+    private fun mapOf(dateListByExchange: List<LocalDate>, valueListByExchange: List<Double?>): Map<LocalDate, Double?> {
+        val map = mutableMapOf<LocalDate, Double?>()
         dateListByExchange.forEachIndexed { index, date -> map[date] = valueListByExchange[index] }
         return map
     }
 
-    private fun flatten(entryMap: Map<Date, Double?>): Map<Date, Double?> {
-        val map = TreeMap<Date, Double?>()
+    private fun flatten(entryMap: Map<LocalDate, Double?>): Map<LocalDate, Double?> {
+        val map = TreeMap<LocalDate, Double?>()
         for (date in dateList)
             map[date] = null
         for (entry in entryMap)
@@ -94,9 +95,9 @@ class GroupDtoBuilder(
         return map
     }
 
-    private fun flatMapOf(dateListByExchange: List<Date>, valueListByExchange: List<Double?>): Map<Date, Double?> = flatten(mapOf(dateListByExchange, valueListByExchange))
+    private fun flatMapOf(dateListByExchange: List<LocalDate>, valueListByExchange: List<Double?>): Map<LocalDate, Double?> = flatten(mapOf(dateListByExchange, valueListByExchange))
 
-    private fun weightedRateListByExchange(dateListByExchange: List<Date>, effStockIdsListByExchange: List<List<String>>, stockDtoMapByExchange: Map<String, StockDto>, offsetMapByExchange: Map<String, Int?>, valueListTransform: (StockDto) -> List<Double?>, weightListTransform: (StockDto) -> List<Double?>): List<Double> {
+    private fun weightedRateListByExchange(dateListByExchange: List<LocalDate>, effStockIdsListByExchange: List<List<String>>, stockDtoMapByExchange: Map<String, StockDto>, offsetMapByExchange: Map<String, Int?>, valueListTransform: (StockDto) -> List<Double?>, weightListTransform: (StockDto) -> List<Double?>): List<Double> {
         val weightedRateList = mutableListOf<Double>()
         dateListByExchange.indices.forEach { index ->
             if (index > 0) {
@@ -132,7 +133,7 @@ class GroupDtoBuilder(
         return cumList
     }
 
-    private fun sumListByExchange(dateListByExchange: List<Date>, stockIdsListByExchange: List<List<String>>, stockDtoMapByExchange: Map<String, StockDto>, offsetMapByExchange: Map<String, Int?>, valueListTransform: (StockDto) -> List<Double?>) =
+    private fun sumListByExchange(dateListByExchange: List<LocalDate>, stockIdsListByExchange: List<List<String>>, stockDtoMapByExchange: Map<String, StockDto>, offsetMapByExchange: Map<String, Int?>, valueListTransform: (StockDto) -> List<Double?>) =
             dateListByExchange.indices.map { index ->
                 stockIdsListByExchange[index].sumOf { stockId ->
                     val offset = offsetMapByExchange[stockId]
@@ -143,7 +144,7 @@ class GroupDtoBuilder(
                 }
             }
 
-    private fun openPreListByExchange(dateListByExchange: List<Date>, effStockIdsListByExchange: List<List<String>>, stockDtoMapByExchange: Map<String, StockDto>, offsetMapByExchange: Map<String, Int?>) = cumprod(weightedRateListByExchange(dateListByExchange, effStockIdsListByExchange, stockDtoMapByExchange, offsetMapByExchange, StockDto::open, StockDto::totalShare))
+    private fun openPreListByExchange(dateListByExchange: List<LocalDate>, effStockIdsListByExchange: List<List<String>>, stockDtoMapByExchange: Map<String, StockDto>, offsetMapByExchange: Map<String, Int?>) = cumprod(weightedRateListByExchange(dateListByExchange, effStockIdsListByExchange, stockDtoMapByExchange, offsetMapByExchange, StockDto::open, StockDto::totalShare))
 
     private val openPreListBySh by lazy { openPreListByExchange(dateListBySh, effStockIdsListBySh, stockDtoMapBySh, offsetMapBySh) }
 
@@ -153,7 +154,7 @@ class GroupDtoBuilder(
 
     private val flatOpenPreListBySz by lazy { flatMapOf(dateListBySz, openPreListBySz).values.toList() }
 
-    private fun closePreListByExchange(dateListByExchange: List<Date>, effStockIdsListByExchange: List<List<String>>, stockDtoMapByExchange: Map<String, StockDto>, offsetMapByExchange: Map<String, Int?>) = cumprod(weightedRateListByExchange(dateListByExchange, effStockIdsListByExchange, stockDtoMapByExchange, offsetMapByExchange, StockDto::close, StockDto::totalShare))
+    private fun closePreListByExchange(dateListByExchange: List<LocalDate>, effStockIdsListByExchange: List<List<String>>, stockDtoMapByExchange: Map<String, StockDto>, offsetMapByExchange: Map<String, Int?>) = cumprod(weightedRateListByExchange(dateListByExchange, effStockIdsListByExchange, stockDtoMapByExchange, offsetMapByExchange, StockDto::close, StockDto::totalShare))
 
     private val closePreListBySh by lazy { closePreListByExchange(dateListBySh, effStockIdsListBySh, stockDtoMapBySh, offsetMapBySh) }
 
@@ -163,7 +164,7 @@ class GroupDtoBuilder(
 
     private val flatClosePreListBySz by lazy { flatMapOf(dateListBySz, closePreListBySz).values.toList() }
 
-    private fun highPreListByExchange(dateListByExchange: List<Date>, effStockIdsListByExchange: List<List<String>>, stockDtoMapByExchange: Map<String, StockDto>, offsetMapByExchange: Map<String, Int?>) = cumprod(weightedRateListByExchange(dateListByExchange, effStockIdsListByExchange, stockDtoMapByExchange, offsetMapByExchange, StockDto::high, StockDto::totalShare))
+    private fun highPreListByExchange(dateListByExchange: List<LocalDate>, effStockIdsListByExchange: List<List<String>>, stockDtoMapByExchange: Map<String, StockDto>, offsetMapByExchange: Map<String, Int?>) = cumprod(weightedRateListByExchange(dateListByExchange, effStockIdsListByExchange, stockDtoMapByExchange, offsetMapByExchange, StockDto::high, StockDto::totalShare))
 
     private val highPreListBySh by lazy { highPreListByExchange(dateListBySh, effStockIdsListBySh, stockDtoMapBySh, offsetMapBySh) }
 
@@ -173,7 +174,7 @@ class GroupDtoBuilder(
 
     private val flatHighPreListBySz by lazy { flatMapOf(dateListBySz, highPreListBySz).values.toList() }
 
-    private fun lowPreListByExchange(dateListByExchange: List<Date>, effStockIdsListByExchange: List<List<String>>, stockDtoMapByExchange: Map<String, StockDto>, offsetMapByExchange: Map<String, Int?>) = cumprod(weightedRateListByExchange(dateListByExchange, effStockIdsListByExchange, stockDtoMapByExchange, offsetMapByExchange, StockDto::low, StockDto::totalShare))
+    private fun lowPreListByExchange(dateListByExchange: List<LocalDate>, effStockIdsListByExchange: List<List<String>>, stockDtoMapByExchange: Map<String, StockDto>, offsetMapByExchange: Map<String, Int?>) = cumprod(weightedRateListByExchange(dateListByExchange, effStockIdsListByExchange, stockDtoMapByExchange, offsetMapByExchange, StockDto::low, StockDto::totalShare))
 
     private val lowPreListBySh by lazy { lowPreListByExchange(dateListBySh, effStockIdsListBySh, stockDtoMapBySh, offsetMapBySh) }
 
@@ -183,7 +184,7 @@ class GroupDtoBuilder(
 
     private val flatLowPreListBySz by lazy { flatMapOf(dateListBySz, lowPreListBySz).values.toList() }
 
-    private fun volumePreListByExchange(dateListByExchange: List<Date>, stockIdsListByExchange: List<List<String>>, stockDtoMapByExchange: Map<String, StockDto>, offsetMapByExchange: Map<String, Int?>) = sumListByExchange(dateListByExchange, stockIdsListByExchange, stockDtoMapByExchange, offsetMapByExchange, StockDto::volume)
+    private fun volumePreListByExchange(dateListByExchange: List<LocalDate>, stockIdsListByExchange: List<List<String>>, stockDtoMapByExchange: Map<String, StockDto>, offsetMapByExchange: Map<String, Int?>) = sumListByExchange(dateListByExchange, stockIdsListByExchange, stockDtoMapByExchange, offsetMapByExchange, StockDto::volume)
 
     private val volumePreListBySh by lazy { volumePreListByExchange(dateListBySh, stockIdsListBySh, stockDtoMapBySh, offsetMapBySh) }
 
@@ -193,7 +194,7 @@ class GroupDtoBuilder(
 
     private val flatVolumePreListBySz by lazy { flatMapOf(dateListBySz, volumePreListBySz).values.toList() }
 
-    private fun amountListByExchange(dateListByExchange: List<Date>, stockIdsListByExchange: List<List<String>>, stockDtoMapByExchange: Map<String, StockDto>, offsetMapByExchange: Map<String, Int?>) = sumListByExchange(dateListByExchange, stockIdsListByExchange, stockDtoMapByExchange, offsetMapByExchange, StockDto::amount)
+    private fun amountListByExchange(dateListByExchange: List<LocalDate>, stockIdsListByExchange: List<List<String>>, stockDtoMapByExchange: Map<String, StockDto>, offsetMapByExchange: Map<String, Int?>) = sumListByExchange(dateListByExchange, stockIdsListByExchange, stockDtoMapByExchange, offsetMapByExchange, StockDto::amount)
 
     private val amountListBySh by lazy { amountListByExchange(dateListBySh, stockIdsListBySh, stockDtoMapBySh, offsetMapBySh) }
 
@@ -203,7 +204,7 @@ class GroupDtoBuilder(
 
     private val flatAmountListBySz by lazy { flatMapOf(dateListBySz, amountListBySz).values.toList() }
 
-    private fun flowShareListByExchange(dateListByExchange: List<Date>, stockIdsListByExchange: List<List<String>>, stockDtoMapByExchange: Map<String, StockDto>, offsetMapByExchange: Map<String, Int?>) = sumListByExchange(dateListByExchange, stockIdsListByExchange, stockDtoMapByExchange, offsetMapByExchange, StockDto::flowShare)
+    private fun flowShareListByExchange(dateListByExchange: List<LocalDate>, stockIdsListByExchange: List<List<String>>, stockDtoMapByExchange: Map<String, StockDto>, offsetMapByExchange: Map<String, Int?>) = sumListByExchange(dateListByExchange, stockIdsListByExchange, stockDtoMapByExchange, offsetMapByExchange, StockDto::flowShare)
 
     private val flowShareListBySh by lazy { flowShareListByExchange(dateListBySh, stockIdsListBySh, stockDtoMapBySh, offsetMapBySh) }
 
@@ -213,7 +214,7 @@ class GroupDtoBuilder(
 
     private val flatFlowShareListBySz by lazy { flatMapOf(dateListBySz, flowShareListBySz).values.toList() }
 
-    private fun totalShareListByExchange(dateListByExchange: List<Date>, stockIdsListByExchange: List<List<String>>, stockDtoMapByExchange: Map<String, StockDto>, offsetMapByExchange: Map<String, Int?>) = sumListByExchange(dateListByExchange, stockIdsListByExchange, stockDtoMapByExchange, offsetMapByExchange, StockDto::totalShare)
+    private fun totalShareListByExchange(dateListByExchange: List<LocalDate>, stockIdsListByExchange: List<List<String>>, stockDtoMapByExchange: Map<String, StockDto>, offsetMapByExchange: Map<String, Int?>) = sumListByExchange(dateListByExchange, stockIdsListByExchange, stockDtoMapByExchange, offsetMapByExchange, StockDto::totalShare)
 
     private val totalShareListBySh by lazy { totalShareListByExchange(dateListBySh, stockIdsListBySh, stockDtoMapBySh, offsetMapBySh) }
 
@@ -223,7 +224,7 @@ class GroupDtoBuilder(
 
     private val flatTotalShareListBySz by lazy { flatMapOf(dateListBySz, totalShareListBySz).values.toList() }
 
-    private fun flowValueListByExchange(dateListByExchange: List<Date>, stockIdsListByExchange: List<List<String>>, stockDtoMapByExchange: Map<String, StockDto>, offsetMapByExchange: Map<String, Int?>) = sumListByExchange(dateListByExchange, stockIdsListByExchange, stockDtoMapByExchange, offsetMapByExchange, StockDto::flowValue)
+    private fun flowValueListByExchange(dateListByExchange: List<LocalDate>, stockIdsListByExchange: List<List<String>>, stockDtoMapByExchange: Map<String, StockDto>, offsetMapByExchange: Map<String, Int?>) = sumListByExchange(dateListByExchange, stockIdsListByExchange, stockDtoMapByExchange, offsetMapByExchange, StockDto::flowValue)
 
     private val flowValueListBySh by lazy { flowValueListByExchange(dateListBySh, stockIdsListBySh, stockDtoMapBySh, offsetMapBySh) }
 
@@ -233,7 +234,7 @@ class GroupDtoBuilder(
 
     private val flatFlowValueListBySz by lazy { flatMapOf(dateListBySz, flowValueListBySz).values.toList() }
 
-    private fun totalValueListByExchange(dateListByExchange: List<Date>, stockIdsListByExchange: List<List<String>>, stockDtoMapByExchange: Map<String, StockDto>, offsetMapByExchange: Map<String, Int?>) = sumListByExchange(dateListByExchange, stockIdsListByExchange, stockDtoMapByExchange, offsetMapByExchange, StockDto::totalValue)
+    private fun totalValueListByExchange(dateListByExchange: List<LocalDate>, stockIdsListByExchange: List<List<String>>, stockDtoMapByExchange: Map<String, StockDto>, offsetMapByExchange: Map<String, Int?>) = sumListByExchange(dateListByExchange, stockIdsListByExchange, stockDtoMapByExchange, offsetMapByExchange, StockDto::totalValue)
 
     private val totalValueListBySh by lazy { totalValueListByExchange(dateListBySh, stockIdsListBySh, stockDtoMapBySh, offsetMapBySh) }
 
@@ -243,7 +244,7 @@ class GroupDtoBuilder(
 
     private val flatTotalValueListBySz by lazy { flatMapOf(dateListBySz, totalValueListBySz).values.toList() }
 
-    private fun pbListByExchange(dateListByExchange: List<Date>, effStockIdsListByExchange: List<List<String>>, stockDtoMapByExchange: Map<String, StockDto>, offsetMapByExchange: Map<String, Int?>) = cumprod(weightedRateListByExchange(dateListByExchange, effStockIdsListByExchange, stockDtoMapByExchange, offsetMapByExchange, StockDto::pb, StockDto::totalShare))
+    private fun pbListByExchange(dateListByExchange: List<LocalDate>, effStockIdsListByExchange: List<List<String>>, stockDtoMapByExchange: Map<String, StockDto>, offsetMapByExchange: Map<String, Int?>) = cumprod(weightedRateListByExchange(dateListByExchange, effStockIdsListByExchange, stockDtoMapByExchange, offsetMapByExchange, StockDto::pb, StockDto::totalShare))
 
     private val pbListBySh by lazy { pbListByExchange(dateListBySh, effStockIdsListBySh, stockDtoMapBySh, offsetMapBySh) }
 
@@ -253,7 +254,7 @@ class GroupDtoBuilder(
 
     private val flatPbListBySz by lazy { flatMapOf(dateListBySz, pbListBySz).values.toList() }
 
-    private fun peListByExchange(dateListByExchange: List<Date>, effStockIdsListByExchange: List<List<String>>, stockDtoMapByExchange: Map<String, StockDto>, offsetMapByExchange: Map<String, Int?>) = cumprod(weightedRateListByExchange(dateListByExchange, effStockIdsListByExchange, stockDtoMapByExchange, offsetMapByExchange, StockDto::pe, StockDto::totalShare))
+    private fun peListByExchange(dateListByExchange: List<LocalDate>, effStockIdsListByExchange: List<List<String>>, stockDtoMapByExchange: Map<String, StockDto>, offsetMapByExchange: Map<String, Int?>) = cumprod(weightedRateListByExchange(dateListByExchange, effStockIdsListByExchange, stockDtoMapByExchange, offsetMapByExchange, StockDto::pe, StockDto::totalShare))
 
     private val peListBySh by lazy { peListByExchange(dateListBySh, effStockIdsListBySh, stockDtoMapBySh, offsetMapBySh) }
 
@@ -263,7 +264,7 @@ class GroupDtoBuilder(
 
     private val flatPeListBySz by lazy { flatMapOf(dateListBySz, peListBySz).values.toList() }
 
-    private fun psListByExchange(dateListByExchange: List<Date>, effStockIdsListByExchange: List<List<String>>, stockDtoMapByExchange: Map<String, StockDto>, offsetMapByExchange: Map<String, Int?>) = cumprod(weightedRateListByExchange(dateListByExchange, effStockIdsListByExchange, stockDtoMapByExchange, offsetMapByExchange, StockDto::ps, StockDto::totalShare))
+    private fun psListByExchange(dateListByExchange: List<LocalDate>, effStockIdsListByExchange: List<List<String>>, stockDtoMapByExchange: Map<String, StockDto>, offsetMapByExchange: Map<String, Int?>) = cumprod(weightedRateListByExchange(dateListByExchange, effStockIdsListByExchange, stockDtoMapByExchange, offsetMapByExchange, StockDto::ps, StockDto::totalShare))
 
     private val psListBySh by lazy { psListByExchange(dateListBySh, effStockIdsListBySh, stockDtoMapBySh, offsetMapBySh) }
 
@@ -273,7 +274,7 @@ class GroupDtoBuilder(
 
     private val flatPsListBySz by lazy { flatMapOf(dateListBySz, psListBySz).values.toList() }
 
-    private fun pcfListByExchange(dateListByExchange: List<Date>, effStockIdsListByExchange: List<List<String>>, stockDtoMapByExchange: Map<String, StockDto>, offsetMapByExchange: Map<String, Int?>) = cumprod(weightedRateListByExchange(dateListByExchange, effStockIdsListByExchange, stockDtoMapByExchange, offsetMapByExchange, StockDto::pcf, StockDto::totalShare))
+    private fun pcfListByExchange(dateListByExchange: List<LocalDate>, effStockIdsListByExchange: List<List<String>>, stockDtoMapByExchange: Map<String, StockDto>, offsetMapByExchange: Map<String, Int?>) = cumprod(weightedRateListByExchange(dateListByExchange, effStockIdsListByExchange, stockDtoMapByExchange, offsetMapByExchange, StockDto::pcf, StockDto::totalShare))
 
     private val pcfListBySh by lazy { pcfListByExchange(dateListBySh, effStockIdsListBySh, stockDtoMapBySh, offsetMapBySh) }
 
@@ -326,7 +327,15 @@ class GroupDtoBuilder(
 
     val psList by lazy { weightedCombine(flatPsListBySh, flatFlowValueListBySh, flatPsListBySz, flatFlowValueListBySz) }
 
-    val pcfList by lazy { weightedCombine(flatPcfListBySh, flatFlowValueListBySh, flatPcfListBySz, flatFlowValueListBySz) }
+    /*
+       TODO cumprod(weightedRateListByExchange) is not applicable to pcf
+    */
+    val pcfList by lazy {
+        /*weightedCombine(flatPcfListBySh, flatFlowValueListBySh, flatPcfListBySz, flatFlowValueListBySz)*/
+        dateList.map { null }
+    }
+
+    val messageList by lazy { dateList.map { null } }
 
     val stockIdList by lazy { stockIdListBySh + stockIdListBySz }
 
@@ -341,9 +350,6 @@ class GroupDtoBuilder(
 
     fun build(): GroupDto {
         logger.info("Constructing $groupId DTO")
-        /*
-           TODO cumprod(weightedRateListByExchange) is not applicable to pcf
-        */
-        return GroupDto("CN", groupId, name, message, stockIdList, percentList, dateList, openPreList, closePreList, highPreList, lowPreList, volumePreList, amountList, flowShareList, totalShareList, flowValueList, totalValueList, pbList, peList, psList, dateList.map { 0.0 }/*pcfList*/)
+        return GroupDto("CN", groupId, name, stockIdList, percentList, dateList, openPreList, closePreList, highPreList, lowPreList, volumePreList, amountList, flowShareList, totalShareList, flowValueList, totalValueList, pbList, peList, psList, pcfList, messageList)
     }
 }

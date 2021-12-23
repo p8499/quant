@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.text.DecimalFormat
-import java.util.*
 import java.util.concurrent.TimeUnit
 
 @Service
@@ -38,11 +37,10 @@ class ForecastSynchronizer {
         Flowable.fromIterable(stockIdList).zipWith(Flowable.interval(1200, TimeUnit.MILLISECONDS)) { stockId, _ -> stockId }
                 .blockingSubscribe { stockId ->
                     forecastService.saveAll(forecastRequest.invoke(ForecastRequest.InParams(tsCode = stockId), ForecastRequest.OutParams::class.java, arrayOf("ann_date", "end_date", "type", "p_change_min", "p_change_max", "change_reason"))
-                            .groupBy(ForecastRequest.OutParams::endDate).mapValues { it.value.sortedWith(compareBy(ForecastRequest.OutParams::annDate)).last() }.map {
-                                Calendar.getInstance().run {
-                                    time = it.value.endDate
-                                    Forecast(stockId, get(Calendar.YEAR), get(Calendar.MONTH) / 3 + 1,
-                                            it.value.annDate ?: it.value.endDate,
+                            .groupBy(ForecastRequest.OutParams::endDate).mapValues { it.value.sortedWith(compareBy(ForecastRequest.OutParams::annDate)).last() }.mapNotNull {
+                                it.value.endDate?.run {
+                                    Forecast(stockId, year, (monthValue - 1) / 3 + 1,
+                                            it.value.annDate ?: this,
                                             "${it.value.type} (${it.value.pChangeMin?.run(format::format) ?: "null"}% ~ ${it.value.pChangeMax?.run(format::format) ?: "null"}%)",
                                             it.value.changeReason)
                                 }

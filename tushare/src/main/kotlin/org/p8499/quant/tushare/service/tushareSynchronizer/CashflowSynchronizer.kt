@@ -11,7 +11,6 @@ import org.p8499.quant.tushare.service.tushareRequest.CashflowRequest
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import java.util.*
 import java.util.concurrent.TimeUnit
 
 @Service
@@ -36,11 +35,10 @@ class CashflowSynchronizer {
         Flowable.fromIterable(stockIdList).zipWith(Flowable.interval(1200, TimeUnit.MILLISECONDS)) { stockId, _ -> stockId }
                 .blockingSubscribe { stockId ->
                     cashflowService.saveAll(cashflowRequest.invoke(CashflowRequest.InParams(tsCode = stockId), CashflowRequest.OutParams::class.java, arrayOf("ann_date", "end_date", "n_cashflow_act", "update_flag"))
-                            .groupBy(CashflowRequest.OutParams::endDate).mapValues { it.value.sortedWith(compareBy(CashflowRequest.OutParams::updateFlag)).last() }.map {
-                                Calendar.getInstance().run {
-                                    time = it.value.endDate
-                                    Cashflow(stockId, get(Calendar.YEAR), get(Calendar.MONTH) / 3 + 1, it.value.annDate
-                                            ?: it.value.endDate, it.value.nCashflowAct)
+                            .groupBy(CashflowRequest.OutParams::endDate).mapValues { it.value.sortedWith(compareBy(CashflowRequest.OutParams::updateFlag)).last() }.mapNotNull {
+                                it.value.endDate?.run {
+                                    Cashflow(stockId, year, (monthValue - 1) / 3 + 1, it.value.annDate
+                                            ?: this, it.value.nCashflowAct)
                                 }
                             })
                 }

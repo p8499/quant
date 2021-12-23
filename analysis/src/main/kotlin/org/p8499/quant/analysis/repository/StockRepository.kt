@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface StockRepository :
-        JpaRepository<Stock, Long>,
+        JpaRepository<Stock, Stock.StockId>,
         JpaSpecificationExecutor<Stock>,
-        PagingAndSortingRepository<Stock, Long>,
+        PagingAndSortingRepository<Stock, Stock.StockId>,
         StockDao

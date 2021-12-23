@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface StockIndexDailyRepository :
-        JpaRepository<StockIndexDaily, Long>,
+        JpaRepository<StockIndexDaily, StockIndexDaily.StockIndexDailyId>,
         JpaSpecificationExecutor<StockIndexDaily>,
-        PagingAndSortingRepository<StockIndexDaily, Long>,
+        PagingAndSortingRepository<StockIndexDaily, StockIndexDaily.StockIndexDailyId>,
         StockIndexDailyDao

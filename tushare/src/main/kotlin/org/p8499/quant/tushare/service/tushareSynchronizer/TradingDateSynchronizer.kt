@@ -8,7 +8,8 @@ import org.p8499.quant.tushare.service.tushareRequest.TradeCalRequest
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import java.util.*
+import java.time.LocalDate
+import java.time.LocalDateTime
 
 @Service
 class TradingDateSynchronizer {
@@ -25,17 +26,14 @@ class TradingDateSynchronizer {
 
     fun invoke() {
         logger.info("Start Synchronizing TradingDate")
-        val unprocessedTradingDateList: (String) -> List<TradingDate> = { exchange ->
+        val unprocessedTradingDateList: (String, Boolean) -> List<TradingDate> = { exchange, todayIncluded ->
             val lastDate = tradingDateService.last(exchange)?.date
-            val startDate = lastDate?.let {
-                Calendar.getInstance().apply {
-                    time = it
-                    add(Calendar.DATE, 1)
-                }.time
-            } ?: GregorianCalendar(2007, 0, 1).time
-            tradeCalRequest.invoke(TradeCalRequest.InParams(exchange = exchange, startDate = startDate, endDate = Date(), isOpen = 1), TradeCalRequest.OutParams::class.java).map { TradingDate(it.exchange, it.calDate) }
+            val startDate = lastDate?.plusDays(1) ?: LocalDate.of(2007, 1, 1)
+            val endDate = LocalDate.now().let { if (todayIncluded) it else it.minusDays(1) }
+            tradeCalRequest.invoke(TradeCalRequest.InParams(exchange = exchange, startDate = startDate, endDate = endDate, isOpen = 1), TradeCalRequest.OutParams::class.java).map { TradingDate(it.exchange, it.calDate) }
         }
-        tradingDateService.saveAll(unprocessedTradingDateList("SSE") + unprocessedTradingDateList("SZSE"))
+        val todayIncluded = LocalDateTime.now().hour >= 16
+        tradingDateService.saveAll(unprocessedTradingDateList("SSE", todayIncluded) + unprocessedTradingDateList("SZSE", todayIncluded))
         controllerService.complete("TradingDate")
         logger.info("Finish Synchronizing TradingDate")
     }

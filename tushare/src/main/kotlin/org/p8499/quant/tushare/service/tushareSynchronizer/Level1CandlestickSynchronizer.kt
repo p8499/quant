@@ -13,7 +13,7 @@ import org.p8499.quant.tushare.service.tushareRequest.DailyRequest
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import java.util.*
+import java.time.LocalDate
 
 @Service
 class Level1CandlestickSynchronizer {
@@ -37,12 +37,7 @@ class Level1CandlestickSynchronizer {
     fun invoke() {
         logger.info("Start Synchronizing Level1Candlestick")
         val level1CandlestickIterable: (String) -> Iterable<Level1Candlestick> = { tsCode ->
-            val datesCollection = tradingDateService.unprocessedForLevel1Candlestick(tsCode).mapNotNull(TradingDate::date).groupBy {
-                Calendar.getInstance().run {
-                    time = it
-                    get(Calendar.YEAR)
-                }
-            }.values
+            val datesCollection = tradingDateService.unprocessedForLevel1Candlestick(tsCode).mapNotNull(TradingDate::date).groupBy(LocalDate::getYear).values
             Flowable.fromIterable(datesCollection)
                     .flatMap { Flowable.fromArray(*dailyRequest.invoke(DailyRequest.InParams(tsCode = tsCode, startDate = it.minOrNull(), endDate = it.maxOrNull()), DailyRequest.OutParams::class.java)) }
                     .map { Level1Candlestick(tsCode, it.tradeDate, it.open, it.close, it.high, it.low, it.vol?.times(100), it.amount?.times(1000)) }

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface Level1AdjFactorRepository :
-        JpaRepository<Level1AdjFactor, Long>,
+        JpaRepository<Level1AdjFactor, Level1AdjFactor.Level1AdjFactorId>,
         JpaSpecificationExecutor<Level1AdjFactor>,
-        PagingAndSortingRepository<Level1AdjFactor, Long>,
+        PagingAndSortingRepository<Level1AdjFactor, Level1AdjFactor.Level1AdjFactorId>,
         Level1AdjFactorDao

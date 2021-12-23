@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface BalanceSheetRepository :
-        JpaRepository<BalanceSheet, Long>,
+        JpaRepository<BalanceSheet, BalanceSheet.BalanceSheetId>,
         JpaSpecificationExecutor<BalanceSheet>,
-        PagingAndSortingRepository<BalanceSheet, Long>,
+        PagingAndSortingRepository<BalanceSheet, BalanceSheet.BalanceSheetId>,
         BalanceSheetDao

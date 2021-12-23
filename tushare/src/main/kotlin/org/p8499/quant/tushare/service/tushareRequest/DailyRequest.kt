@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.retry.annotation.Backoff
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 import java.util.*
 
 @Service
@@ -37,18 +38,18 @@ class DailyRequest : TushareRequest<DailyRequest.InParams, DailyRequest.OutParam
 
             @get:JsonInclude(JsonInclude.Include.NON_NULL)
             @get:JsonProperty("trade_date")
-            @get:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
-            var tradeDate: Date? = null,
+            @get:JsonFormat(pattern = "yyyyMMdd")
+            var tradeDate: LocalDate? = null,
 
             @get:JsonInclude(JsonInclude.Include.NON_NULL)
             @get:JsonProperty("start_date")
-            @get:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
-            var startDate: Date? = null,
+            @get:JsonFormat(pattern = "yyyyMMdd")
+            var startDate: LocalDate? = null,
 
             @get:JsonInclude(JsonInclude.Include.NON_NULL)
             @get:JsonProperty("end_date")
-            @get:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
-            var endDate: Date? = null)
+            @get:JsonFormat(pattern = "yyyyMMdd")
+            var endDate: LocalDate? = null)
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     class OutParams(
@@ -56,8 +57,8 @@ class DailyRequest : TushareRequest<DailyRequest.InParams, DailyRequest.OutParam
             var tsCode: String? = null,
 
             @set:JsonProperty("trade_date")
-            @set:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
-            var tradeDate: Date? = null,
+            @set:JsonFormat(pattern = "yyyyMMdd")
+            var tradeDate: LocalDate? = null,
 
             var open: Double? = null,
 

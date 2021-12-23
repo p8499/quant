@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface Level2Repository :
-        JpaRepository<Level2, Long>,
+        JpaRepository<Level2, Level2.Level2Id>,
         JpaSpecificationExecutor<Level2>,
-        PagingAndSortingRepository<Level2, Long>,
+        PagingAndSortingRepository<Level2, Level2.Level2Id>,
         Level2Dao

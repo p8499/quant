@@ -13,7 +13,7 @@ import org.p8499.quant.tushare.service.tushareRequest.DailyBasicRequest
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import java.util.*
+import java.time.LocalDate
 import java.util.concurrent.TimeUnit
 
 @Service
@@ -38,12 +38,7 @@ class Level1BasicSynchronizer {
     fun invoke() {
         logger.info("Start Synchronizing Level1Basic")
         val level1BasicIterable: (String) -> Iterable<Level1Basic> = { tsCode ->
-            val datesCollection = tradingDateService.unprocessedForLevel1Basic(tsCode).mapNotNull(TradingDate::date).groupBy {
-                Calendar.getInstance().run {
-                    time = it
-                    get(Calendar.YEAR)
-                }
-            }.values
+            val datesCollection = tradingDateService.unprocessedForLevel1Basic(tsCode).mapNotNull(TradingDate::date).groupBy(LocalDate::getYear).values
             Flowable.fromIterable(datesCollection).zipWith(Flowable.interval(150, TimeUnit.MILLISECONDS)) { dateList, _ -> dateList }
                     .flatMap { Flowable.fromArray(*dailyBasicRequest.invoke(DailyBasicRequest.InParams(tsCode = tsCode, startDate = it.minOrNull(), endDate = it.maxOrNull()), DailyBasicRequest.OutParams::class.java)) }
                     .map { Level1Basic(tsCode, it.tradeDate, it.totalShare?.times(10000), it.floatShare?.times(10000)) }

@@ -15,7 +15,7 @@ import org.p8499.quant.tushare.service.tushareRequest.IndexWeightRequest
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import java.util.*
+import java.time.LocalDate
 import java.util.concurrent.TimeUnit
 
 @Service
@@ -51,12 +51,12 @@ class GroupStockSynchronizer {
 
     fun invoke() {
         logger.info("Start Synchronizing GroupStock")
-        val groupStockListOfIndex: (Date) -> List<GroupStock> = { tradeDate ->
+        val groupStockListOfIndex: (LocalDate) -> List<GroupStock> = { tradeDate ->
             val groupStockList = indexWeightRequest.invoke(IndexWeightRequest.InParams(tradeDate = tradeDate), IndexWeightRequest.OutParams::class.java).map { GroupStock(it.indexCode, it.conCode, it.weight) }
             val stockIdList = stockService.findAll().map(Stock::id)
             groupStockList.filter { stockIdList.contains(it.stockId) }
         }
-        val flowShareMap: (Date) -> Map<String, Double> = { tradeDate ->
+        val flowShareMap: (LocalDate) -> Map<String, Double> = { tradeDate ->
             val stockIdFlowable = Flowable.fromIterable(stockService.findAll()).mapNotNull(Stock::id)
             val flowShareFlowable = stockIdFlowable.parallel(3).runOn(Schedulers.io()).mapNotNull { level1BasicService[it, tradeDate]?.flowShare }.sequential()
             Flowable.zip(stockIdFlowable, flowShareFlowable) { stockId, flowShare -> Pair(stockId, flowShare) }

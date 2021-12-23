@@ -17,20 +17,22 @@ class PersistentService {
     protected lateinit var stockIndexDailyService: StockIndexDailyService
 
     @Autowired
+    protected lateinit var stockMessageDailyService: StockMessageDailyService
+
+    @Autowired
     protected lateinit var groupService: GroupService
 
     @Autowired
     protected lateinit var groupIndexDailyService: GroupIndexDailyService
 
     @Autowired
+    protected lateinit var groupMessageDailyService: GroupMessageDailyService
+
+    @Autowired
     protected lateinit var groupStockService: GroupStockService
 
     @Autowired
     protected lateinit var controllerService: ControllerService
-
-    fun findStockByGroup(region: String, groupId: String) = stockService.findByGroup(region, groupId)
-
-    fun findStockIndexDaily(region: String, id: String, kpi: String) = stockIndexDailyService.find(region, id, kpi)
 
     @Transactional
     fun saveStock(region: String, id: String,
@@ -45,10 +47,15 @@ class PersistentService {
                   totalShareDailyIterable: Iterable<StockIndexDaily>,
                   flowValueDailyIterable: Iterable<StockIndexDaily>,
                   totalValueDailyIterable: Iterable<StockIndexDaily>,
+                  assetDailyIterable: Iterable<StockIndexDaily>,
+                  profitDailyIterable: Iterable<StockIndexDaily>,
+                  revenueDailyIterable: Iterable<StockIndexDaily>,
+                  cashflowDailyIterable: Iterable<StockIndexDaily>,
                   pbDailyIterable: Iterable<StockIndexDaily>,
                   peDailyIterable: Iterable<StockIndexDaily>,
                   psDailyIterable: Iterable<StockIndexDaily>,
-                  pcfDailyIterable: Iterable<StockIndexDaily>) {
+                  pcfDailyIterable: Iterable<StockIndexDaily>,
+                  messageDailyIterable: Iterable<StockMessageDaily>) {
         logger.info("${stock.id} Saving Start")
         val time0 = System.currentTimeMillis()
         stockService.delete(region, id)
@@ -64,10 +71,15 @@ class PersistentService {
         stockIndexDailyService.saveAll(totalShareDailyIterable)
         stockIndexDailyService.saveAll(flowValueDailyIterable)
         stockIndexDailyService.saveAll(totalValueDailyIterable)
+        stockIndexDailyService.saveAll(assetDailyIterable)
+        stockIndexDailyService.saveAll(profitDailyIterable)
+        stockIndexDailyService.saveAll(revenueDailyIterable)
+        stockIndexDailyService.saveAll(cashflowDailyIterable)
         stockIndexDailyService.saveAll(pbDailyIterable)
         stockIndexDailyService.saveAll(peDailyIterable)
         stockIndexDailyService.saveAll(psDailyIterable)
         stockIndexDailyService.saveAll(pcfDailyIterable)
+        stockMessageDailyService.saveAll(messageDailyIterable)
         val time1 = System.currentTimeMillis()
         logger.info("${stock.id} Saving Finish, time = ${time1 - time0} milliseconds")
     }
@@ -89,7 +101,10 @@ class PersistentService {
                   pbDailyIterable: Iterable<GroupIndexDaily>,
                   peDailyIterable: Iterable<GroupIndexDaily>,
                   psDailyIterable: Iterable<GroupIndexDaily>,
-                  pcfDailyIterable: Iterable<GroupIndexDaily>) {
+                  pcfDailyIterable: Iterable<GroupIndexDaily>,
+                  messageDailyIterable: Iterable<GroupMessageDaily>) {
+        logger.info("${group.id} Saving Start")
+        val time0 = System.currentTimeMillis()
         groupService.delete(region, id)
         groupStockService.deleteByGroup(region, id)
         groupIndexDailyService.delete(region, id)
@@ -109,6 +124,9 @@ class PersistentService {
         groupIndexDailyService.saveAll(peDailyIterable)
         groupIndexDailyService.saveAll(psDailyIterable)
         groupIndexDailyService.saveAll(pcfDailyIterable)
+        groupMessageDailyService.saveAll(messageDailyIterable)
+        val time1 = System.currentTimeMillis()
+        logger.info("${group.id} Saving Finish, time = ${time1 - time0} milliseconds")
     }
 
     fun complete(region: String) {

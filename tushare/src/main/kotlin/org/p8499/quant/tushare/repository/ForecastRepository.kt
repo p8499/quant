@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface ForecastRepository :
-        JpaRepository<Forecast, Long>,
+        JpaRepository<Forecast, Forecast.ForecastId>,
         JpaSpecificationExecutor<Forecast>,
-        PagingAndSortingRepository<Forecast, Long>,
+        PagingAndSortingRepository<Forecast, Forecast.ForecastId>,
         ForecastDao

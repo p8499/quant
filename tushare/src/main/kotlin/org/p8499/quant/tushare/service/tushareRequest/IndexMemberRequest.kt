@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.retry.annotation.Backoff
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 import java.util.*
 
 @Service
@@ -59,12 +60,12 @@ class IndexMemberRequest : TushareRequest<IndexMemberRequest.InParams, IndexMemb
             var conName: String? = null,
 
             @set:JsonProperty("in_date")
-            @set:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
-            var inDate: Date? = null,
+            @set:JsonFormat(pattern = "yyyyMMdd")
+            var inDate: LocalDate? = null,
 
             @set:JsonProperty("out_date")
-            @set:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
-            var outDate: Date? = null,
+            @set:JsonFormat(pattern = "yyyyMMdd")
+            var outDate: LocalDate? = null,
 
             @set:JsonProperty("is_new")
             var isNew: Char? = null)

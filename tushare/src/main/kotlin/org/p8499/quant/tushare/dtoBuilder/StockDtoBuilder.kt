@@ -7,12 +7,13 @@ import org.p8499.quant.tushare.dto.StockDto
 import org.p8499.quant.tushare.entity.*
 import org.p8499.quant.tushare.service.*
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 import java.util.*
 
 class StockDtoBuilder(
         val stockId: String,
-        from: Date,
-        to: Date,
+        from: LocalDate,
+        to: LocalDate,
         val exchangeService: ExchangeService,
         val tradingDateService: TradingDateService,
         val stockService: StockService,
@@ -29,9 +30,9 @@ class StockDtoBuilder(
         val forecastService: ForecastService) {
     protected val logger by lazy { LoggerFactory.getLogger(TushareApplication::class.java) }
 
-    private val name by lazy { stockService[stockId]?.name ?: "" }
+    val name by lazy { stockService[stockId]?.name ?: "" }
 
-    private val message by lazy {
+    /*val message by lazy {
         val forecast = forecastService.last(stockId)
         val required = forecast?.publish?.let {
             val balanceSheetForecast = balanceSheetService.last(stockId)?.publish
@@ -44,17 +45,17 @@ class StockDtoBuilder(
             expressForecast == null || expressForecast < it
         } ?: false
         forecast.takeIf { required }?.let { "${it.subject}\n${it.content}" } ?: ""
-    }
+    }*/
 
-    private fun <T> mapOf(items: Iterable<T>, keyTransform: (T) -> Date?, valueTransform: (T) -> Double?): Map<Date, Double?> {
-        val entryMap = mutableMapOf<Date, Double?>()
+    private fun <T, V> mapOf(items: Iterable<T>, keyTransform: (T) -> LocalDate?, valueTransform: (T) -> V?): Map<LocalDate, V?> {
+        val entryMap = mutableMapOf<LocalDate, V?>()
         for (item in items)
             keyTransform(item)?.let { entryMap[it] = valueTransform(item) }
         return entryMap
     }
 
-    private fun flatten(entryMap: Map<Date, Double?>): Map<Date, Double?> {
-        val map = TreeMap<Date, Double?>()
+    private fun <V> flatten(entryMap: Map<LocalDate, V?>): Map<LocalDate, V?> {
+        val map = TreeMap<LocalDate, V?>()
         for (date in dateList)
             map[date] = null
         for (entry in entryMap)
@@ -69,7 +70,7 @@ class StockDtoBuilder(
         return map
     }
 
-    private fun <T> flatMapOf(items: Iterable<T>, keyTransform: (T) -> Date?, valueTransform: (T) -> Double?): Map<Date, Double?> = flatten(mapOf(items, keyTransform, valueTransform))
+    private fun <T, V> flatMapOf(items: Iterable<T>, keyTransform: (T) -> LocalDate?, valueTransform: (T) -> V?): Map<LocalDate, V?> = flatten(mapOf(items, keyTransform, valueTransform))
 
     val dateList by lazy { tradingDateService.findByStockIdBetween(stockId, from, to).mapNotNull(TradingDate::date) }
 
@@ -95,17 +96,21 @@ class StockDtoBuilder(
 
     val volumeList by lazy { flatMapOf(level1CandlestickService.findByStockIdBetween(stockId, from, to), Level1Candlestick::date, Level1Candlestick::volume).values.toList() }
 
-    val volumePreList by lazy { volumeList.mapIndexed { index, d -> let(d, factorList[index], maxFactor) { a, b, c -> (a * b / c).finiteOrNull() } } }
+    val volumePreList by lazy { volumeList.mapIndexed { index, d -> let(d, factorList[index], maxFactor) { a, b, c -> (a / b * c).finiteOrNull() } } }
 
     val amountList by lazy { flatMapOf(level1CandlestickService.findByStockIdBetween(stockId, from, to), Level1Candlestick::date, Level1Candlestick::amount).values.toList() }
 
     val flowShareList by lazy { flatMapOf(level1BasicService.findByStockIdBetween(stockId, from, to), Level1Basic::date, Level1Basic::flowShare).values.toList() }
 
+    val flowSharePreList by lazy { flowShareList.mapIndexed { index, d -> let(d, factorList[index], maxFactor) { a, b, c -> (a / b * c).finiteOrNull() } } }
+
     val totalShareList by lazy { flatMapOf(level1BasicService.findByStockIdBetween(stockId, from, to), Level1Basic::date, Level1Basic::totalShare).values.toList() }
 
-    val flowValueList by lazy { flowShareList.mapIndexed { index, d -> let(d, closeList[index]) { a, b -> a * b } } }
+    val totalSharePreList by lazy { totalShareList.mapIndexed { index, d -> let(d, factorList[index], maxFactor) { a, b, c -> (a / b * c).finiteOrNull() } } }
 
-    val totalValueList by lazy { totalShareList.mapIndexed { index, d -> let(d, closeList[index]) { a, b -> a * b } } }
+    val flowValueList by lazy { flowSharePreList.mapIndexed { index, d -> let(d, closePreList[index]) { a, b -> a * b } } }
+
+    val totalValueList by lazy { totalSharePreList.mapIndexed { index, d -> let(d, closePreList[index]) { a, b -> a * b } } }
 
     private val balanceSheetList by lazy { balanceSheetService.findByStockIdBetween(stockId, from, to) }
 
@@ -115,24 +120,24 @@ class StockDtoBuilder(
 
     private val expressList by lazy { expressService.findByStockIdBetween(stockId, from, to) }
 
-    private fun <T> multiplierOf(items: Iterable<T>, dateTransform: (T) -> Date?, yearTransform: (T) -> Int?, periodTransform: (T) -> Int?, valueTransform: (T) -> Double?, date: Date, period: Int): Double? {
+    private fun <T> multiplierOf(items: Iterable<T>, dateTransform: (T) -> LocalDate?, yearTransform: (T) -> Int?, periodTransform: (T) -> Int?, valueTransform: (T) -> Double?, date: LocalDate, period: Int): Double? {
         val periodItemList = items.filter { item -> dateTransform(item)?.let { it < date } ?: false && periodTransform(item) == period }
         val yearItemList = periodItemList.map { periodItem -> items.find { yearItem -> yearTransform(yearItem) == yearTransform(periodItem) && periodTransform(yearItem) == 4 } }
-        val multiplierList = periodItemList.mapIndexedNotNull { index, periodItem -> valueTransform(periodItem)?.let { yearItemList[index]?.let(valueTransform)?.div(it) } }
+        val multiplierList = periodItemList.mapIndexedNotNull { index, periodItem -> valueTransform(periodItem)?.let { yearItemList[index]?.let(valueTransform)?.div(it)?.finiteOrNull() } }
         return multiplierList.takeIf(List<*>::isNotEmpty)?.sorted()?.let { it[it.size - 1] }
     }
 
-    private fun <T> multipliedMapOf(items: Iterable<T>, dateTransform: (T) -> Date?, periodTransform: (T) -> Int?, valueTransform: (T) -> Double?, multiplier: (Date, Int) -> Double?): Map<Date, Double?> = mapOf(items.mapNotNull {
+    private fun <T> multipliedMapOf(items: Iterable<T>, dateTransform: (T) -> LocalDate?, periodTransform: (T) -> Int?, valueTransform: (T) -> Double?, multiplier: (LocalDate, Int) -> Double?): Map<LocalDate, Double?> = mapOf(items.mapNotNull {
         let(dateTransform(it), periodTransform(it), valueTransform(it)) { a, b, c -> a to multiplier(a, b)?.times(c) }
-    }, Pair<Date, Double?>::first, Pair<Date, Double?>::second)
+    }, Pair<LocalDate, Double?>::first, Pair<LocalDate, Double?>::second)
 
-    private fun <T> multipliedFlatMapOf(items: Iterable<T>, dateTransform: (T) -> Date?, periodTransform: (T) -> Int?, valueTransform: (T) -> Double?, multiplier: (Date, Int) -> Double?): Map<Date, Double?> = flatten(multipliedMapOf(items, dateTransform, periodTransform, valueTransform, multiplier))
+    private fun <T> multipliedFlatMapOf(items: Iterable<T>, dateTransform: (T) -> LocalDate?, periodTransform: (T) -> Int?, valueTransform: (T) -> Double?, multiplier: (LocalDate, Int) -> Double?): Map<LocalDate, Double?> = flatten(multipliedMapOf(items, dateTransform, periodTransform, valueTransform, multiplier))
 
-    private fun netProfitMultiplier(publish: Date, period: Int): Double? = multiplierOf(incomeList, Income::publish, Income::year, Income::period, Income::nIncomeAttrP, publish, period)
+    private fun netProfitMultiplier(publish: LocalDate, period: Int): Double? = multiplierOf(incomeList, Income::publish, Income::year, Income::period, Income::nIncomeAttrP, publish, period)
 
-    private fun revenueMultiplier(publish: Date, period: Int): Double? = multiplierOf(incomeList, Income::publish, Income::year, Income::period, Income::revenue, publish, period)
+    private fun revenueMultiplier(publish: LocalDate, period: Int): Double? = multiplierOf(incomeList, Income::publish, Income::year, Income::period, Income::revenue, publish, period)
 
-    private fun opCashflowMultiplier(publish: Date, period: Int): Double? = multiplierOf(cashflowList, Cashflow::publish, Cashflow::year, Cashflow::period, Cashflow::nCashflowAct, publish, period)
+    private fun opCashflowMultiplier(publish: LocalDate, period: Int): Double? = multiplierOf(cashflowList, Cashflow::publish, Cashflow::year, Cashflow::period, Cashflow::nCashflowAct, publish, period)
 
     val netAssetList by lazy {
         flatten(mapOf(balanceSheetList, BalanceSheet::publish, BalanceSheet::totalHldrEqyExcMinInt)
@@ -148,19 +153,13 @@ class StockDtoBuilder(
 
     val opCashflowList by lazy { multipliedFlatMapOf(cashflowList, Cashflow::publish, Cashflow::period, Cashflow::nCashflowAct, this::opCashflowMultiplier).values.toList() }
 
-    val netAssetPerStockList by lazy {
-        netAssetList.mapIndexed { index, d ->
-            let(d, totalShareList[index]) { a, b ->
-                (a / b).finiteOrNull()
-            }
-        }
-    }
+    val netAssetPerStockList by lazy { netAssetList.mapIndexed { index, d -> let(d, totalSharePreList[index]) { a, b -> (a / b).finiteOrNull() } } }
 
-    val netProfitPerStockList by lazy { netProfitList.mapIndexed { index, d -> let(d, totalShareList[index]) { a, b -> (a / b).finiteOrNull() } } }
+    val netProfitPerStockList by lazy { netProfitList.mapIndexed { index, d -> let(d, totalSharePreList[index]) { a, b -> (a / b).finiteOrNull() } } }
 
-    val revenuePerStockList by lazy { revenueList.mapIndexed { index, d -> let(d, totalShareList[index]) { a, b -> (a / b).finiteOrNull() } } }
+    val revenuePerStockList by lazy { revenueList.mapIndexed { index, d -> let(d, totalSharePreList[index]) { a, b -> (a / b).finiteOrNull() } } }
 
-    val opCashflowPerStockList by lazy { opCashflowList.mapIndexed { index, d -> let(d, totalShareList[index]) { a, b -> (a / b).finiteOrNull() } } }
+    val opCashflowPerStockList by lazy { opCashflowList.mapIndexed { index, d -> let(d, totalSharePreList[index]) { a, b -> (a / b).finiteOrNull() } } }
 
     val pbList by lazy { closePreList.mapIndexed { index, d -> let(d, netAssetPerStockList[index]) { a, b -> (a / b).finiteOrNull() } } }
 
@@ -170,8 +169,15 @@ class StockDtoBuilder(
 
     val pcfList by lazy { closePreList.mapIndexed { index, d -> let(d, opCashflowPerStockList[index]) { a, b -> (a / b).finiteOrNull() } } }
 
+    val messageList by lazy {
+        val forecasts = forecastService.findByStockId(stockId)
+        val blankForecasts = forecasts.mapNotNull { let(it.stockId, it.year, it.period) { a, b, c -> forecastService.expires(a, b, c) } }
+                .map { Forecast(stockId, 0, 0, it, "", "") }
+        flatMapOf(forecasts + blankForecasts, Forecast::publish, Forecast::subject).values.toList()
+    }
+
     fun build(): StockDto {
         logger.info("Constructing $stockId DTO")
-        return StockDto("CN", stockId, name, message, dateList, openPreList, closePreList, highPreList, lowPreList, volumePreList, amountList, flowShareList, totalShareList, flowValueList, totalValueList, pbList, peList, psList, pcfList)
+        return StockDto("CN", stockId, name, dateList, openPreList, closePreList, highPreList, lowPreList, volumePreList, amountList, flowSharePreList, totalSharePreList, flowValueList, totalValueList, netAssetList, netProfitList, revenueList, opCashflowList, pbList, peList, psList, pcfList, messageList)
     }
 }

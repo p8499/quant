@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.retry.annotation.Backoff
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 import java.util.*
 
 @Service
@@ -88,12 +89,12 @@ class StockBasicRequest : TushareRequest<StockBasicRequest.InParams, StockBasicR
             var listStatus: Char? = null,
 
             @set:JsonProperty("list_date")
-            @set:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
-            var listDate: Date? = null,
+            @set:JsonFormat(pattern = "yyyyMMdd")
+            var listDate: LocalDate? = null,
 
             @set:JsonProperty("delist_date")
-            @set:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
-            var delistDate: Date? = null,
+            @set:JsonFormat(pattern = "yyyyMMdd")
+            var delistDate: LocalDate? = null,
 
             @set:JsonProperty("is_hs")
             var isHs: Char? = null)

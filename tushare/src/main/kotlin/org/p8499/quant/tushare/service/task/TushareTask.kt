@@ -4,17 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.reactivex.Flowable
 import io.reactivex.schedulers.Schedulers
 import org.p8499.quant.tushare.TushareApplication
-import org.p8499.quant.tushare.dto.StockDto
 import org.p8499.quant.tushare.dtoBuilder.DtoBuilderFactory
-import org.p8499.quant.tushare.dtoBuilder.GroupDtoBuilder
 import org.p8499.quant.tushare.dtoBuilder.StockDtoBuilder
-import org.p8499.quant.tushare.entity.Group
-import org.p8499.quant.tushare.entity.GroupStock
 import org.p8499.quant.tushare.entity.Stock
 import org.p8499.quant.tushare.feignClient.PersistentFeignClient
 import org.p8499.quant.tushare.service.GroupService
 import org.p8499.quant.tushare.service.GroupStockService
 import org.p8499.quant.tushare.service.StockService
+import org.p8499.quant.tushare.service.TradingDateService
 import org.p8499.quant.tushare.service.tushareSynchronizer.*
 import org.slf4j.LoggerFactory
 import org.springframework.amqp.core.AmqpTemplate
@@ -22,9 +19,9 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
+import java.io.File
+import java.nio.file.Files
 import java.time.LocalDate
-import java.time.ZoneId
-import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors
 
@@ -76,6 +73,9 @@ class TushareTask {
     protected lateinit var forecastSynchronizer: ForecastSynchronizer
 
     @Autowired
+    protected lateinit var tradingDateService: TradingDateService
+
+    @Autowired
     protected lateinit var stockService: StockService
 
     @Autowired
@@ -113,11 +113,8 @@ class TushareTask {
      *                                           │ express           │
      *                                           └ forecast          ┘
      */
-    @Scheduled(cron = "00 00 18 * * MON-SAT")
+    @Scheduled(cron = "00 00 18 * * SUN-SAT")
     fun syncAndSend() {
-        val startDate = GregorianCalendar(2015, 0, 1).time
-        val today = Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant())
-
         /**
          * Download from tushare.pro and save the data into database
          */
@@ -143,32 +140,30 @@ class TushareTask {
         /**
          * Calculate from database and call analysis persistent function
          */
-        stringRedisTemplate.keys("*").forEach { stringRedisTemplate.delete(it) }
-        stockService.findAll().mapNotNull(Stock::id)
-                .parallelStream()
-                .map { dtoBuilderFactory.newStockBuilder(it, startDate, today) }
-                .map(StockDtoBuilder::build)
-                .forEach {
-                    stringRedisTemplate.opsForValue().set(it.id, objectMapper.writeValueAsString(it))
-                    persistentFeignClient.saveStock(it)
-                }
-
-        val groupIdFlowable = Flowable.fromIterable(groupService.findAll().mapNotNull(Group::id))
-        val stockIdListFlowable = groupIdFlowable.map { groupStockService.findByGroupId(it).mapNotNull(GroupStock::stockId) }
-        Flowable.zip(groupIdFlowable, stockIdListFlowable) { groupId, stockIdList -> groupId to stockIdList }
-                .filter { it.second.isNotEmpty() }.doOnNext { print("Emitting ${it.first}") }
-                .parallel(3).runOn(Schedulers.io()).map { pair ->
-                    pair.second
-                            .map(stringRedisTemplate.opsForValue()::get)
-                            .map { json -> objectMapper.readValue(json, StockDto::class.java) }
-                            .let { dtoBuilderFactory.newGroupBuilder(pair.first, it) }
-                            .let(GroupDtoBuilder::build)
-                            .run(persistentFeignClient::saveGroup)
-                }.sequential().subscribe()
-
-        /**
-         * Notify ampq
-         */
-//        amqpTemplate.convertAndSend("quant", "CN")
+        val startDate = LocalDate.of(2015, 1, 4)
+        val endDate = tradingDateService.last("SSE")?.date
+        if (endDate != null) {
+            val directory = Files.createTempDirectory(null).toFile()
+            logger.info("Directory: ${directory.absolutePath}")
+            Flowable.fromIterable(stockService.findAll().mapNotNull(Stock::id))
+                    .parallel(3).runOn(Schedulers.io())
+                    .map { dtoBuilderFactory.newStockBuilder(it, startDate, endDate) }
+                    .map(StockDtoBuilder::build)
+                    .doOnNext { File(directory, it.id).writeText(objectMapper.writeValueAsString(it)) }
+                    .doOnNext(persistentFeignClient::saveStock)
+                    .sequential().subscribe()
+//            val groupIdFlowable = Flowable.fromIterable(groupService.findAll().mapNotNull(Group::id))
+//            val stockIdListFlowable = groupIdFlowable.map { groupStockService.findByGroupId(it).mapNotNull(GroupStock::stockId) }
+//            Flowable.zip(groupIdFlowable, stockIdListFlowable) { groupId, stockIdList -> groupId to stockIdList }
+//                    .filter { it.second.isNotEmpty() }
+//                    .parallel(3).runOn(Schedulers.io()).map { pair ->
+//                        pair.second
+//                                .map { File(directory, it).readText() }
+//                                .map { json -> objectMapper.readValue(json, StockDto::class.java) }
+//                                .let { dtoBuilderFactory.newGroupBuilder(pair.first, it) }
+//                                .let(GroupDtoBuilder::build)
+//                                .run(persistentFeignClient::saveGroup)
+//                    }.sequential().subscribe()
+        }
     }
 }

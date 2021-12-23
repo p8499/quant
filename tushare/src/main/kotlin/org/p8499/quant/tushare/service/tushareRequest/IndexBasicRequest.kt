@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.retry.annotation.Backoff
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 import java.util.*
 
 @Service
@@ -66,15 +67,15 @@ class IndexBasicRequest : TushareRequest<IndexBasicRequest.InParams, IndexBasicR
             var category: String? = null,
 
             @set:JsonProperty("base_date")
-            @set:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
-            var baseDate: Date? = null,
+            @set:JsonFormat(pattern = "yyyyMMdd")
+            var baseDate: LocalDate? = null,
 
             @set:JsonProperty("base_point")
             var basePoint: Double? = null,
 
             @set:JsonProperty("list_date")
-            @set:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
-            var listDate: Date? = null,
+            @set:JsonFormat(pattern = "yyyyMMdd")
+            var listDate: LocalDate? = null,
 
             @set:JsonProperty("weight_rule")
             var weightRule: String? = null,
@@ -82,6 +83,6 @@ class IndexBasicRequest : TushareRequest<IndexBasicRequest.InParams, IndexBasicR
             var desc: String? = null,
 
             @set:JsonProperty("exp_date")
-            @set:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
-            var expDate: Date? = null)
+            @set:JsonFormat(pattern = "yyyyMMdd")
+            var expDate: LocalDate? = null)
 }

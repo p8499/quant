@@ -10,6 +10,8 @@ class StockService {
     @Autowired
     protected lateinit var stockRepository: StockRepository
 
+    fun find(region: String) = stockRepository.find(region)
+
     fun findByGroup(region: String, groupId: String) = stockRepository.findByGroup(region, groupId)
 
     fun save(entity: Stock): Stock = stockRepository.save(entity)

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface CashflowRepository :
-        JpaRepository<Cashflow, Long>,
+        JpaRepository<Cashflow, Cashflow.CashflowId>,
         JpaSpecificationExecutor<Cashflow>,
-        PagingAndSortingRepository<Cashflow, Long>,
+        PagingAndSortingRepository<Cashflow, Cashflow.CashflowId>,
         CashflowDao

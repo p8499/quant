@@ -12,5 +12,9 @@ class ForecastService {
 
     fun last(stockId: String) = forecastRepository.last(stockId)
 
+    fun findByStockId(stockId: String) = forecastRepository.findByStockId(stockId)
+
+    fun expires(stockId: String, year: Int, period: Int) = forecastRepository.expires(stockId, year, period)
+
     fun saveAll(entityIterable: Iterable<Forecast>): List<Forecast> = forecastRepository.saveAllAndFlush(entityIterable)
 }

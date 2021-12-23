@@ -10,6 +10,8 @@ class GroupService {
     @Autowired
     protected lateinit var groupRepository: GroupRepository
 
+    fun find(region: String) = groupRepository.find(region)
+
     fun save(entity: Group): Group = groupRepository.save(entity)
 
     fun delete(region: String, id: String): Int = groupRepository.delete(region, id)

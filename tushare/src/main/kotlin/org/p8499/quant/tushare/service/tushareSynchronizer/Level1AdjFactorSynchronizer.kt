@@ -13,7 +13,7 @@ import org.p8499.quant.tushare.service.tushareRequest.AdjFactorRequest
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import java.util.*
+import java.time.LocalDate
 
 @Service
 class Level1AdjFactorSynchronizer {
@@ -37,12 +37,7 @@ class Level1AdjFactorSynchronizer {
     fun invoke() {
         logger.info("Start Synchronizing Level1AdjFactor")
         val level1AdjFactorIterable: (String) -> Iterable<Level1AdjFactor> = { tsCode ->
-            val datesCollection = tradingDateService.unprocessedForLevel1AdjFactor(tsCode).mapNotNull(TradingDate::date).groupBy {
-                Calendar.getInstance().run {
-                    time = it
-                    get(Calendar.YEAR)
-                }
-            }.values
+            val datesCollection = tradingDateService.unprocessedForLevel1AdjFactor(tsCode).mapNotNull(TradingDate::date).groupBy(LocalDate::getYear).values
             Flowable.fromIterable(datesCollection)
                     .flatMap { Flowable.fromArray(*adjFactorRequest.invoke(AdjFactorRequest.InParams(tsCode = tsCode, startDate = it.minOrNull(), endDate = it.maxOrNull()), AdjFactorRequest.OutParams::class.java)) }
                     .map { Level1AdjFactor(tsCode, it.tradeDate, it.adjFactor) }

@@ -1,29 +1,33 @@
 package org.p8499.quant.analysis.entity
 
 import java.io.Serializable
+import java.util.*
 import javax.persistence.*
 
 @Entity
 @Table(name = "GS")
 @IdClass(GroupStock.GroupStockId::class)
-data class GroupStock(
+open class GroupStock(
         @Id
         @Column(nullable = false, length = 2)
-        var region: String? = null,
+        open var region: String? = null,
 
         @Id
         @Column(nullable = false, length = 32)
-        var groupId: String? = null,
+        open var groupId: String? = null,
 
         @Id
         @Column(nullable = false, length = 32)
-        var stockId: String? = null,
+        open var stockId: String? = null,
 
         @Id
         @Column(nullable = false, columnDefinition = "NUMBER(5, 4)", precision = 5, scale = 4)
-        var percent: Double? = null) {
-    data class GroupStockId(
-            var region: String? = null,
-            var groupId: String? = null,
-            var stockId: String? = null) : Serializable
+        open var percent: Double? = null) {
+    open class GroupStockId(
+            open var region: String? = null,
+            open var groupId: String? = null,
+            open var stockId: String? = null) : Serializable {
+        override fun hashCode(): Int = Objects.hash(region, groupId, stockId)
+        override fun equals(other: Any?): Boolean = other is GroupStockId && other.region == region && other.groupId == groupId && other.stockId == stockId
+    }
 }

@@ -1,27 +1,30 @@
 package org.p8499.quant.tushare.entity
 
-import java.util.*
-import javax.persistence.*
+import java.time.LocalDate
+import javax.persistence.Column
+import javax.persistence.Entity
+import javax.persistence.Id
+import javax.persistence.Table
 
 @Entity
-@Table(name = "F03", uniqueConstraints = [UniqueConstraint(columnNames = ["exchangeId", "code"])])
-data class Stock(
+@Table(name = "F03")
+open class Stock(
         @Id
         @Column(nullable = false, length = 16)
-        var id: String? = null,
+        open var id: String? = null,
 
         @Column(nullable = false, length = 4)
-        var exchangeId: String? = null,
+        open var exchangeId: String? = null,
 
         @Column(nullable = false, length = 6)
-        var code: String? = null,
+        open var code: String? = null,
 
         @Column(nullable = false, length = 16)
-        var name: String? = null,
+        open var name: String? = null,
 
         @Column(nullable = false)
-        @Temporal(TemporalType.DATE)
-        var listed: Date? = null,
+//        @Temporal(TemporalType.DATE)
+        open var listed: LocalDate? = null,
 
-        @Temporal(TemporalType.DATE)
-        var delisted: Date? = null)
+//        @Temporal(TemporalType.DATE)
+        open var delisted: LocalDate? = null)

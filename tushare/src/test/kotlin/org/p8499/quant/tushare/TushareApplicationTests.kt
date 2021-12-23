@@ -1,15 +1,9 @@
 package org.p8499.quant.tushare
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.reactivex.Flowable
 import org.junit.jupiter.api.Test
-import org.p8499.quant.tushare.dto.StockDto
 import org.p8499.quant.tushare.dtoBuilder.DtoBuilderFactory
-import org.p8499.quant.tushare.dtoBuilder.GroupDtoBuilder
 import org.p8499.quant.tushare.dtoBuilder.StockDtoBuilder
-import org.p8499.quant.tushare.entity.Group
-import org.p8499.quant.tushare.entity.GroupStock
-import org.p8499.quant.tushare.entity.Stock
 import org.p8499.quant.tushare.feignClient.PersistentFeignClient
 import org.p8499.quant.tushare.service.GroupService
 import org.p8499.quant.tushare.service.GroupStockService
@@ -21,10 +15,9 @@ import org.p8499.quant.tushare.service.tushareSynchronizer.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.redis.core.StringRedisTemplate
-import java.lang.ref.WeakReference
+import java.io.File
+import java.nio.file.Files
 import java.time.LocalDate
-import java.time.ZoneId
-import java.util.*
 
 @SpringBootTest
 class TushareApplicationTests {
@@ -126,13 +119,17 @@ class TushareApplicationTests {
 
     @Test
     fun contextLoads() {
-        val startDate = GregorianCalendar(2015, 0, 1).time
-        val today = Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant())
-       listOf("601318.SH")
+//        val x = dailyBasicRequest.invoke(DailyBasicRequest.InParams(tsCode = "603733.SH", startDate = GregorianCalendar(2020, 7, 5).time, endDate = GregorianCalendar(2020, 7, 5).time), DailyBasicRequest.OutParams::class.java)
+//        val y = dailyRequest.invoke(DailyRequest.InParams(tsCode = "603733.SH", startDate = GregorianCalendar(2020, 7, 5).time, endDate = GregorianCalendar(2020, 7, 5).time), DailyRequest.OutParams::class.java)
+//        print(x)
+        val startDate = LocalDate.of(2015, 1, 4)
+        val today = LocalDate.now()
+        listOf("000408.SZ")
                 .parallelStream()
                 .map { dtoBuilderFactory.newStockBuilder(it, startDate, today) }
                 .map(StockDtoBuilder::build)
                 .forEach {
+//                    stringRedisTemplate.opsForValue().set(it.id, objectMapper.writeValueAsString(it))
                     persistentFeignClient.saveStock(it)
                 }
 

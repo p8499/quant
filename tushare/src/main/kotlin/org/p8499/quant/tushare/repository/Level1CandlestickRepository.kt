@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface Level1CandlestickRepository :
-        JpaRepository<Level1Candlestick, Long>,
+        JpaRepository<Level1Candlestick, Level1Candlestick.Level1CandlestickId>,
         JpaSpecificationExecutor<Level1Candlestick>,
-        PagingAndSortingRepository<Level1Candlestick, Long>,
+        PagingAndSortingRepository<Level1Candlestick, Level1Candlestick.Level1CandlestickId>,
         Level1CandlestickDao

@@ -7,6 +7,7 @@ import org.p8499.quant.tushare.repository.TradingDateRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 import java.util.*
 
 @Service
@@ -17,11 +18,11 @@ class Level1AdjFactorService {
     @Autowired
     protected lateinit var tradingDateRepository: TradingDateRepository
 
-    operator fun get(stockId: String, date: Date) = level1AdjFactorRepository.get(stockId, date)
+    operator fun get(stockId: String, date: LocalDate) = level1AdjFactorRepository.get(stockId, date)
 
     fun findByStockId(stockId: String) = level1AdjFactorRepository.findByStockId(stockId)
 
-    fun findByStockIdBetween(stockId: String, from: Date, to: Date) = level1AdjFactorRepository.findByStockIdBetween(stockId, from, to)
+    fun findByStockIdBetween(stockId: String, from: LocalDate, to: LocalDate) = level1AdjFactorRepository.findByStockIdBetween(stockId, from, to)
 
     fun saveAll(entityIterable: Iterable<Level1AdjFactor>): List<Level1AdjFactor> = level1AdjFactorRepository.saveAllAndFlush(entityIterable)
 
@@ -29,6 +30,6 @@ class Level1AdjFactorService {
     fun fillVacancies(stockId: String) {
         val dateList = tradingDateRepository.vacantForLevel1AdjFactor(stockId).mapNotNull(TradingDate::date)
         for (date in dateList)
-            level1AdjFactorRepository.previous(stockId, date)?.copy(date = date)?.let(level1AdjFactorRepository::saveAndFlush)
+            level1AdjFactorRepository.previous(stockId, date)?.let { Level1AdjFactor(it.stockId, date, it.factor) }?.let(level1AdjFactorRepository::saveAndFlush)
     }
 }

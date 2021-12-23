@@ -39,5 +39,5 @@ eureka:
       defaultZone: http://localhost:9000/eureka/
 logging:
   level:
-    org.hibernate.SQL: error
-    org.p8499.quant.analysis.service.*: error
+    org.hibernate.SQL: off
+    org.p8499.quant.analysis.service.*: info

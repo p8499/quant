@@ -2,7 +2,7 @@ package org.p8499.quant.tushare.dto
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonProperty
-import java.util.*
+import java.time.LocalDate
 
 data class GroupDto(
         var region: String = "",
@@ -10,8 +10,6 @@ data class GroupDto(
         var id: String = "",
 
         var name: String = "",
-
-        var message: String = "",
 
         @get:JsonProperty("stock_id_list")
         @set:JsonProperty("stock_id_list")
@@ -22,7 +20,8 @@ data class GroupDto(
         var percentList: List<Double> = listOf(),
 
         @get:JsonFormat(pattern = "yyyyMMdd")
-        var date: List<Date> = listOf(),
+        @set:JsonFormat(pattern = "yyyyMMdd")
+        var date: List<LocalDate> = listOf(),
 
         var open: List<Double?> = listOf(),
 
@@ -50,4 +49,6 @@ data class GroupDto(
 
         var ps: List<Double?> = listOf(),
 
-        var pcf: List<Double?> = listOf())
+        var pcf: List<Double?> = listOf(),
+
+        var message: List<String?> = listOf())

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface GroupStockRepository :
-        JpaRepository<GroupStock, Long>,
+        JpaRepository<GroupStock, GroupStock.GroupStockId>,
         JpaSpecificationExecutor<GroupStock>,
-        PagingAndSortingRepository<GroupStock, Long>,
+        PagingAndSortingRepository<GroupStock, GroupStock.GroupStockId>,
         GroupStockDao

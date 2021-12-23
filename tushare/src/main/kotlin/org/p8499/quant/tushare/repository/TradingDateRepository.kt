@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface TradingDateRepository :
-        JpaRepository<TradingDate, Long>,
+        JpaRepository<TradingDate, TradingDate.TradingDateId>,
         JpaSpecificationExecutor<TradingDate>,
-        PagingAndSortingRepository<TradingDate, Long>,
+        PagingAndSortingRepository<TradingDate, TradingDate.TradingDateId>,
         TradingDateDao

@@ -7,11 +7,11 @@ import javax.persistence.Table
 
 @Entity
 @Table(name = "F01")
-data class Exchange(
+open class Exchange(
         @Id
         @Column(nullable = false, length = 4)
-        var id: String? = null,
+        open var id: String? = null,
 
         @Column(nullable = false, length = 8)
-        var name: String? = null)
+        open var name: String? = null)
 

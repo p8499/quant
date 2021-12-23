@@ -7,6 +7,7 @@ import org.p8499.quant.tushare.repository.TradingDateRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 import java.util.*
 
 @Service
@@ -17,13 +18,13 @@ class Level1CandlestickService {
     @Autowired
     protected lateinit var tradingDateRepository: TradingDateRepository
 
-    operator fun get(stockId: String, date: Date) = level1CandlestickRepository.get(stockId, date)
+    operator fun get(stockId: String, date: LocalDate) = level1CandlestickRepository.get(stockId, date)
 
     fun findByStockId(stockId: String) = level1CandlestickRepository.findByStockId(stockId)
 
-    fun findByStockIdBetween(stockId: String, from: Date, to: Date) = level1CandlestickRepository.findByStockIdBetween(stockId, from, to)
+    fun findByStockIdBetween(stockId: String, from: LocalDate, to: LocalDate) = level1CandlestickRepository.findByStockIdBetween(stockId, from, to)
 
-    fun previous(stockId: String, date: Date) = level1CandlestickRepository.previous(stockId, date)
+    fun previous(stockId: String, date: LocalDate) = level1CandlestickRepository.previous(stockId, date)
 
     fun saveAll(entityIterable: Iterable<Level1Candlestick>): List<Level1Candlestick> = level1CandlestickRepository.saveAllAndFlush(entityIterable)
 

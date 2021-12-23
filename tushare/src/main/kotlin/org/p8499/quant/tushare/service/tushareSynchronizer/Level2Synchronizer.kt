@@ -13,7 +13,7 @@ import org.p8499.quant.tushare.service.tushareRequest.MoneyflowRequest
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import java.util.*
+import java.time.LocalDate
 import java.util.concurrent.TimeUnit
 
 @Service
@@ -38,12 +38,7 @@ class Level2Synchronizer {
     fun invoke() {
         logger.info("Start Synchronizing Level2")
         val level2Iterable: (String) -> Iterable<Level2> = { tsCode ->
-            val datesCollection = tradingDateService.unprocessedForLevel2(tsCode).mapNotNull(TradingDate::date).groupBy {
-                Calendar.getInstance().run {
-                    time = it
-                    get(Calendar.YEAR)
-                }
-            }.values
+            val datesCollection = tradingDateService.unprocessedForLevel2(tsCode).mapNotNull(TradingDate::date).groupBy(LocalDate::getYear).values
             Flowable.fromIterable(datesCollection).zipWith(Flowable.interval(200, TimeUnit.MILLISECONDS)) { dateList, _ -> dateList }
                     .flatMap { Flowable.fromArray(*moneyflowRequest.invoke(MoneyflowRequest.InParams(tsCode = tsCode, startDate = it.minOrNull(), endDate = it.maxOrNull()), MoneyflowRequest.OutParams::class.java)) }
                     .map { Level2(tsCode, it.tradeDate, it.buySmVol, it.sellSmVol, it.buyMdVol, it.sellMdVol, it.buyLgVol, it.sellLgVol, it.buyElgVol, it.sellElgVol) }

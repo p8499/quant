@@ -1,7 +1,7 @@
 package org.p8499.quant.tushare.dao
 
 import org.p8499.quant.tushare.entity.TradingDate
-import java.util.*
+import java.time.LocalDate
 
 interface TradingDateDao {
     fun last(exchangeId: String): TradingDate?
@@ -18,6 +18,6 @@ interface TradingDateDao {
     fun firstUnprocessedForLevel2(stockId: String): TradingDate?
     fun vacantForLevel2(stockId: String): List<TradingDate>
     fun findByStockId(stockId: String): List<TradingDate>
-    fun findByStockIdBetween(stockId: String, from: Date, to: Date): List<TradingDate>
+    fun findByStockIdBetween(stockId: String, from: LocalDate, to: LocalDate): List<TradingDate>
     fun findByExchangeId(exchangeId: String): List<TradingDate>
 }

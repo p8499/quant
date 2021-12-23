@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.retry.annotation.Backoff
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 import java.util.*
 
 @Service
@@ -37,22 +38,22 @@ class IncomeRequest : TushareRequest<IncomeRequest.InParams, IncomeRequest.OutPa
 
             @get:JsonInclude(JsonInclude.Include.NON_NULL)
             @get:JsonProperty("ann_date")
-            @get:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
-            var annDate: Date? = null,
+            @get:JsonFormat(pattern = "yyyyMMdd")
+            var annDate: LocalDate? = null,
 
             @get:JsonInclude(JsonInclude.Include.NON_NULL)
             @get:JsonProperty("start_date")
-            @get:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
-            var startDate: Date? = null,
+            @get:JsonFormat(pattern = "yyyyMMdd")
+            var startDate: LocalDate? = null,
 
             @get:JsonInclude(JsonInclude.Include.NON_NULL)
             @get:JsonProperty("end_date")
-            @get:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
-            var endDate: Date? = null,
+            @get:JsonFormat(pattern = "yyyyMMdd")
+            var endDate: LocalDate? = null,
 
             @get:JsonInclude(JsonInclude.Include.NON_NULL)
-            @get:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
-            var period: Date? = null,
+            @get:JsonFormat(pattern = "yyyyMMdd")
+            var period: LocalDate? = null,
 
             @get:JsonInclude(JsonInclude.Include.NON_NULL)
             @get:JsonProperty("report_type")
@@ -68,16 +69,16 @@ class IncomeRequest : TushareRequest<IncomeRequest.InParams, IncomeRequest.OutPa
             var tsCode: String? = null,
 
             @set:JsonProperty("ann_date")
-            @set:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
-            var annDate: Date? = null,
+            @set:JsonFormat(pattern = "yyyyMMdd")
+            var annDate: LocalDate? = null,
 
             @set:JsonProperty("f_ann_date")
-            @set:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
-            var fAnnDate: Date? = null,
+            @set:JsonFormat(pattern = "yyyyMMdd")
+            var fAnnDate: LocalDate? = null,
 
             @set:JsonProperty("end_date")
-            @set:JsonFormat(pattern = "yyyyMMdd", timezone = "GMT+8")
-            var endDate: Date? = null,
+            @set:JsonFormat(pattern = "yyyyMMdd")
+            var endDate: LocalDate? = null,
 
             @set:JsonProperty("report_type")
             var reportType: String? = null,

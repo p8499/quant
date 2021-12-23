@@ -31,8 +31,8 @@ dependencies {
     runtimeOnly("com.oracle.database.jdbc:ojdbc8")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.amqp:spring-rabbit-test")
-    testImplementation("org.springframework.amqp:spring-rabbit-test")
     testImplementation("org.springframework.batch:spring-batch-test")
+    testImplementation("org.jfree:jfreechart:1.5.3")
 }
 
 dependencyManagement {
@@ -50,4 +50,5 @@ tasks.withType<KotlinCompile> {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    maxHeapSize = "8192m"
 }

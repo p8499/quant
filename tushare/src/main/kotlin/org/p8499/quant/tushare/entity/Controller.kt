@@ -1,15 +1,18 @@
 package org.p8499.quant.tushare.entity
 
-import java.util.*
-import javax.persistence.*
+import java.time.LocalDateTime
+import javax.persistence.Column
+import javax.persistence.Entity
+import javax.persistence.Id
+import javax.persistence.Table
 
 @Entity
 @Table(name = "F91")
-class Controller(
+open class Controller(
         @Id
         @Column(nullable = false, length = 32)
-        var objectId: String? = null,
+        open var objectId: String? = null,
 
         @Column(nullable = false, name = "dte")
-        @Temporal(TemporalType.TIMESTAMP)
-        var date: Date? = null)
+//        @Temporal(TemporalType.TIMESTAMP)
+        open var date: LocalDateTime? = null)

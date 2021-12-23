@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface ExpressRepository :
-        JpaRepository<Express, Long>,
+        JpaRepository<Express, Express.ExpressId>,
         JpaSpecificationExecutor<Express>,
-        PagingAndSortingRepository<Express, Long>,
+        PagingAndSortingRepository<Express, Express.ExpressId>,
         ExpressDao

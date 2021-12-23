@@ -4,6 +4,7 @@ import org.p8499.quant.tushare.entity.TradingDate
 import org.p8499.quant.tushare.repository.TradingDateRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 import java.util.*
 
 @Service
@@ -39,7 +40,7 @@ class TradingDateService {
 
     fun findByStockId(stockId: String) = tradingDateRepository.findByStockId(stockId)
 
-    fun findByStockIdBetween(stockId: String, from: Date, to: Date) = tradingDateRepository.findByStockIdBetween(stockId, from, to)
+    fun findByStockIdBetween(stockId: String, from: LocalDate, to: LocalDate) = tradingDateRepository.findByStockIdBetween(stockId, from, to)
 
     fun findByExchangeId(exchangeId: String) = tradingDateRepository.findByExchangeId(exchangeId)
 

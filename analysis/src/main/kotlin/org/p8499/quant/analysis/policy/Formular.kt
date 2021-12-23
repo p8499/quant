@@ -1,13 +1,82 @@
 package org.p8499.quant.analysis.policy
 
+import org.p8499.quant.analysis.common.let
 import org.p8499.quant.analysis.common.minus
 import org.p8499.quant.analysis.common.plus
 import org.p8499.quant.analysis.common.times
+import kotlin.math.max
+
+fun ref(valueList: List<Double?>, n: Int): List<Double?> {
+    return valueList.indices.map { i ->
+        if (i - n >= 0) valueList[i - n] else null
+    }
+}
+
+fun ma(valueList: List<Double?>, n: Int): List<Double?> {
+    return if (n > 0)
+        valueList.indices.map { i ->
+            val elements = valueList.subList(max(i - n + 1, 0), i + 1)
+            if (elements.all { it !== null }) elements.mapNotNull { it }.sum() / elements.size else null
+        }
+    else
+        arrayOfNulls<Double>(valueList.size).toList()
+}
 
 fun dma(valueList: List<Double?>, weightList: List<Double?>): List<Double?> {
-    assert(valueList.size == weightList.size && weightList.filterNotNull().all { it in 0.0..1.0 })
-    return valueList.mapIndexed { i, value ->
-        val previousValue = if (i == 0) value else valueList[i - 1]
-        value * weightList[i] + previousValue * (1.0 - weightList[i])
+    return if (valueList.size == weightList.size && weightList.filterNotNull().all { it in 0.0..1.0 })
+        valueList.mapIndexed { i, value ->
+            val previousValue = if (i == 0) value else valueList[i - 1]
+            value * weightList[i] + previousValue * (1.0 - weightList[i])
+        }
+    else
+        arrayOfNulls<Double>(valueList.size).toList()
+}
+
+fun hod(valueList: List<Double?>, n: Int): List<Double?> {
+    return if (n > 0)
+        valueList.mapIndexed { i, value ->
+            valueList.subList(max(i - n + 1, 0), i + 1).count { let(it, value) { a, b -> a > b } ?: false }.toDouble()
+        }
+    else
+        arrayOfNulls<Double>(valueList.size).toList()
+}
+
+fun lod(valueList: List<Double?>, n: Int): List<Double?> {
+    return if (n > 0)
+        valueList.mapIndexed { i, value ->
+            valueList.subList(max(i - n + 1, 0), i + 1).count { let(it, value) { a, b -> a < b } ?: false }.toDouble()
+        }
+    else
+        arrayOfNulls<Double>(valueList.size).toList()
+}
+
+fun barscount(valueList: List<Double?>): List<Double?> {
+    val first = valueList.indexOfFirst { it != null }.let { if (it > -1) it else valueList.size }
+    return valueList.indices.map { i ->
+        (i - first + 1).let { if (it < 0) 0 else it }.toDouble()
+    }
+}
+
+fun hhv(valueList: List<Double?>, n: Int): List<Double?> {
+    return when {
+        n > 0 -> valueList.indices.map { i ->
+            valueList.subList(max(i - n + 1, 0), i + 1).maxByOrNull { it ?: Double.MAX_VALUE }
+        }
+        n == 0 -> valueList.indices.map { i ->
+            valueList.subList(0, i + 1).maxByOrNull { it ?: Double.MAX_VALUE }
+        }
+        else -> arrayOfNulls<Double>(valueList.size).toList()
+    }
+}
+
+fun llv(valueList: List<Double?>, n: Int): List<Double?> {
+    return when {
+        n > 0 -> valueList.indices.map { i ->
+            valueList.subList(max(i - n + 1, 0), i + 1).minByOrNull { it ?: -Double.MAX_VALUE }
+        }
+        n == 0 -> valueList.indices.map { i ->
+            valueList.subList(0, i + 1).minByOrNull { it ?: -Double.MAX_VALUE }
+        }
+        else -> arrayOfNulls<Double>(valueList.size).toList()
     }
 }

@@ -11,7 +11,6 @@ import org.p8499.quant.tushare.service.tushareRequest.ExpressRequest
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import java.util.*
 import java.util.concurrent.TimeUnit
 
 @Service
@@ -36,11 +35,10 @@ class ExpressSynchronizer {
         Flowable.fromIterable(stockIdList).zipWith(Flowable.interval(1200, TimeUnit.MILLISECONDS)) { stockId, _ -> stockId }
                 .blockingSubscribe { stockId ->
                     expressService.saveAll(expressRequest.invoke(ExpressRequest.InParams(tsCode = stockId), ExpressRequest.OutParams::class.java, arrayOf("ann_date", "end_date", "revenue", "total_hldr_eqy_exc_min_int", "is_audit"))
-                            .groupBy(ExpressRequest.OutParams::endDate).mapValues { it.value.sortedWith(compareBy(ExpressRequest.OutParams::isAudit)).last() }.map {
-                                Calendar.getInstance().run {
-                                    time = it.value.endDate
-                                    Express(stockId, get(Calendar.YEAR), get(Calendar.MONTH) / 3 + 1, it.value.annDate
-                                            ?: it.value.endDate, it.value.totalHldrEqyExcMinInt, it.value.revenue)
+                            .groupBy(ExpressRequest.OutParams::endDate).mapValues { it.value.sortedWith(compareBy(ExpressRequest.OutParams::isAudit)).last() }.mapNotNull {
+                                it.value.endDate?.run {
+                                    Express(stockId, year, (monthValue - 1) / 3 + 1, it.value.annDate
+                                            ?: this, it.value.totalHldrEqyExcMinInt, it.value.revenue)
                                 }
                             })
                 }
