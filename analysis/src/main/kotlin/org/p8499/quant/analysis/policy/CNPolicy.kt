@@ -47,7 +47,7 @@ class CNPolicy : Policy {
         val barDate = date.minusDays(1)
         val slots = 1
         var securitiesTarget = targets(stage, barDate, slots)
-        val positionsSell = stage.positions()
+        stage.positions()
                 .filter { it.first !in securitiesTarget }
                 .onEach { stage.sell(it.first.region, it.first.id, it.second) }
         val freeSlots = { slots - stage.positionMap.size }

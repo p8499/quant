@@ -109,15 +109,15 @@ open class Stage(initCash: Double, val precision: Double) {
             policy.select().onEach(policy::extend).forEach { put(encode(it.region, it.id), it) }
         }
         date = if (isTradingDate(from)) from else nextTradingDate(from, to)
-        logger.info("初始价值 ${value(date)}")
+        logger.info("初始价值 ${value()}")
 
         while (date <= to) {
             logger.info("${dateFormat.format(date)} 开始")
             policy.proceed(this, date)
-            logger.info("${dateFormat.format(date)} 结束 持仓 ${positionMap.size} 价值 ${value(date)}")
+            logger.info("${dateFormat.format(date)} 结束 持仓 ${positionMap.size} 价值 ${value()}")
             date = nextTradingDate(date, to)
         }
-        logger.info("终末价值 ${value(date)}")
+        logger.info("终末价值 ${value()}")
     }
 
     private fun isTradingDate(currentDate: LocalDate): Boolean {
@@ -132,7 +132,7 @@ open class Stage(initCash: Double, val precision: Double) {
         return nextDate
     }
 
-    private fun value(currentDate: LocalDate): Double {
+    private fun value(): Double {
         return positions().sumOf {
             securityMap[encode(it.first.region, it.first.id)]?.let { security ->
                 security.date.indexOf(date).takeIf { it > -1 }
