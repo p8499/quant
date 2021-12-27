@@ -57,6 +57,46 @@ fun barscount(valueList: List<Double?>): List<Double?> {
     }
 }
 
+fun barslast(valueList: List<Double?>): List<Double?> {
+    val last: (Int) -> Int? = { iEnd ->
+        var i = iEnd
+        var result: Int? = null
+        do {
+            val value = valueList[i] ?: break
+            if (value > 0.0) {
+                result = iEnd - i
+                break
+            }
+            i -= 1
+        } while (i > -1)
+        result
+    }
+    return valueList.indices.map { last(it) }.map { it?.toDouble() }
+}
+
+fun every(valueList: List<Double?>, n: Int): List<Double?> {
+    return if (n > 1) {
+        val check: (Int) -> Double? = { iEnd ->
+            var i = iEnd
+            var result: Double? = 1.0
+            do {
+                val value = valueList[i]
+                if (value == null) {
+                    result = null
+                    break
+                } else if (value <= 0.0) {
+                    result = 0.0
+                    break
+                }
+                i -= 1
+            } while (i > iEnd - n)
+            result
+        }
+        valueList.indices.map { i -> check(i) }
+    } else
+        arrayOfNulls<Double>(valueList.size).toList()
+}
+
 fun hhv(valueList: List<Double?>, n: Int): List<Double?> {
     return when {
         n > 0 -> valueList.indices.map { i ->

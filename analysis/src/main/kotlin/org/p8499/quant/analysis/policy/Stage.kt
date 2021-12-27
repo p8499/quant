@@ -1,143 +1,98 @@
 package org.p8499.quant.analysis.policy
 
-import org.slf4j.LoggerFactory
+import org.p8499.quant.analysis.common.let
 import java.lang.Double.min
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
+open class Stage(val initCash: Double, val precision: Double) {
+    private val initDate = LocalDate.ofEpochDay(0)
 
-open class Stage(initCash: Double, val precision: Double) {
-    protected val logger by lazy { LoggerFactory.getLogger(Stage::class.java) }
+    private var date: LocalDate = initDate
 
-    protected var dateFormat = DateTimeFormatter.ofPattern("yyyy/MM/dd")
+    private var cash = initCash
 
-    protected lateinit var tradingDates: List<LocalDate>
+    private val positions = mutableListOf<Position>()
 
-    protected lateinit var securityMap: Map<String, Security>
+    fun cash(): Double = cash
 
-    var cash = initCash
-        private set
+    fun position(security: Security): Position? = positions.singleOrNull { it.security == security }
 
-    val positionMap: MutableMap<String, Pair<Security, Double>> = mutableMapOf()
+    fun positions(): List<Position> = positions
 
-    var date: LocalDate = LocalDate.ofEpochDay(0)
-        private set
-
-    val securities: List<Security> by lazy { securityMap.values.toList() }
-
-    private fun position(region: String, id: String) = positionMap[encode(region, id)]?.second ?: 0.0
-
-    fun positions(): List<Pair<Security, Double>> = positionMap.values.iterator().asSequence().toList()
-
-    fun position(security: Security): Double = position(security.region, security.id)
-
-    private fun encode(region: String, id: String) = "${region}-${id}"
-
-    private fun decode(key: String) = key.substringBefore('-') to key.substringAfter('-')
-
-    /**
-     * buy at open
-     * */
-    fun buySlot(region: String, id: String, slot: Int) {
-        buyAmount(region, id, cash / slot)
+    fun buySlot(security: Security, priceAs: String, slot: Int) {
+        buyAmount(security, priceAs, cash / slot)
     }
 
-    /**
-     * buy at open
-     * */
-    fun buyAmount(region: String, id: String, amount: Double) {
-        securityMap[encode(region, id)]?.let { security ->
-            security.date.indexOf(date).takeIf { it > -1 }
-                    ?.let(security.open::get)
-                    ?.let { price -> buyVolume(region, id, (amount / price / precision).toInt() * precision) }
+    fun buyAmount(security: Security, priceAs: String, amount: Double) {
+        security["open", date]
+                ?.let { (amount / it / precision).toInt() * precision }
+                ?.let { buyVolume(security, priceAs, it) }
+    }
+
+    fun buyVolume(security: Security, priceAs: String, volume: Double) {
+        val adjust: (Double) -> Double = { price ->
+            var adjVolume = volume
+            while (price * adjVolume > cash) {
+                adjVolume -= precision
+            }
+            adjVolume
+        }
+        security[priceAs, date]?.let {
+            val adjVolume = adjust(it)
+            if (adjVolume > 0) {
+                cash -= it * adjVolume
+                val position = position(security)
+                if (position != null) {
+                    position.cost = (position.cost * position.volume + it * adjVolume) / (position.volume + adjVolume)
+                    position.volume += adjVolume
+                } else
+                    positions.add(Position(security, adjVolume, it))
+            }
         }
     }
 
-    /**
-     * buy at open
-     * */
-    fun buyVolume(region: String, id: String, volume: Double) {
-        securityMap[encode(region, id)]?.let { security ->
-            security.date.indexOf(date).takeIf { it > -1 }
-                    ?.let(security.open::get)
-                    ?.let { price ->
-                        var volumeAdjusted = volume
-                        while (price * volumeAdjusted > cash) {
-                            volumeAdjusted -= precision
-                        }
-                        if (volumeAdjusted > 0) {
-                            val key = encode(security.region, security.id)
-                            val available = (positionMap[key]?.second ?: 0.0)
-                            positionMap[key] = security to available + volumeAdjusted
-                            cash -= price * volumeAdjusted
-                            logger.info("${dateFormat.format(date)} 多仓 ${key}，单价 $price，数量 $volumeAdjusted，现金余 $cash")
-                        }
-                    }
+    fun sell(security: Security, priceAs: String, volume: Double) {
+        security[priceAs, date]?.let {
+            val position = position(security)
+            if (position != null) {
+                val adjVolume = min(volume, position.volume)
+                position.volume -= adjVolume
+                cash += it * adjVolume
+                if (position.volume == 0.0)
+                    positions.remove(position)
+            }
         }
     }
 
-    /**
-     * sell at open
-     * */
-    fun sell(region: String, id: String, volume: Double) {
-        securityMap[encode(region, id)]?.let { security ->
-            security.date.indexOf(date).takeIf { it > -1 }
-                    ?.let(security.open::get)?.let { price ->
-                        val key = encode(security.region, security.id)
-                        val available = (positionMap[key]?.second ?: 0.0)
-                        val volumeAdjusted = min(volume, available)
-                        positionMap[key] = security to available - volumeAdjusted
-                        key.takeIf { positionMap[key]?.second == 0.0 }.also(positionMap::remove)
-                        cash += price * volumeAdjusted
-                        logger.info("${dateFormat.format(date)} 平仓 ${key}，单价 $price，数量 $volumeAdjusted，现金余 $cash")
-                    }
-        }
+    fun sell(security: Security, priceAs: String) {
+        position(security)?.volume?.let { sell(security, priceAs, it) }
     }
 
-    /**
-     * sell at open
-     * */
-    fun sellAll() {
-        for (pair in positions()) {
-            sell(pair.first.region, pair.first.id, pair.second)
-        }
+    fun sell(priceAs: String) {
+        positions().forEach { sell(it.security, priceAs) }
     }
 
     fun run(from: LocalDate, to: LocalDate, policy: Policy) {
-        tradingDates = policy.dates()
-        securityMap = mutableMapOf<String, Security>().apply {
-            policy.select().onEach(policy::extend).forEach { put(encode(it.region, it.id), it) }
-        }
-        date = if (isTradingDate(from)) from else nextTradingDate(from, to)
-        logger.info("初始价值 ${value()}")
-
-        while (date <= to) {
-            logger.info("${dateFormat.format(date)} 开始")
+        val tradingDates = policy.tradingDates(from, to)
+        tradingDates.forEachIndexed { i, tradingDate ->
+            date = tradingDate
+            if (i == 0)
+                policy.pre(this, date)
             policy.proceed(this, date)
-            logger.info("${dateFormat.format(date)} 结束 持仓 ${positionMap.size} 价值 ${value()}")
-            date = nextTradingDate(date, to)
+            if (i == tradingDates.size - 1)
+                policy.post(this, date)
         }
-        logger.info("终末价值 ${value()}")
     }
 
-    private fun isTradingDate(currentDate: LocalDate): Boolean {
-        return tradingDates.indexOf(currentDate) > -1
+    fun reset() {
+        date = initDate
+        cash = initCash
+        positions.clear()
     }
 
-    private fun nextTradingDate(currentDate: LocalDate, finalDate: LocalDate): LocalDate {
-        var nextDate = currentDate
-        do {
-            nextDate = nextDate.plusDays(1)
-        } while (!isTradingDate(nextDate) && nextDate < finalDate)
-        return nextDate
+    fun value(): Double {
+        return positions().sumOf { let(it.security["close", date], it.volume) { a, b -> a * b } ?: 0.0 } + cash
     }
 
-    private fun value(): Double {
-        return positions().sumOf {
-            securityMap[encode(it.first.region, it.first.id)]?.let { security ->
-                security.date.indexOf(date).takeIf { it > -1 }
-                        ?.let(security.close::get)?.let { price -> price * it.second }
-            } ?: 0.0
-        } + cash
-    }
+    class Position(val security: Security, var volume: Double, var cost: Double)
 }

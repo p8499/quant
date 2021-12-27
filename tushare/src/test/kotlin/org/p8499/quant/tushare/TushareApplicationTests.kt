@@ -124,7 +124,7 @@ class TushareApplicationTests {
 //        print(x)
         val startDate = LocalDate.of(2015, 1, 4)
         val today = LocalDate.now()
-        listOf("000408.SZ")
+        listOf("002739.SZ")
                 .parallelStream()
                 .map { dtoBuilderFactory.newStockBuilder(it, startDate, today) }
                 .map(StockDtoBuilder::build)
