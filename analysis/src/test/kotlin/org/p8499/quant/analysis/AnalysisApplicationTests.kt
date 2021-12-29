@@ -11,7 +11,7 @@ import java.time.LocalDate
 
 @SpringBootTest
 class AnalysisApplicationTests {
-    protected val logger by lazy { LoggerFactory.getLogger(Stage::class.java) }
+    protected val logger by lazy { LoggerFactory.getLogger(javaClass) }
 
     @Autowired
     protected lateinit var policyService: PolicyService
@@ -21,6 +21,9 @@ class AnalysisApplicationTests {
         val stage = Stage(10000000.00, 100.00)
         stage.apply {
             run(LocalDate.of(2018, 1, 1), LocalDate.now(), CNPolicy(policyService))
+            logger.info(log())
+            reset()
         }
+
     }
 }

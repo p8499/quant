@@ -1,6 +1,5 @@
 package org.p8499.quant.tushare.dtoBuilder
 
-import org.p8499.quant.tushare.TushareApplication
 import org.p8499.quant.tushare.common.finiteOrNull
 import org.p8499.quant.tushare.common.let
 import org.p8499.quant.tushare.dto.StockDto
@@ -28,7 +27,7 @@ class StockDtoBuilder(
         val cashflowService: CashflowService,
         val expressService: ExpressService,
         val forecastService: ForecastService) {
-    protected val logger by lazy { LoggerFactory.getLogger(TushareApplication::class.java) }
+    protected val logger by lazy { LoggerFactory.getLogger(javaClass) }
 
     val name by lazy { stockService[stockId]?.name ?: "" }
 

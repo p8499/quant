@@ -56,5 +56,5 @@ feign:
 logging:
   level:
     org.hibernate.SQL: off
-    org.p8499.quant.tushare.feignClient.*: info
+    org.p8499.quant.tushare.feignClient.*: debug
     org.p8499.quant.tushare.service.*: info

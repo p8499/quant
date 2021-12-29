@@ -13,7 +13,7 @@ import java.time.LocalDateTime
 
 @Service
 class TradingDateSynchronizer {
-    val logger by lazy { LoggerFactory.getLogger(TushareApplication::class.java) }
+    protected val logger by lazy { LoggerFactory.getLogger(javaClass) }
 
     @Autowired
     protected lateinit var tradingDateService: TradingDateService

@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit
 
 @Service
 class ForecastSynchronizer {
-    val logger by lazy { LoggerFactory.getLogger(TushareApplication::class.java) }
+    protected val logger by lazy { LoggerFactory.getLogger(javaClass) }
 
     @Autowired
     lateinit var stockService: StockService

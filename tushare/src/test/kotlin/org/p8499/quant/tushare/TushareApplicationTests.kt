@@ -1,17 +1,17 @@
 package org.p8499.quant.tushare
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.reactivex.Flowable
+import io.reactivex.schedulers.Schedulers
 import org.junit.jupiter.api.Test
 import org.p8499.quant.tushare.dtoBuilder.DtoBuilderFactory
 import org.p8499.quant.tushare.dtoBuilder.StockDtoBuilder
 import org.p8499.quant.tushare.feignClient.PersistentFeignClient
-import org.p8499.quant.tushare.service.GroupService
-import org.p8499.quant.tushare.service.GroupStockService
-import org.p8499.quant.tushare.service.IncomeService
-import org.p8499.quant.tushare.service.StockService
+import org.p8499.quant.tushare.service.*
 import org.p8499.quant.tushare.service.task.TushareTask
 import org.p8499.quant.tushare.service.tushareRequest.*
 import org.p8499.quant.tushare.service.tushareSynchronizer.*
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.redis.core.StringRedisTemplate
@@ -21,6 +21,8 @@ import java.time.LocalDate
 
 @SpringBootTest
 class TushareApplicationTests {
+    protected val logger by lazy { LoggerFactory.getLogger(javaClass) }
+
     @Autowired
     lateinit var balanceSheetSynchronizer: BalanceSheetSynchronizer
 
@@ -100,6 +102,9 @@ class TushareApplicationTests {
     protected lateinit var persistentFeignClient: PersistentFeignClient
 
     @Autowired
+    protected lateinit var tradingDateService: TradingDateService
+
+    @Autowired
     protected lateinit var incomeService: IncomeService
 
     @Autowired
@@ -119,19 +124,19 @@ class TushareApplicationTests {
 
     @Test
     fun contextLoads() {
-//        val x = dailyBasicRequest.invoke(DailyBasicRequest.InParams(tsCode = "603733.SH", startDate = GregorianCalendar(2020, 7, 5).time, endDate = GregorianCalendar(2020, 7, 5).time), DailyBasicRequest.OutParams::class.java)
-//        val y = dailyRequest.invoke(DailyRequest.InParams(tsCode = "603733.SH", startDate = GregorianCalendar(2020, 7, 5).time, endDate = GregorianCalendar(2020, 7, 5).time), DailyRequest.OutParams::class.java)
-//        print(x)
         val startDate = LocalDate.of(2015, 1, 4)
-        val today = LocalDate.now()
-        listOf("002739.SZ")
-                .parallelStream()
-                .map { dtoBuilderFactory.newStockBuilder(it, startDate, today) }
-                .map(StockDtoBuilder::build)
-                .forEach {
-//                    stringRedisTemplate.opsForValue().set(it.id, objectMapper.writeValueAsString(it))
-                    persistentFeignClient.saveStock(it)
-                }
-
+        val endDate = tradingDateService.last("SSE")?.date
+        if (endDate != null) {
+            val directory = Files.createTempDirectory(null).toFile()
+            logger.info("Directory: ${directory.absolutePath}")
+            Flowable.fromIterable(listOf("603718.SH"))
+                    .parallel(3).runOn(Schedulers.io())
+                    .map { dtoBuilderFactory.newStockBuilder(it, startDate, endDate) }
+                    .map(StockDtoBuilder::build)
+                    .doOnNext { File(directory, it.id).writeText(objectMapper.writeValueAsString(it)) }
+                    .doOnNext { persistentFeignClient.saveStock(it) }
+                    .sequential().subscribe()
+            persistentFeignClient.complete("CN")
+        }
     }
 }

@@ -12,7 +12,7 @@ class Security(
         val datesFunction: (String, String, Int) -> List<LocalDate>,
         val valuesFunction: (String, String, String, Int) -> List<Double?>,
         val messagesFunction: (String, String, Int) -> List<String?>) {
-    protected val logger by lazy { LoggerFactory.getLogger(Stage::class.java) }
+    protected val logger by lazy { LoggerFactory.getLogger(javaClass) }
     val size: Int by lazy { sizeFunction(region, id) }
     val date: List<LocalDate> by lazy { datesFunction(region, id, limit) }
     val open: List<Double?> get() = this["open"] as List<Double?>
@@ -35,7 +35,9 @@ class Security(
     val pcf: List<Double?> get() = this["pcf"] as List<Double?>
     val message: List<String?> by lazy { messagesFunction(region, id, limit) }
 
-    operator fun get(kpi: String): List<Double?>? {
+    operator fun get(kpi: String): List<Double?> = getSafe(kpi) ?: throw NullPointerException()
+
+    fun getSafe(kpi: String): List<Double?>? {
         return if (arrayOf("open", "close", "high", "low", "volume", "amount", "totalShare", "flowShare", "totalValue", "flowValue", "asset", "profit", "revenue", "cashflow", "pb", "pe", "ps", "pcf").contains(kpi))
             if (!valuesMap.containsKey(kpi))
                 valuesFunction(region, id, kpi, limit).also { valuesMap[kpi] = it }

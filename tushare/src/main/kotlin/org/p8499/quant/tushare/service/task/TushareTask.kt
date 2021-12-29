@@ -3,7 +3,6 @@ package org.p8499.quant.tushare.service.task
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.reactivex.Flowable
 import io.reactivex.schedulers.Schedulers
-import org.p8499.quant.tushare.TushareApplication
 import org.p8499.quant.tushare.dtoBuilder.DtoBuilderFactory
 import org.p8499.quant.tushare.dtoBuilder.StockDtoBuilder
 import org.p8499.quant.tushare.entity.Stock
@@ -28,7 +27,7 @@ import java.util.concurrent.Executors
 
 @Service
 class TushareTask {
-    protected val logger by lazy { LoggerFactory.getLogger(TushareApplication::class.java) }
+    protected val logger by lazy { LoggerFactory.getLogger(javaClass) }
 
     @Autowired
     protected lateinit var exchangeSynchronizer: ExchangeSynchronizer
@@ -113,7 +112,7 @@ class TushareTask {
      *                                           │ express           │
      *                                           └ forecast          ┘
      */
-    @Scheduled(cron = "00 05 18 * * SUN-SAT")
+    @Scheduled(cron = "00 05 18 * * MON-FRI")
     fun syncAndSend() {
         /**
          * Download from tushare.pro and save the data into database
@@ -150,8 +149,9 @@ class TushareTask {
                     .map { dtoBuilderFactory.newStockBuilder(it, startDate, endDate) }
                     .map(StockDtoBuilder::build)
                     .doOnNext { File(directory, it.id).writeText(objectMapper.writeValueAsString(it)) }
-                    .doOnNext(persistentFeignClient::saveStock)
+                    .doOnNext {  persistentFeignClient.saveStock(it) }
                     .sequential().subscribe()
+            persistentFeignClient.complete("CN")
 //            val groupIdFlowable = Flowable.fromIterable(groupService.findAll().mapNotNull(Group::id))
 //            val stockIdListFlowable = groupIdFlowable.map { groupStockService.findByGroupId(it).mapNotNull(GroupStock::stockId) }
 //            Flowable.zip(groupIdFlowable, stockIdListFlowable) { groupId, stockIdList -> groupId to stockIdList }

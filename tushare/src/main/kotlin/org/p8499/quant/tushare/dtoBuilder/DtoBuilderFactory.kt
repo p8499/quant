@@ -1,6 +1,5 @@
 package org.p8499.quant.tushare.dtoBuilder
 
-import org.p8499.quant.tushare.TushareApplication
 import org.p8499.quant.tushare.dto.StockDto
 import org.p8499.quant.tushare.service.*
 import org.slf4j.LoggerFactory
@@ -10,7 +9,7 @@ import java.time.LocalDate
 
 @Component
 class DtoBuilderFactory {
-    protected val logger by lazy { LoggerFactory.getLogger(TushareApplication::class.java) }
+    protected val logger by lazy { LoggerFactory.getLogger(javaClass) }
 
     @Autowired
     protected lateinit var exchangeService: ExchangeService

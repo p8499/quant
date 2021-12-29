@@ -2,7 +2,6 @@ package org.p8499.quant.tushare.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.commons.text.StringEscapeUtils
-import org.p8499.quant.tushare.TushareApplication
 import org.p8499.quant.tushare.feignClient.TushareFeignClient
 import org.p8499.quant.tushare.feignClient.TushareRequestBody
 import org.p8499.quant.tushare.feignClient.TushareResponseBody
@@ -13,7 +12,7 @@ class TushareRequestBodyFactory(val token: String) {
 }
 
 abstract class TushareRequest<I, O> {
-    protected val logger by lazy { LoggerFactory.getLogger(TushareApplication::class.java) }
+    protected val logger by lazy { LoggerFactory.getLogger(javaClass) }
 
     protected abstract val apiName: String
 

@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class GroupSynchronizer {
-    val logger by lazy { LoggerFactory.getLogger(TushareApplication::class.java) }
+    protected val logger by lazy { LoggerFactory.getLogger(javaClass) }
 
     @Autowired
     protected lateinit var groupService: GroupService

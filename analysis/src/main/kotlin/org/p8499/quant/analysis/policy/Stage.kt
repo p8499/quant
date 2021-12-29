@@ -4,7 +4,7 @@ import org.p8499.quant.analysis.common.let
 import java.lang.Double.min
 import java.time.LocalDate
 
-open class Stage(val initCash: Double, val precision: Double) {
+class Stage(val initCash: Double, val precision: Double) {
     private val initDate = LocalDate.ofEpochDay(0)
 
     private var date: LocalDate = initDate
@@ -13,11 +13,19 @@ open class Stage(val initCash: Double, val precision: Double) {
 
     private val positions = mutableListOf<Position>()
 
+    private val audit = Audit(this)
+
+    fun date(): LocalDate = date
+
     fun cash(): Double = cash
 
     fun position(security: Security): Position? = positions.singleOrNull { it.security == security }
 
     fun positions(): List<Position> = positions
+
+    fun log(content: String) = audit.log(content)
+
+    fun log() = audit.toString()
 
     fun buySlot(security: Security, priceAs: String, slot: Int) {
         buyAmount(security, priceAs, cash / slot)
@@ -47,6 +55,7 @@ open class Stage(val initCash: Double, val precision: Double) {
                     position.volume += adjVolume
                 } else
                     positions.add(Position(security, adjVolume, it))
+                audit.buy(security, it, adjVolume)
             }
         }
     }
@@ -60,6 +69,7 @@ open class Stage(val initCash: Double, val precision: Double) {
                 cash += it * adjVolume
                 if (position.volume == 0.0)
                     positions.remove(position)
+                audit.sell(position, it, adjVolume)
             }
         }
     }
@@ -79,6 +89,8 @@ open class Stage(val initCash: Double, val precision: Double) {
             if (i == 0)
                 policy.pre(this, date)
             policy.proceed(this, date)
+            audit.snapshot()
+            audit.wrap()
             if (i == tradingDates.size - 1)
                 policy.post(this, date)
         }
@@ -88,6 +100,7 @@ open class Stage(val initCash: Double, val precision: Double) {
         date = initDate
         cash = initCash
         positions.clear()
+        audit.clear()
     }
 
     fun value(): Double {

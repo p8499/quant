@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit
 
 @Service
 class Level1BasicSynchronizer {
-    val logger by lazy { LoggerFactory.getLogger(TushareApplication::class.java) }
+    protected val logger by lazy { LoggerFactory.getLogger(javaClass) }
 
     @Autowired
     protected lateinit var tradingDateService: TradingDateService
