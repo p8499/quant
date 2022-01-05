@@ -1,0 +1,14 @@
+{
+  "properties": [
+    {
+      "name": "analysis.persistent.url",
+      "type": "java.lang.String",
+      "description": "Description for analysis.persistent.url."
+    },
+    {
+      "name": "tushare.token",
+      "type": "java.lang.String",
+      "description": "Description for tushare.token."
+    }
+  ]
+}
