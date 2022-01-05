@@ -1,9 +1,9 @@
 package org.p8499.quant.analysis.dao
 
-import org.p8499.quant.analysis.entity.StockMessageDaily
+import org.p8499.quant.analysis.entity.StockMessageDay
 
-interface StockMessageDailyDao {
-    fun find(region: String, id: String): List<StockMessageDaily>
+interface StockMessageDayDao {
+    fun find(region: String, id: String): List<StockMessageDay>
 
     fun messages(region: String, id: String, limit: Int): List<String>
 

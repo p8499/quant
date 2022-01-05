@@ -8,43 +8,54 @@ class Security(
         val region: String,
         val id: String,
         val limit: Int,
-        val sizeFunction: (String, String) -> Int,
         val datesFunction: (String, String, Int) -> List<LocalDate>,
         val valuesFunction: (String, String, String, Int) -> List<Double?>,
-        val messagesFunction: (String, String, Int) -> List<String?>) {
+        val messagesFunction: (String, String, Int) -> List<String?>,
+        val quarterDatesFunction: (String, String, Int) -> List<LocalDate>,
+        val quarterValuesFunction: (String, String, String, Int) -> List<Double?>,
+        val quarterPublishesFunction: (String, String, String, Int) -> List<LocalDate?>) {
     protected val logger by lazy { LoggerFactory.getLogger(javaClass) }
-    val size: Int by lazy { sizeFunction(region, id) }
+
     val date: List<LocalDate> by lazy { datesFunction(region, id, limit) }
-    val open: List<Double?> get() = this["open"] as List<Double?>
-    val close: List<Double?> get() = this["close"] as List<Double?>
-    val high: List<Double?> get() = this["high"] as List<Double?>
-    val low: List<Double?> get() = this["low"] as List<Double?>
-    val volume: List<Double?> get() = this["volume"] as List<Double?>
-    val amount: List<Double?> get() = this["amount"] as List<Double?>
-    val totalShare: List<Double?> get() = this["totalShare"] as List<Double?>
-    val flowShare: List<Double?> get() = this["flowShare"] as List<Double?>
-    val totalValue: List<Double?> get() = this["totalValue"] as List<Double?>
-    val flowValue: List<Double?> get() = this["flowValue"] as List<Double?>
-    val asset: List<Double?> get() = this["asset"] as List<Double?>
-    val profit: List<Double?> get() = this["profit"] as List<Double?>
-    val revenue: List<Double?> get() = this["revenue"] as List<Double?>
-    val cashflow: List<Double?> get() = this["cashflow"] as List<Double?>
-    val pb: List<Double?> get() = this["pb"] as List<Double?>
-    val pe: List<Double?> get() = this["pe"] as List<Double?>
-    val ps: List<Double?> get() = this["ps"] as List<Double?>
-    val pcf: List<Double?> get() = this["pcf"] as List<Double?>
+    val open: List<Double?> get() = this["open"]
+    val close: List<Double?> get() = this["close"]
+    val high: List<Double?> get() = this["high"]
+    val low: List<Double?> get() = this["low"]
+    val volume: List<Double?> get() = this["volume"]
+    val amount: List<Double?> get() = this["amount"]
+    val totalShare: List<Double?> get() = this["totalShare"]
+    val flowShare: List<Double?> get() = this["flowShare"]
+    val totalValue: List<Double?> get() = this["totalValue"]
+    val flowValue: List<Double?> get() = this["flowValue"]
+    val pb: List<Double?> get() = this["pb"]
+    val pe: List<Double?> get() = this["pe"]
+    val ps: List<Double?> get() = this["ps"]
+    val pcf: List<Double?> get() = this["pcf"]
     val message: List<String?> by lazy { messagesFunction(region, id, limit) }
+    private val valuesMap: MutableMap<String, List<Double?>> = mutableMapOf()
+    private val extension: MutableMap<String, () -> List<Double?>> = mutableMapOf()
 
-    operator fun get(kpi: String): List<Double?> = getSafe(kpi) ?: throw NullPointerException()
+    val quarterLimit = limit / 60
+    val quarterDate: List<LocalDate> by lazy { quarterDatesFunction(region, id, limit) }
+    fun asset(asOf: LocalDate): List<Double?> = this.getQuarter("asset", asOf)
+    fun profit(asOf: LocalDate): List<Double?> = this.getQuarter("profit", asOf)
+    fun revenue(asOf: LocalDate): List<Double?> = this.getQuarter("revenue", asOf)
+    fun cashflow(asOf: LocalDate): List<Double?> = this.getQuarter("cashflow", asOf)
+    private val quarterValuesMap: MutableMap<String, List<Double?>> = mutableMapOf()
+    private val quarterPublishesMap: MutableMap<String, List<LocalDate?>> = mutableMapOf()
 
-    fun getSafe(kpi: String): List<Double?>? {
-        return if (arrayOf("open", "close", "high", "low", "volume", "amount", "totalShare", "flowShare", "totalValue", "flowValue", "asset", "profit", "revenue", "cashflow", "pb", "pe", "ps", "pcf").contains(kpi))
-            if (!valuesMap.containsKey(kpi))
+    operator fun get(kpi: String, asOf: LocalDate): Double? = dateIndex(asOf).takeIf { it > -1 }?.let { get(kpi)[it] }
+
+    operator fun get(kpi: String): List<Double?> = safeGet(kpi) ?: throw NullPointerException()
+
+    fun safeGet(kpi: String): List<Double?>? {
+        return if (kpi in arrayOf("open", "close", "high", "low", "volume", "amount", "totalShare", "flowShare", "totalValue", "flowValue", "pb", "pe", "ps", "pcf"))
+            if (kpi !in valuesMap.keys)
                 valuesFunction(region, id, kpi, limit).also { valuesMap[kpi] = it }
             else
                 valuesMap[kpi]
         else if (kpi in extension.keys)
-            if (!valuesMap.containsKey(kpi))
+            if (kpi !in valuesMap.keys)
                 extension[kpi]?.invoke()?.also { valuesMap[kpi] = it }
             else
                 valuesMap[kpi]
@@ -52,17 +63,32 @@ class Security(
             valuesMap[kpi]
     }
 
-    private fun dateIndex(asOf: LocalDate): Int = date.indexOfLast { it <= asOf }
-
-    operator fun get(kpi: String, asOf: LocalDate): Double? = dateIndex(asOf).takeIf { it > -1 }?.let { get(kpi)?.get(it) }
-
-    private val valuesMap: MutableMap<String, List<Double?>> = mutableMapOf()
-
-    private val extension: MutableMap<String, () -> List<Double?>> = mutableMapOf()
+    fun register(kpi: String, transform: () -> List<Double?>) = extension.put(kpi, transform)
 
     fun message(asOf: LocalDate): String? = dateIndex(asOf).takeIf { it > -1 }?.let(message::get)
 
-    fun register(kpi: String, transform: () -> List<Double?>) = extension.put(kpi, transform)
+    private fun dateIndex(asOf: LocalDate): Int = date.indexOfLast { it <= asOf }
+
+
+    fun getQuarter(kpi: String, date: LocalDate, asOf: LocalDate): Double? = dateIndexQuarter(kpi, asOf).takeIf { it > -1 }?.let { getQuarter(kpi, asOf)[it] }
+
+    fun getQuarter(kpi: String, asOf: LocalDate): List<Double?> =
+            safeGetQuarter(kpi, asOf) ?: throw NullPointerException()
+
+    fun safeGetQuarter(kpi: String, asOf: LocalDate): List<Double?>? {
+        //站在某一天拿到整个kpi列表
+        val values = if (kpi in arrayOf("asset", "profit", "revenue", "cashflow") && kpi !in quarterValuesMap.keys) {
+            quarterPublishesFunction(region, id, kpi, limit).also { quarterPublishesMap[kpi] = it }
+            quarterValuesFunction(region, id, kpi, limit).also { quarterValuesMap[kpi] = it }
+        } else
+            quarterValuesMap[kpi]
+        return values?.let { snapshotQuater(kpi, it, asOf) }
+    }
+
+    private fun dateIndexQuarter(kpi: String, asOf: LocalDate): Int =
+            quarterPublishesMap[kpi]?.indexOfLast { it != null && it <= asOf } ?: -1
+
+    private fun snapshotQuater(kpi: String, values: List<Double?>, asOf: LocalDate): List<Double?> = values.subList(0, dateIndexQuarter(kpi, asOf) + 1)
 
     override fun hashCode(): Int = Objects.hash(region, id)
 

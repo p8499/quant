@@ -7,8 +7,8 @@ import javax.persistence.*
 
 @Entity
 @Table(name = "SID")
-@IdClass(StockIndexDaily.StockIndexDailyId::class)
-open class StockIndexDaily(
+@IdClass(StockIndexDay.StockIndexDayId::class)
+open class StockIndexDay(
         @Id
         @Column(nullable = false, length = 2)
         open var region: String? = null,
@@ -28,12 +28,12 @@ open class StockIndexDaily(
 
         @Column(nullable = true, columnDefinition = "NUMBER(32, 16)", precision = 32, scale = 16)
         open var value: Double? = null) {
-    open class StockIndexDailyId(
+    open class StockIndexDayId(
             open var region: String? = null,
             open var id: String? = null,
             open var kpi: String? = null,
             open var date: LocalDate? = null) : Serializable {
         override fun hashCode(): Int = Objects.hash(region, id, kpi, date)
-        override fun equals(other: Any?): Boolean = other is StockIndexDailyId && other.region == region && other.kpi == kpi && other.date == date
+        override fun equals(other: Any?): Boolean = other is StockIndexDayId && other.region == region && other.kpi == kpi && other.date == date
     }
 }

@@ -76,3 +76,15 @@ create table SMD
 )
 /
 
+create table SIQ
+(
+    REGION  VARCHAR2(2 char)  not null,
+    ID      VARCHAR2(32 char) not null,
+    KPI     VARCHAR2(16 char) not null,
+    DTE     DATE              not null,
+    VALUE   NUMBER(32, 8),
+    PUBLISH DATE,
+    primary key (REGION, ID, KPI, DTE)
+)
+/
+

@@ -6,9 +6,9 @@ import java.util.*
 import javax.persistence.*
 
 @Entity
-@Table(name = "GMD")
-@IdClass(GroupMessageDaily.GroupMessageDailyId::class)
-open class GroupMessageDaily(
+@Table(name = "SMD")
+@IdClass(StockMessageDay.StockMessageDayId::class)
+open class StockMessageDay(
         @Id
         @Column(nullable = false, length = 2)
         open var region: String? = null,
@@ -25,11 +25,11 @@ open class GroupMessageDaily(
         @Lob
         @Column(nullable = true, columnDefinition = "CLOB")
         open var message: String? = null) {
-    open class GroupMessageDailyId(
+    open class StockMessageDayId(
             open var region: String? = null,
             open var id: String? = null,
             open var date: LocalDate? = null) : Serializable {
         override fun hashCode(): Int = Objects.hash(region, id, date)
-        override fun equals(other: Any?): Boolean = other is GroupMessageDailyId && other.region == region && other.date == date
+        override fun equals(other: Any?): Boolean = other is StockMessageDayId && other.region == region && other.date == date
     }
 }

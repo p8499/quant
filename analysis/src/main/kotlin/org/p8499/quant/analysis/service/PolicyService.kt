@@ -12,22 +12,31 @@ class PolicyService {
     protected lateinit var stockService: StockService
 
     @Autowired
-    protected lateinit var stockIndexDailyService: StockIndexDailyService
+    protected lateinit var stockIndexDayService: StockIndexDayService
 
     @Autowired
-    protected lateinit var stockMessageDailyService: StockMessageDailyService
+    protected lateinit var stockMessageDayService: StockMessageDayService
 
-    fun dates(region: String, id: String, limit: Int) = stockIndexDailyService.dates(region, id, limit)
+    @Autowired
+    protected lateinit var stockIndexQuarterService: StockIndexQuarterService
 
-    fun size(region: String, id: String) = stockIndexDailyService.size(region, id)
+    fun size(region: String, id: String) = stockIndexDayService.size(region, id)
 
-    fun values(region: String, id: String, kpi: String, limit: Int) = stockIndexDailyService.values(region, id, kpi, limit)
+    fun dates(region: String, id: String, limit: Int) = stockIndexDayService.dates(region, id, limit)
 
-    fun messages(region: String, id: String, limit: Int) = stockMessageDailyService.messages(region, id, limit)
+    fun values(region: String, id: String, kpi: String, limit: Int) = stockIndexDayService.values(region, id, kpi, limit)
 
-    fun tradingDates(region: String): List<LocalDate> = stockIndexDailyService.tradingDates(region)
+    fun messages(region: String, id: String, limit: Int) = stockMessageDayService.messages(region, id, limit)
+
+    fun quarterDays(region: String, id: String, limit: Int) = stockIndexQuarterService.dates(region, id, limit)
+
+    fun quarterValues(region: String, id: String, kpi: String, limit: Int) = stockIndexQuarterService.values(region, id, kpi, limit)
+
+    fun quarterPublishes(region: String, id: String, kpi: String, limit: Int) = stockIndexQuarterService.publishes(region, id, kpi, limit)
+
+    fun tradingDates(region: String): List<LocalDate> = stockIndexDayService.tradingDates(region)
 
     fun securitiesByRegion(region: String, limit: Int) = stockService.find(region).mapNotNull { let(it.region, it.id) { region, id -> security(region, id, limit) } }
 
-    fun security(region: String, id: String, limit: Int) = Security(region, id, limit, this::size, this::dates, this::values, this::messages)
+    fun security(region: String, id: String, limit: Int) = Security(region, id, limit, ::dates, ::values, ::messages, ::quarterDays, ::quarterValues, ::quarterPublishes)
 }

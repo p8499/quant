@@ -6,11 +6,11 @@ import io.reactivex.schedulers.Schedulers
 import org.p8499.quant.tushare.dtoBuilder.DtoBuilderFactory
 import org.p8499.quant.tushare.dtoBuilder.StockDtoBuilder
 import org.p8499.quant.tushare.entity.Stock
-import org.p8499.quant.tushare.feignClient.PersistentFeignClient
 import org.p8499.quant.tushare.service.GroupService
 import org.p8499.quant.tushare.service.GroupStockService
 import org.p8499.quant.tushare.service.StockService
 import org.p8499.quant.tushare.service.TradingDateService
+import org.p8499.quant.tushare.service.persistentRequest.PersistentRequest
 import org.p8499.quant.tushare.service.tushareSynchronizer.*
 import org.slf4j.LoggerFactory
 import org.springframework.amqp.core.AmqpTemplate
@@ -87,7 +87,7 @@ class TushareTask {
     protected lateinit var dtoBuilderFactory: DtoBuilderFactory
 
     @Autowired
-    protected lateinit var persistentFeignClient: PersistentFeignClient
+    protected lateinit var persistentRequest: PersistentRequest
 
     @Autowired
     protected lateinit var amqpTemplate: AmqpTemplate
@@ -112,7 +112,7 @@ class TushareTask {
      *                                           │ express           │
      *                                           └ forecast          ┘
      */
-    @Scheduled(cron = "00 05 18 * * MON-FRI")
+    @Scheduled(cron = "00 00 18 * * MON-FRI")
     fun syncAndSend() {
         /**
          * Download from tushare.pro and save the data into database
@@ -149,9 +149,9 @@ class TushareTask {
                     .map { dtoBuilderFactory.newStockBuilder(it, startDate, endDate) }
                     .map(StockDtoBuilder::build)
                     .doOnNext { File(directory, it.id).writeText(objectMapper.writeValueAsString(it)) }
-                    .doOnNext {  persistentFeignClient.saveStock(it) }
-                    .sequential().subscribe()
-            persistentFeignClient.complete("CN")
+                    .doOnNext(persistentRequest::saveStock)
+                    .sequential().blockingSubscribe()
+            persistentRequest.complete("CN")
 //            val groupIdFlowable = Flowable.fromIterable(groupService.findAll().mapNotNull(Group::id))
 //            val stockIdListFlowable = groupIdFlowable.map { groupStockService.findByGroupId(it).mapNotNull(GroupStock::stockId) }
 //            Flowable.zip(groupIdFlowable, stockIdListFlowable) { groupId, stockIdList -> groupId to stockIdList }

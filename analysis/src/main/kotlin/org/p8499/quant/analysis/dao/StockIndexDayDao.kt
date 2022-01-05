@@ -1,10 +1,10 @@
 package org.p8499.quant.analysis.dao
 
-import org.p8499.quant.analysis.entity.GroupIndexDaily
+import org.p8499.quant.analysis.entity.StockIndexDay
 import java.time.LocalDate
 
-interface GroupIndexDailyDao {
-    fun find(region: String, id: String, kpi: String): List<GroupIndexDaily>
+interface StockIndexDayDao {
+    fun find(region: String, id: String, kpi: String): List<StockIndexDay>
 
     fun size(region: String, id: String): Int
 

@@ -34,14 +34,6 @@ data class StockDto(
 
         var totalValue: List<Double?> = listOf(),
 
-        var asset: List<Double?> = listOf(),
-
-        var profit: List<Double?> = listOf(),
-
-        var revenue: List<Double?> = listOf(),
-
-        var cashflow: List<Double?> = listOf(),
-
         var pb: List<Double?> = listOf(),
 
         var pe: List<Double?> = listOf(),
@@ -50,4 +42,32 @@ data class StockDto(
 
         var pcf: List<Double?> = listOf(),
 
-        var message: List<String?> = listOf())
+        var message: List<String?> = listOf(),
+
+        @get:JsonFormat(pattern = "yyyyMMdd")
+        @set:JsonFormat(pattern = "yyyyMMdd")
+        var quarterDate: List<LocalDate> = listOf(),
+
+        var asset: List<Double?> = listOf(),
+
+        @get:JsonFormat(pattern = "yyyyMMdd")
+        @set:JsonFormat(pattern = "yyyyMMdd")
+        var assetPublish: List<LocalDate?> = listOf(),
+
+        var profit: List<Double?> = listOf(),
+
+        @get:JsonFormat(pattern = "yyyyMMdd")
+        @set:JsonFormat(pattern = "yyyyMMdd")
+        var profitPublish: List<LocalDate?> = listOf(),
+
+        var revenue: List<Double?> = listOf(),
+
+        @get:JsonFormat(pattern = "yyyyMMdd")
+        @set:JsonFormat(pattern = "yyyyMMdd")
+        var revenuePublish: List<LocalDate?> = listOf(),
+
+        var cashflow: List<Double?> = listOf(),
+
+        @get:JsonFormat(pattern = "yyyyMMdd")
+        @set:JsonFormat(pattern = "yyyyMMdd")
+        var cashflowPublish: List<LocalDate?> = listOf())

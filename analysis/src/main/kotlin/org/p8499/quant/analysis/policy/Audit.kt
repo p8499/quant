@@ -16,7 +16,7 @@ class Audit(val stage: Stage) {
     protected val stringBuilder = StringBuilder()
 
     fun snapshot() {
-        stringBuilder.append("${dateFormat.format(stage.date())}: 总价值 ${amountFormat.format(stage.value())}\n")
+        stringBuilder.append("${dateFormat.format(stage.date())}: 总价值 ${amountFormat.format(stage.value("close"))}\n")
         stage.positions().forEach {
             val close = it.security["close", stage.date()] ?: 0.0
             stringBuilder.append("    ${it.security.id}: ${amountFormat.format(close * it.volume)}, 成本: ${amountFormat.format(it.cost)}, 现价: ${amountFormat.format(close)}, 数量: ${volumeFormat.format(it.volume)}, 浮盈: ${amountFormat.format((close - it.cost) * it.volume)}\n")

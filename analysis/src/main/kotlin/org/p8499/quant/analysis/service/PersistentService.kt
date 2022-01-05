@@ -14,19 +14,22 @@ class PersistentService {
     protected lateinit var stockService: StockService
 
     @Autowired
-    protected lateinit var stockIndexDailyService: StockIndexDailyService
+    protected lateinit var stockIndexDayService: StockIndexDayService
 
     @Autowired
-    protected lateinit var stockMessageDailyService: StockMessageDailyService
+    protected lateinit var stockMessageDayService: StockMessageDayService
+
+    @Autowired
+    protected lateinit var stockIndexQuarterService: StockIndexQuarterService
 
     @Autowired
     protected lateinit var groupService: GroupService
 
     @Autowired
-    protected lateinit var groupIndexDailyService: GroupIndexDailyService
+    protected lateinit var groupIndexDayService: GroupIndexDayService
 
     @Autowired
-    protected lateinit var groupMessageDailyService: GroupMessageDailyService
+    protected lateinit var groupMessageDayService: GroupMessageDayService
 
     @Autowired
     protected lateinit var groupStockService: GroupStockService
@@ -35,98 +38,50 @@ class PersistentService {
     protected lateinit var controllerService: ControllerService
 
     @Transactional
-    fun saveStock(region: String, id: String,
-                  stock: Stock,
-                  openDailyIterable: Iterable<StockIndexDaily>,
-                  closeDailyIterable: Iterable<StockIndexDaily>,
-                  highDailyIterable: Iterable<StockIndexDaily>,
-                  lowDailyIterable: Iterable<StockIndexDaily>,
-                  volumeDailyIterable: Iterable<StockIndexDaily>,
-                  amountDailyIterable: Iterable<StockIndexDaily>,
-                  flowShareDailyIterable: Iterable<StockIndexDaily>,
-                  totalShareDailyIterable: Iterable<StockIndexDaily>,
-                  flowValueDailyIterable: Iterable<StockIndexDaily>,
-                  totalValueDailyIterable: Iterable<StockIndexDaily>,
-                  assetDailyIterable: Iterable<StockIndexDaily>,
-                  profitDailyIterable: Iterable<StockIndexDaily>,
-                  revenueDailyIterable: Iterable<StockIndexDaily>,
-                  cashflowDailyIterable: Iterable<StockIndexDaily>,
-                  pbDailyIterable: Iterable<StockIndexDaily>,
-                  peDailyIterable: Iterable<StockIndexDaily>,
-                  psDailyIterable: Iterable<StockIndexDaily>,
-                  pcfDailyIterable: Iterable<StockIndexDaily>,
-                  messageDailyIterable: Iterable<StockMessageDaily>) {
-        logger.info("${stock.id} Saving Start")
-        val time0 = System.currentTimeMillis()
+    fun saveStock(region: String, id: String, stock: Stock) {
         stockService.delete(region, id)
-        stockIndexDailyService.delete(region, id)
         stockService.save(stock)
-        stockIndexDailyService.saveAll(openDailyIterable)
-        stockIndexDailyService.saveAll(closeDailyIterable)
-        stockIndexDailyService.saveAll(highDailyIterable)
-        stockIndexDailyService.saveAll(lowDailyIterable)
-        stockIndexDailyService.saveAll(volumeDailyIterable)
-        stockIndexDailyService.saveAll(amountDailyIterable)
-        stockIndexDailyService.saveAll(flowShareDailyIterable)
-        stockIndexDailyService.saveAll(totalShareDailyIterable)
-        stockIndexDailyService.saveAll(flowValueDailyIterable)
-        stockIndexDailyService.saveAll(totalValueDailyIterable)
-        stockIndexDailyService.saveAll(assetDailyIterable)
-        stockIndexDailyService.saveAll(profitDailyIterable)
-        stockIndexDailyService.saveAll(revenueDailyIterable)
-        stockIndexDailyService.saveAll(cashflowDailyIterable)
-        stockIndexDailyService.saveAll(pbDailyIterable)
-        stockIndexDailyService.saveAll(peDailyIterable)
-        stockIndexDailyService.saveAll(psDailyIterable)
-        stockIndexDailyService.saveAll(pcfDailyIterable)
-        stockMessageDailyService.saveAll(messageDailyIterable)
-        val time1 = System.currentTimeMillis()
-        logger.info("${stock.id} Saving Finish, time = ${time1 - time0} milliseconds")
     }
 
     @Transactional
-    fun saveGroup(region: String, id: String,
-                  group: Group,
-                  groupStockIterable: Iterable<GroupStock>,
-                  openDailyIterable: Iterable<GroupIndexDaily>,
-                  closeDailyIterable: Iterable<GroupIndexDaily>,
-                  highDailyIterable: Iterable<GroupIndexDaily>,
-                  lowDailyIterable: Iterable<GroupIndexDaily>,
-                  volumeDailyIterable: Iterable<GroupIndexDaily>,
-                  amountDailyIterable: Iterable<GroupIndexDaily>,
-                  flowShareDailyIterable: Iterable<GroupIndexDaily>,
-                  totalShareDailyIterable: Iterable<GroupIndexDaily>,
-                  flowValueDailyIterable: Iterable<GroupIndexDaily>,
-                  totalValueDailyIterable: Iterable<GroupIndexDaily>,
-                  pbDailyIterable: Iterable<GroupIndexDaily>,
-                  peDailyIterable: Iterable<GroupIndexDaily>,
-                  psDailyIterable: Iterable<GroupIndexDaily>,
-                  pcfDailyIterable: Iterable<GroupIndexDaily>,
-                  messageDailyIterable: Iterable<GroupMessageDaily>) {
-        logger.info("${group.id} Saving Start")
-        val time0 = System.currentTimeMillis()
+    fun saveStockIndexDay(region: String, id: String, vararg stockIndexDayIterables: Iterable<StockIndexDay>) {
+        stockIndexDayService.delete(region, id)
+        for (stockIndexDayIterable in stockIndexDayIterables)
+            stockIndexDayService.saveAll(stockIndexDayIterable)
+    }
+
+    @Transactional
+    fun saveStockMessageDay(region: String, id: String, vararg stockMessageDayIterables: Iterable<StockMessageDay>) {
+        stockMessageDayService.delete(region, id)
+        for (stockMessageDayIterable in stockMessageDayIterables)
+            stockMessageDayService.saveAll(stockMessageDayIterable)
+    }
+
+    @Transactional
+    fun saveStockIndexQuarter(region: String, id: String, vararg stockIndexQuarterIterables: Iterable<StockIndexQuarter>) {
+        stockIndexQuarterService.delete(region, id)
+        for (stockIndexQuarterIterable in stockIndexQuarterIterables)
+            stockIndexQuarterService.saveAll(stockIndexQuarterIterable)
+    }
+
+    @Transactional
+    fun saveGroup(region: String, id: String, group: Group) {
         groupService.delete(region, id)
-        groupStockService.deleteByGroup(region, id)
-        groupIndexDailyService.delete(region, id)
         groupService.save(group)
-        groupStockService.saveAll(groupStockIterable)
-        groupIndexDailyService.saveAll(openDailyIterable)
-        groupIndexDailyService.saveAll(closeDailyIterable)
-        groupIndexDailyService.saveAll(highDailyIterable)
-        groupIndexDailyService.saveAll(lowDailyIterable)
-        groupIndexDailyService.saveAll(volumeDailyIterable)
-        groupIndexDailyService.saveAll(amountDailyIterable)
-        groupIndexDailyService.saveAll(flowShareDailyIterable)
-        groupIndexDailyService.saveAll(totalShareDailyIterable)
-        groupIndexDailyService.saveAll(flowValueDailyIterable)
-        groupIndexDailyService.saveAll(totalValueDailyIterable)
-        groupIndexDailyService.saveAll(pbDailyIterable)
-        groupIndexDailyService.saveAll(peDailyIterable)
-        groupIndexDailyService.saveAll(psDailyIterable)
-        groupIndexDailyService.saveAll(pcfDailyIterable)
-        groupMessageDailyService.saveAll(messageDailyIterable)
-        val time1 = System.currentTimeMillis()
-        logger.info("${group.id} Saving Finish, time = ${time1 - time0} milliseconds")
+    }
+
+    @Transactional
+    fun saveGroupIndexDay(region: String, id: String, vararg groupIndexDayIterables: Iterable<GroupIndexDay>) {
+        groupIndexDayService.delete(region, id)
+        for (groupIndexDayIterable in groupIndexDayIterables)
+            groupIndexDayService.saveAll(groupIndexDayIterable)
+    }
+
+    @Transactional
+    fun saveGroupMessageDay(region: String, id: String, vararg groupMessageDayIterables: Iterable<GroupMessageDay>) {
+        groupMessageDayService.delete(region, id)
+        for (groupMessageDayIterable in groupMessageDayIterables)
+            groupMessageDayService.saveAll(groupMessageDayIterable)
     }
 
     fun complete(region: String) {
