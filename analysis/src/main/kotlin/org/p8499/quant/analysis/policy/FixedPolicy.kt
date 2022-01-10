@@ -18,7 +18,7 @@ abstract class FixedPolicy(val policyService: PolicyService) : Policy() {
                 .let { it.subList(0, min(slots, it.size)) }
         val securitiesSell = securitiesPos.filter { it !in securitiesTarget }.onEach { stage.sell(it, "open") }
         val securitiesBuy = securitiesTarget.filter { it !in securitiesPos }.onEach { stage.buySlot(it, "open", slots) }
-        (securitiesPos + securitiesTarget).forEach { stage.log("查看 ${it.id} lodps = ${it["lodps", barDate]}") }
+        (securitiesPos + securitiesTarget).toSet().forEach { stage.log("查看 ${it.id} lodps = ${it["lodps", barDate]}") }
     }
 
     fun invincible(security: Security, barDate: LocalDate): Boolean = false

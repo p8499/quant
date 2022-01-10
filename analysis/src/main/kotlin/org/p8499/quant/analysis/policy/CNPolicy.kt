@@ -34,7 +34,7 @@ open class CNPolicy(policyService: PolicyService) : FixedPolicy(policyService) {
                 { it["rateps", barDate] ?: Double.MAX_VALUE }))
     }
 
-    override val slots = 4
+    override val slots = 1
 
     override fun pre(stage: Stage, date: LocalDate) {
         super.pre(stage, date)
@@ -44,7 +44,7 @@ open class CNPolicy(policyService: PolicyService) : FixedPolicy(policyService) {
     override fun post(stage: Stage, date: LocalDate) {
         super.post(stage, date)
         stage.log("终末价值 ${amountFormat.format(stage.value("close"))}")
-        val securitiesBuy = targets(stage, date, slots)
+        val securitiesBuy = find(securities, date)
         stage.log("明日建议 ${securitiesBuy.joinToString(separator = ", ") { "${it.region}-${it.id}" }}")
     }
 }
