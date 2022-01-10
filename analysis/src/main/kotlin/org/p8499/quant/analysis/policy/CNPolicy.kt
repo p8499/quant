@@ -45,6 +45,6 @@ open class CNPolicy(policyService: PolicyService) : FixedPolicy(policyService) {
         super.post(stage, date)
         stage.log("终末价值 ${amountFormat.format(stage.value("close"))}")
         val securitiesBuy = find(securities, date)
-        stage.log("明日建议 ${securitiesBuy.joinToString(separator = ", ") { "${it.region}-${it.id}" }}")
+        stage.log("明日建议\n${securitiesBuy.joinToString(separator = "\n  ") { "${it.region}-${it.id} lodps = ${it["lodps", date]}" }}")
     }
 }
