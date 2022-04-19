@@ -2,7 +2,8 @@ package org.p8499.quant.tushare.dtoBuilder
 
 import org.p8499.quant.tushare.common.finiteOrNull
 import org.p8499.quant.tushare.common.let
-import org.p8499.quant.tushare.dto.StockDto
+import org.p8499.quant.tushare.dto.SecurityDayDto
+import org.p8499.quant.tushare.dto.SecurityDto
 import org.p8499.quant.tushare.entity.*
 import org.p8499.quant.tushare.service.*
 import org.slf4j.LoggerFactory
@@ -29,12 +30,22 @@ class StockDtoBuilder(
         val forecastService: ForecastService) {
     protected val logger by lazy { LoggerFactory.getLogger(javaClass) }
 
-    val name by lazy { stockService[stockId]?.name ?: "" }
+    val name by lazy {
+        stockService[stockId]?.name
+                ?: ""
+    }
 
     private fun <T, K, V> mapOf(items: Iterable<T>, keyTransform: (T) -> K?, valueTransform: (T) -> V?): Map<K, V?> {
         val entryMap = mutableMapOf<K, V?>()
         for (item in items)
             keyTransform(item)?.let { entryMap[it] = valueTransform(item) }
+        return entryMap
+    }
+
+    private fun <T, K, V> mapIndexedOf(items: List<T>, keyTransform: (Int, T) -> K?, valueTransform: (Int, T) -> V?): Map<K, V?> {
+        val entryMap = mutableMapOf<K, V?>()
+        for (index in items.indices)
+            keyTransform(index, items[index])?.let { entryMap[it] = valueTransform(index, items[index]) }
         return entryMap
     }
 
@@ -69,7 +80,11 @@ class StockDtoBuilder(
 
     private fun <T, V> flatMapOf(items: Iterable<T>, keyTransform: (T) -> LocalDate?, valueTransform: (T) -> V?): Map<LocalDate, V?> = flatten(mapOf(items, keyTransform, valueTransform))
 
+    private fun <T, V> flatMapIndexedOf(items: List<T>, keyTransform: (Int, T) -> LocalDate?, valueTransform: (Int, T) -> V?): Map<LocalDate, V?> = flatten(mapIndexedOf(items, keyTransform, valueTransform))
+
     private fun <T, V> quarterFlatMapOf(items: Iterable<T>, keyTransform: (T) -> LocalDate?, valueTransform: (T) -> V?): Map<LocalDate, V?> = quarterFlatten(mapOf(items, keyTransform, valueTransform))
+
+    private fun <T, V> quarterFlatMapIndexedOf(items: List<T>, keyTransform: (Int, T) -> LocalDate?, valueTransform: (Int, T) -> V?): Map<LocalDate, V?> = quarterFlatten(mapIndexedOf(items, keyTransform, valueTransform))
 
     val dateList by lazy { tradingDateService.findByStockIdBetween(stockId, from, to).mapNotNull(TradingDate::date) }
 
@@ -139,6 +154,14 @@ class StockDtoBuilder(
 
     private val expressList by lazy { expressService.findByStockIdBetween(stockId, from, to) }
 
+    private val forecastList by lazy { forecastService.findByStockIdBetween(stockId, from, to) }
+
+    private fun forecastedProfit(forecast: Forecast): Double? {
+        val profitLastYear = let(forecast.year, forecast.period) { a, b -> incomeList.find { it.year == a - 1 && it.period == b } }?.nIncomeAttrP
+        val multiplier = forecast.subject?.substringAfter('(')?.substringBefore('%')?.toDoubleOrNull()?.div(100)?.plus(1)
+        return let(profitLastYear, multiplier) { a, b -> a * b }
+    }
+
     private fun <T> multiplierOf(items: Iterable<T>, dateTransform: (T) -> LocalDate?, yearTransform: (T) -> Int?, periodTransform: (T) -> Int?, valueTransform: (T) -> Double?, date: LocalDate, period: Int): Double? {
         val periodItemList = items.filter { item -> dateTransform(item)?.let { it < date } ?: false && periodTransform(item) == period }
         val yearItemList = periodItemList.map { periodItem -> items.find { yearItem -> yearTransform(yearItem) == yearTransform(periodItem) && periodTransform(yearItem) == 4 } }
@@ -163,12 +186,28 @@ class StockDtoBuilder(
 
     private fun opCashflowMultiplier(publish: LocalDate, period: Int): Double? = multiplierOf(cashflowList, Cashflow::publish, Cashflow::year, Cashflow::period, Cashflow::nCashflowAct, publish, period)
 
+    private fun <T> sliceIndexed(items: List<T>, yearTransform: (Int, T) -> Int?, periodTransform: (Int, T) -> Int?, valueTransform: (Int, T) -> Double?): List<Double?> {
+        val indices = items.indices
+        return items.mapIndexed { index, item ->
+            let(yearTransform(index, item), periodTransform(index, item)) { year, period ->
+                if (period > 1) {
+                    val pq = previousQuarter(year to period)
+                    let(valueTransform(index, item), indices.find { yearTransform(it, items[it]) == pq.first && periodTransform(it, items[it]) == pq.second }?.let { it to items[it] }?.let { valueTransform(it.first, it.second) }) { a, b -> a - b }
+                } else
+                    valueTransform(index, item)
+            }
+        }
+    }
+
     val netAssetList by lazy {
         flatten(mapOf(expressList, Express::publish, Express::totalHldrEqyExcMinInt)
                 + mapOf(balanceSheetList, BalanceSheet::publish, BalanceSheet::totalHldrEqyExcMinInt)).values.toList()
     }
 
-    val netProfitList by lazy { multipliedFlatMapOf(incomeList, Income::publish, Income::period, Income::nIncomeAttrP, this::netProfitMultiplier).values.toList() }
+    val netProfitList by lazy {
+        flatten(multipliedMapOf(forecastList, Forecast::publish, Forecast::period, this::forecastedProfit, this::netProfitMultiplier)
+                + multipliedMapOf(incomeList, Income::publish, Income::period, Income::nIncomeAttrP, this::netProfitMultiplier)).values.toList()
+    }
 
     val revenueList by lazy {
         flatten(multipliedMapOf(expressList, Express::publish, Express::period, Express::revenue, this::revenueMultiplier)
@@ -196,10 +235,11 @@ class StockDtoBuilder(
     val messageList by lazy {
         val forecasts = forecastService.findByStockId(stockId)
         val blankForecasts = forecasts.mapNotNull { let(it.stockId, it.year, it.period) { a, b, c -> forecastService.expires(a, b, c) } }
-                .map { Forecast(stockId, 0, 0, it, "", "") }
+                .map { Forecast(stockId, it, 0, 0, "", "") }
         flatMapOf(forecasts + blankForecasts, Forecast::publish, Forecast::subject).values.toList()
     }
 
+    //asset
     val quarterNetAssetList by lazy {
         quarterFlatten(mapOf(expressList, { let(it.year, it.period) { a, b -> q2d(a to b) } }, Express::totalHldrEqyExcMinInt)
                 + mapOf(balanceSheetList, { let(it.year, it.period) { a, b -> q2d(a to b) } }, BalanceSheet::totalHldrEqyExcMinInt)).values.toList()
@@ -210,25 +250,109 @@ class StockDtoBuilder(
                 + mapOf(balanceSheetList, { let(it.year, it.period) { a, b -> q2d(a to b) } }, BalanceSheet::publish)).values.toList()
     }
 
-    val quarterNetProfitList by lazy { quarterMultipliedFlatMapOf(incomeList, { let(it.year, it.period) { a, b -> q2d(a to b) } }, Income::period, Income::nIncomeAttrP, this::netProfitMultiplier).values.toList() }
+    //profit
+    val quarterNetProfitList by lazy {
+        quarterFlatten(multipliedMapOf(forecastList, { let(it.year, it.period) { a, b -> q2d(a to b) } }, Forecast::period, this::forecastedProfit, this::netProfitMultiplier)
+                + multipliedMapOf(incomeList, { let(it.year, it.period) { a, b -> q2d(a to b) } }, Income::period, Income::nIncomeAttrP, this::netProfitMultiplier)).values.toList()
+    }
 
-    val quarterNetProfitPublishList by lazy { quarterFlatMapOf(incomeList, { let(it.year, it.period) { a, b -> q2d(a to b) } }, Income::publish).values.toList() }
+    val quarterNetProfitPublishList by lazy {
+        quarterFlatten(mapOf(forecastList, { let(it.year, it.period) { a, b -> q2d(a to b) } }, Forecast::publish)
+                + mapOf(incomeList, { let(it.year, it.period) { a, b -> q2d(a to b) } }, Income::publish)).values.toList()
+    }
 
+    val quarterNetProfitQuarterList by lazy {
+        quarterFlatten(mapOf(forecastList, { let(it.year, it.period) { a, b -> q2d(a to b) } }, Forecast::publish)
+                + mapOf(incomeList, { let(it.year, it.period) { a, b -> q2d(a to b) } }, Income::publish)).keys.toList()
+    }
+
+    val quarterAccumulatedNetProfitList by lazy {
+        quarterFlatten(mapOf(forecastList, { let(it.year, it.period) { a, b -> q2d(a to b) } }, this::forecastedProfit)
+                + mapOf(incomeList, { let(it.year, it.period) { a, b -> q2d(a to b) } }, Income::nIncomeAttrP)).values.toList()
+    }
+
+    val quarterCurrentNetProfitList by lazy {
+        quarterFlatMapIndexedOf(
+                sliceIndexed(quarterAccumulatedNetProfitList, { i, item -> d2q(quarterNetProfitQuarterList[i]).first }, { i, item -> d2q(quarterNetProfitQuarterList[i]).second }, { i, item -> quarterAccumulatedNetProfitList[i] }),
+                { i, item -> quarterNetProfitQuarterList[i] },
+                { i, item -> item }).values.toList()
+    }
+
+    //revenue
     val quarterRevenueList by lazy {
         quarterFlatten(multipliedMapOf(expressList, { let(it.year, it.period) { a, b -> q2d(a to b) } }, Express::period, Express::revenue, this::revenueMultiplier)
                 + multipliedMapOf(incomeList, { let(it.year, it.period) { a, b -> q2d(a to b) } }, Income::period, Income::revenue, this::revenueMultiplier)).values.toList()
     }
+
     val quarterRevenuePublishList by lazy {
         quarterFlatten(mapOf(expressList, { let(it.year, it.period) { a, b -> q2d(a to b) } }, Express::publish)
                 + mapOf(incomeList, { let(it.year, it.period) { a, b -> q2d(a to b) } }, Income::publish)).values.toList()
     }
 
+    val quarterRevenueQuarterList by lazy {
+        quarterFlatten(mapOf(expressList, { let(it.year, it.period) { a, b -> q2d(a to b) } }, Express::publish)
+                + mapOf(incomeList, { let(it.year, it.period) { a, b -> q2d(a to b) } }, Income::publish)).keys.toList()
+    }
+
+    val quarterAccumulatedRevenueList by lazy {
+        quarterFlatten(mapOf(expressList, { let(it.year, it.period) { a, b -> q2d(a to b) } }, Express::revenue)
+                + mapOf(incomeList, { let(it.year, it.period) { a, b -> q2d(a to b) } }, Income::revenue)).values.toList()
+    }
+
+    val quarterCurrentRevenueList by lazy {
+        quarterFlatMapIndexedOf(
+                sliceIndexed(quarterAccumulatedRevenueList, { i, item -> d2q(quarterRevenueQuarterList[i]).first }, { i, item -> d2q(quarterRevenueQuarterList[i]).second }, { i, item -> quarterAccumulatedRevenueList[i] }),
+                { i, item -> quarterRevenueQuarterList[i] },
+                { i, item -> item }).values.toList()
+    }
+
+    //cashflow
     val quarterOpCashflowList by lazy { quarterMultipliedFlatMapOf(cashflowList, { let(it.year, it.period) { a, b -> q2d(a to b) } }, Cashflow::period, Cashflow::nCashflowAct, this::opCashflowMultiplier).values.toList() }
 
     val quarterOpCashflowPublishList by lazy { quarterFlatMapOf(cashflowList, { let(it.year, it.period) { a, b -> q2d(a to b) } }, Cashflow::publish).values.toList() }
 
-    fun build(): StockDto {
-        logger.info("Constructing $stockId DTO")
-        return StockDto("CN", stockId, name, dateList, openPreList, closePreList, highPreList, lowPreList, volumePreList, amountList, flowSharePreList, totalSharePreList, flowValueList, totalValueList, pbList, peList, psList, pcfList, messageList, quarterDateList, quarterNetAssetList, quarterNetAssetPublishList, quarterNetProfitList, quarterNetProfitPublishList, quarterRevenueList, quarterRevenuePublishList, quarterOpCashflowList, quarterOpCashflowPublishList)
+    val quarterOpCashflowQuarterList by lazy { quarterFlatMapOf(cashflowList, { let(it.year, it.period) { a, b -> q2d(a to b) } }, Cashflow::publish).keys.toList() }
+
+    val quarterAccumulatedOpCashflowList by lazy { quarterFlatMapOf(cashflowList, { let(it.year, it.period) { a, b -> q2d(a to b) } }, Cashflow::nCashflowAct).values.toList() }
+
+    val quarterCurrentOpCashflowList by lazy {
+        quarterFlatMapIndexedOf(
+                sliceIndexed(quarterAccumulatedOpCashflowList, { i, item -> d2q(quarterOpCashflowQuarterList[i]).first }, { i, item -> d2q(quarterOpCashflowQuarterList[i]).second }, { i, item -> quarterAccumulatedOpCashflowList[i] }),
+                { i, item -> quarterOpCashflowQuarterList[i] },
+                { i, item -> item }).values.toList()
     }
+
+    fun securityDto(): SecurityDto {
+        return SecurityDto("CN", stockId, name)
+    }
+
+    fun securityDayDto(): SecurityDayDto {
+        return SecurityDayDto("CN", stockId, dateList, listOf(
+                SecurityDayDto.Indices("open", openPreList),
+                SecurityDayDto.Indices("close", closePreList),
+                SecurityDayDto.Indices("high", highPreList),
+                SecurityDayDto.Indices("low", lowPreList),
+                SecurityDayDto.Indices("volume", volumePreList),
+                SecurityDayDto.Indices("amount", amountList),
+                SecurityDayDto.Indices("flowShare", flowSharePreList),
+                SecurityDayDto.Indices("flowValue", flowValueList),
+                SecurityDayDto.Indices("totalShare", totalSharePreList),
+                SecurityDayDto.Indices("totalValue", totalValueList),
+                SecurityDayDto.Indices("pb", pbList),
+                SecurityDayDto.Indices("pe", peList),
+                SecurityDayDto.Indices("ps", psList),
+                SecurityDayDto.Indices("pcf", pcfList)), listOf(
+                SecurityDayDto.Messages("forecast", messageList)))
+    }
+
+//    fun securityQuarterDto(): SecurityQuarterDto {
+//        return SecurityQuarterDto("CN", stockId, quarterDateList.map(this::d2q).map { it.first * 4 + it.second - 1 }, listOf(
+//                SecurityQuarterDto.Indices("asset", quarterNetAssetList, quarterNetAssetPublishList),
+//                SecurityQuarterDto.Indices("profit", quarterNetProfitList, quarterNetProfitPublishList),
+//                SecurityQuarterDto.Indices("currentProfit", quarterCurrentNetProfitList, quarterNetProfitPublishList),
+//                SecurityQuarterDto.Indices("revenue", quarterRevenueList, quarterRevenuePublishList),
+//                SecurityQuarterDto.Indices("currentRevenue", quarterCurrentRevenueList, quarterRevenuePublishList),
+//                SecurityQuarterDto.Indices("cashflow", quarterOpCashflowList, quarterOpCashflowPublishList),
+//                SecurityQuarterDto.Indices("currentCashflow", quarterCurrentOpCashflowList, quarterOpCashflowPublishList)), listOf())
+//    }
 }

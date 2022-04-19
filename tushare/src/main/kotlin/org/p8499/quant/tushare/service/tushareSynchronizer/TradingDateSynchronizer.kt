@@ -1,6 +1,5 @@
 package org.p8499.quant.tushare.service.tushareSynchronizer
 
-import org.p8499.quant.tushare.TushareApplication
 import org.p8499.quant.tushare.entity.TradingDate
 import org.p8499.quant.tushare.service.ControllerService
 import org.p8499.quant.tushare.service.TradingDateService
@@ -26,6 +25,7 @@ class TradingDateSynchronizer {
 
     fun invoke() {
         logger.info("Start Synchronizing TradingDate")
+        controllerService.begin("TradingDate", LocalDateTime.now())
         val unprocessedTradingDateList: (String, Boolean) -> List<TradingDate> = { exchange, todayIncluded ->
             val lastDate = tradingDateService.last(exchange)?.date
             val startDate = lastDate?.plusDays(1) ?: LocalDate.of(2007, 1, 1)
@@ -34,7 +34,7 @@ class TradingDateSynchronizer {
         }
         val todayIncluded = LocalDateTime.now().hour >= 16
         tradingDateService.saveAll(unprocessedTradingDateList("SSE", todayIncluded) + unprocessedTradingDateList("SZSE", todayIncluded))
-        controllerService.complete("TradingDate")
+        controllerService.end("TradingDate")
         logger.info("Finish Synchronizing TradingDate")
     }
 }

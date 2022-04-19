@@ -13,11 +13,10 @@ import org.springframework.retry.annotation.Backoff
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Service
 import java.time.LocalDate
-import java.util.*
 
 @Service
 class ExpressRequest : TushareRequest<ExpressRequest.InParams, ExpressRequest.OutParams>() {
-    override val apiName = "express"
+    override val apiName = "express_vip"
 
     @Autowired
     override lateinit var objectMapper: ObjectMapper
@@ -70,6 +69,9 @@ class ExpressRequest : TushareRequest<ExpressRequest.InParams, ExpressRequest.Ou
 
             @set:JsonProperty("total_hldr_eqy_exc_min_int")
             var totalHldrEqyExcMinInt: Double? = null,
+
+            @set:JsonProperty("n_income")
+            var nIncome: Double? = null,
 
             var revenue: Double? = null,
 

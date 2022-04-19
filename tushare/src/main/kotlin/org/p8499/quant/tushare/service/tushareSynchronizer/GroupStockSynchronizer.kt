@@ -2,7 +2,6 @@ package org.p8499.quant.tushare.service.tushareSynchronizer
 
 import io.reactivex.Flowable
 import io.reactivex.schedulers.Schedulers
-import org.p8499.quant.tushare.TushareApplication
 import org.p8499.quant.tushare.common.let
 import org.p8499.quant.tushare.common.mapNotNull
 import org.p8499.quant.tushare.entity.Group
@@ -16,6 +15,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.concurrent.TimeUnit
 
 @Service
@@ -51,6 +51,7 @@ class GroupStockSynchronizer {
 
     fun invoke() {
         logger.info("Start Synchronizing GroupStock")
+        controllerService.begin("GroupStock", LocalDateTime.now())
         val groupStockListOfIndex: (LocalDate) -> List<GroupStock> = { tradeDate ->
             val groupStockList = indexWeightRequest.invoke(IndexWeightRequest.InParams(tradeDate = tradeDate), IndexWeightRequest.OutParams::class.java).map { GroupStock(it.indexCode, it.conCode, it.weight) }
             val stockIdList = stockService.findAll().map(Stock::id)
@@ -86,7 +87,7 @@ class GroupStockSynchronizer {
         val date = tradingDateService.last("SSE")?.date ?: return
         val fsMap = flowShareMap(date)
         groupStockService.deleteAndSaveAll(groupStockListOfIndex(date) + groupStockListOfIndustry(fsMap) + groupStockListOfConcept(fsMap))
-        controllerService.complete("GroupStock")
+        controllerService.end("GroupStock")
         logger.info("Finish Synchronizing GroupStock")
     }
 }

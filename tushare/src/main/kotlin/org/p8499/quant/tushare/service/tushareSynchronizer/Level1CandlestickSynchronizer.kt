@@ -1,7 +1,6 @@
 package org.p8499.quant.tushare.service.tushareSynchronizer
 
 import io.reactivex.Flowable
-import org.p8499.quant.tushare.TushareApplication
 import org.p8499.quant.tushare.entity.Level1Candlestick
 import org.p8499.quant.tushare.entity.Stock
 import org.p8499.quant.tushare.entity.TradingDate
@@ -14,6 +13,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 @Service
 class Level1CandlestickSynchronizer {
@@ -36,6 +36,7 @@ class Level1CandlestickSynchronizer {
 
     fun invoke() {
         logger.info("Start Synchronizing Level1Candlestick")
+        controllerService.begin("Level1Candlestick", LocalDateTime.now())
         val level1CandlestickIterable: (String) -> Iterable<Level1Candlestick> = { tsCode ->
             val datesCollection = tradingDateService.unprocessedForLevel1Candlestick(tsCode).mapNotNull(TradingDate::date).groupBy(LocalDate::getYear).values
             Flowable.fromIterable(datesCollection)
@@ -48,7 +49,7 @@ class Level1CandlestickSynchronizer {
             level1CandlestickService.saveAll(level1CandlestickIterable(it))
             level1CandlestickService.fillVacancies(it)
         }
-        controllerService.complete("Level1Candlestick")
+        controllerService.end("Level1Candlestick")
         logger.info("Finish Synchronizing Level1Candlestick")
     }
 }

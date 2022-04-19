@@ -15,15 +15,15 @@ open class Express(
 
         @Id
         @Column(nullable = false)
+        open var publish: LocalDate? = null,
+
+        @Id
+        @Column(nullable = false)
         open var year: Int? = null,
 
         @Id
         @Column(nullable = false)
         open var period: Int? = null,
-
-        @Column(nullable = false)
-//        @Temporal(TemporalType.DATE)
-        open var publish: LocalDate? = null,
 
         /**
          * 股东权益合计(不含少数股东权益)(元) -> 净资产
@@ -32,16 +32,23 @@ open class Express(
         open var totalHldrEqyExcMinInt: Double? = null,
 
         /**
+         * 净利润(元) -> 净利润
+         */
+        @Column(nullable=true,columnDefinition = "NUMBER(26,2)",precision = 26,scale = 2)
+        open var nIncome: Double? = null,
+
+        /**
          * 营业收入(元) -> 营业收入(年初至今)
          */
         @Column(nullable = true, columnDefinition = "NUMBER(26, 2)", precision = 26, scale = 2)
         open var revenue: Double? = null) {
     open class ExpressId(
             open var stockId: String? = null,
+            open var publish: LocalDate? = null,
             open var year: Int? = null,
             open var period: Int? = null) : Serializable {
-        override fun hashCode(): Int = Objects.hash(stockId, year, period)
-        override fun equals(other: Any?): Boolean = other is ExpressId && other.stockId == stockId && other.year == year && other.period == period
+        override fun hashCode(): Int = Objects.hash(stockId, publish, year, period)
+        override fun equals(other: Any?): Boolean = other is ExpressId && other.stockId == stockId && other.publish == publish && other.year == year && other.period == period
     }
 }
 

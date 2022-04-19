@@ -17,7 +17,7 @@ import java.util.*
 
 @Service
 class IncomeRequest : TushareRequest<IncomeRequest.InParams, IncomeRequest.OutParams>() {
-    override val apiName = "income"
+    override val apiName = "income_vip"
 
     @Autowired
     override lateinit var objectMapper: ObjectMapper

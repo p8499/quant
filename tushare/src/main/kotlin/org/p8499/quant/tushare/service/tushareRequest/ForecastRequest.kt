@@ -17,7 +17,7 @@ import java.util.*
 
 @Service
 class ForecastRequest : TushareRequest<ForecastRequest.InParams, ForecastRequest.OutParams>() {
-    override val apiName = "forecast"
+    override val apiName = "forecast_vip"
 
     @Autowired
     override lateinit var objectMapper: ObjectMapper

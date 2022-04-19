@@ -13,6 +13,11 @@ open class Controller(
         @Column(nullable = false, length = 32)
         open var objectId: String? = null,
 
-        @Column(nullable = false, name = "dte")
-//        @Temporal(TemporalType.TIMESTAMP)
-        open var date: LocalDateTime? = null)
+        @Column(nullable = true, name = "snapshot")
+        open var snapshot: LocalDateTime? = null,
+
+        @Column(nullable = true, name = "begin")
+        open var begin: LocalDateTime? = null,
+
+        @Column(nullable = true, name = "end")
+        open var end: LocalDateTime? = null)

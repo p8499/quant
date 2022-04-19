@@ -14,5 +14,7 @@ class ControllerService {
 
     operator fun get(region: String): Controller? = controllerRepository.findByIdOrNull(region)
 
-    fun complete(region: String): Controller = controllerRepository.saveAndFlush(Controller(region, LocalDateTime.now()))
+    fun begin(region: String, snapshot: LocalDateTime): Controller = controllerRepository.saveAndFlush(Controller(region, snapshot, LocalDateTime.now(), null))
+
+    fun end(region: String): Controller? = get(region)?.also { it.end = LocalDateTime.now() }?.run(controllerRepository::saveAndFlush)
 }

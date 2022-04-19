@@ -15,15 +15,15 @@ open class Income(
 
         @Id
         @Column(nullable = false)
+        open var publish: LocalDate? = null,
+
+        @Id
+        @Column(nullable = false)
         open var year: Int? = null,
 
         @Id
         @Column(nullable = false)
         open var period: Int? = null,
-
-        @Column(nullable = false)
-//        @Temporal(TemporalType.DATE)
-        open var publish: LocalDate? = null,
 
         /**
          * 营业收入 -> 营业收入(年初至今)
@@ -37,9 +37,10 @@ open class Income(
         open var nIncomeAttrP: Double? = null) {
     open class IncomeId(
             open var stockId: String? = null,
+            open var publish: LocalDate? = null,
             open var year: Int? = null,
             open var period: Int? = null) : Serializable {
-        override fun hashCode(): Int = Objects.hash(stockId, year, period)
-        override fun equals(other: Any?): Boolean = other is IncomeId && other.stockId == stockId && other.year == year && other.period == period
+        override fun hashCode(): Int = Objects.hash(stockId, publish, year, period)
+        override fun equals(other: Any?): Boolean = other is IncomeId && other.stockId == stockId && other.publish == publish && other.year == year && other.period == period
     }
 }

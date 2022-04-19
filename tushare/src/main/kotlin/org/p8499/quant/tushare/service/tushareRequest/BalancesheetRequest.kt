@@ -16,7 +16,7 @@ import java.time.LocalDate
 
 @Service
 class BalancesheetRequest : TushareRequest<BalancesheetRequest.InParams, BalancesheetRequest.OutParams>() {
-    override val apiName = "balancesheet"
+    override val apiName = "balancesheet_vip"
 
     @Autowired
     override lateinit var objectMapper: ObjectMapper

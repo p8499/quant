@@ -1,6 +1,7 @@
 package org.p8499.quant.tushare.repositoryImpl
 
 import org.p8499.quant.tushare.dao.ForecastDao
+import org.p8499.quant.tushare.entity.Express
 import org.p8499.quant.tushare.entity.Forecast
 import org.springframework.stereotype.Repository
 import java.time.LocalDate
@@ -19,6 +20,10 @@ class ForecastRepositoryImpl : ForecastDao {
     override fun findByStockId(stockId: String): List<Forecast> = em
             .createQuery("select t0 from Forecast as t0 where t0.stockId = :stockId order by t0.publish asc", Forecast::class.java)
             .setParameter("stockId", stockId).resultList
+
+    override fun findByStockIdBetween(stockId: String, from: LocalDate, to: LocalDate): List<Forecast> = em
+            .createQuery("select t0 from Forecast as t0 where t0.stockId = :stockId and t0.publish between :from and :to order by t0.publish asc", Forecast::class.java)
+            .setParameter("stockId", stockId).setParameter("from", from).setParameter("to", to).resultList
 
     override fun expires(stockId: String, year: Int, period: Int): LocalDate? {
         val publishBS = em.createQuery("select t1.publish" +

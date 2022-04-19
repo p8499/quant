@@ -53,6 +53,12 @@ class DtoBuilderFactory {
     @Autowired
     protected lateinit var forecastService: ForecastService
 
+    fun newSecurityDtoBuilder(stockId: String, from: LocalDate, to: LocalDate) = SecurityDtoBuilder(stockId, from, to, exchangeService, tradingDateService, stockService, groupService, level1CandlestickService, level1BasicService, level1AdjFactorService, level2Service, groupStockService, balanceSheetService, incomeService, cashflowService, expressService, forecastService)
+
+    fun newSecurityDayDtoBuilder(stockId: String, from: LocalDate, to: LocalDate) = SecurityDayDtoBuilder(stockId, from, to, exchangeService, tradingDateService, stockService, groupService, level1CandlestickService, level1BasicService, level1AdjFactorService, level2Service, groupStockService, balanceSheetService, incomeService, cashflowService, expressService, forecastService)
+
+    fun newSecurityQuarterDtoBuilder(stockId: String, from: LocalDate, to: LocalDate) = SecurityQuarterDtoBuilder(stockId, from, to, exchangeService, tradingDateService, stockService, groupService, level1CandlestickService, level1BasicService, level1AdjFactorService, level2Service, groupStockService, balanceSheetService, incomeService, cashflowService, expressService, forecastService)
+
     fun newStockBuilder(stockId: String, from: LocalDate, to: LocalDate) = StockDtoBuilder(stockId, from, to, exchangeService, tradingDateService, stockService, groupService, level1CandlestickService, level1BasicService, level1AdjFactorService, level2Service, groupStockService, balanceSheetService, incomeService, cashflowService, expressService, forecastService)
 
     fun newGroupBuilder(groupId: String, stockDtoList: List<StockDto>) = GroupDtoBuilder(groupId, stockDtoList, exchangeService, tradingDateService, stockService, groupService, level1CandlestickService, level1BasicService, level1AdjFactorService, level2Service, groupStockService, balanceSheetService, incomeService, cashflowService, expressService, forecastService)

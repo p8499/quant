@@ -15,15 +15,15 @@ open class Cashflow(
 
         @Id
         @Column(nullable = false)
+        open var publish: LocalDate? = null,
+
+        @Id
+        @Column(nullable = false)
         open var year: Int? = null,
 
         @Id
         @Column(nullable = false)
         open var period: Int? = null,
-
-        @Column(nullable = false)
-//        @Temporal(TemporalType.DATE)
-        open var publish: LocalDate? = null,
 
         /**
          * 经营活动产生的现金流量净额 -> 经营现金(年初至今)
@@ -32,9 +32,10 @@ open class Cashflow(
         open var nCashflowAct: Double? = null) {
     open class CashflowId(
             open var stockId: String? = null,
+            open var publish: LocalDate? = null,
             open var year: Int? = null,
             open var period: Int? = null) : Serializable {
-        override fun hashCode(): Int = Objects.hash(stockId, year, period)
-        override fun equals(other: Any?): Boolean = other is CashflowId && other.stockId == stockId && other.year == year && other.period == period
+        override fun hashCode(): Int = Objects.hash(stockId, publish, year, period)
+        override fun equals(other: Any?): Boolean = other is CashflowId && other.stockId == stockId && other.publish == publish && other.year == year && other.period == period
     }
 }

@@ -15,15 +15,15 @@ open class Forecast(
 
         @Id
         @Column(nullable = false)
+        open var publish: LocalDate? = null,
+
+        @Id
+        @Column(nullable = false)
         open var year: Int? = null,
 
         @Id
         @Column(nullable = false)
         open var period: Int? = null,
-
-        @Column(nullable = false)
-//        @Temporal(TemporalType.DATE)
-        open var publish: LocalDate? = null,
 
         @Column(nullable = false, length = 64)
         open var subject: String? = null,
@@ -33,9 +33,10 @@ open class Forecast(
         open var content: String? = null) {
     open class ForecastId(
             open var stockId: String? = null,
+            open var publish: LocalDate? = null,
             open var year: Int? = null,
             open var period: Int? = null) : Serializable {
-        override fun hashCode(): Int = Objects.hash(stockId, year, period)
-        override fun equals(other: Any?): Boolean = other is ForecastId && other.stockId == stockId && other.year == year && other.period == period
+        override fun hashCode(): Int = Objects.hash(stockId, publish, year, period)
+        override fun equals(other: Any?): Boolean = other is ForecastId && other.stockId == stockId && other.publish == publish && other.year == year && other.period == period
     }
 }

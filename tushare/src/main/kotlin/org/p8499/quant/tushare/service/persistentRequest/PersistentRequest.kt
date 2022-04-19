@@ -1,13 +1,15 @@
 package org.p8499.quant.tushare.service.persistentRequest
 
-import org.p8499.quant.tushare.dto.GroupDto
-import org.p8499.quant.tushare.dto.StockDto
+import org.p8499.quant.tushare.dto.SecurityDayDto
+import org.p8499.quant.tushare.dto.SecurityDto
+import org.p8499.quant.tushare.dto.SecurityQuarterDto
 import org.p8499.quant.tushare.feignClient.PersistentFeignClient
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.retry.annotation.Backoff
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 
 @Service
 class PersistentRequest {
@@ -26,11 +28,17 @@ class PersistentRequest {
     }
 
     @Retryable(maxAttempts = Int.MAX_VALUE, backoff = Backoff(delay = 60000))
-    fun saveStock(stockDto: StockDto) = invoke { it.saveStock(stockDto) }
+    fun begin(region: String, snapshot: LocalDateTime) = invoke { it.begin(region, snapshot) }
 
     @Retryable(maxAttempts = Int.MAX_VALUE, backoff = Backoff(delay = 60000))
-    fun saveGroup(groupDto: GroupDto) = invoke { it.saveGroup(groupDto) }
+    fun saveSecurity(securityDto: SecurityDto) = invoke { it.saveSecurity(securityDto) }
 
     @Retryable(maxAttempts = Int.MAX_VALUE, backoff = Backoff(delay = 60000))
-    fun complete(region: String) = invoke { it.complete(region) }
+    fun saveSecurityDay(securityDayDto: SecurityDayDto) = invoke { it.saveSecurityDay(securityDayDto) }
+
+    @Retryable(maxAttempts = Int.MAX_VALUE, backoff = Backoff(delay = 60000))
+    fun saveSecurityQuarter(securityQuarterDto: SecurityQuarterDto) = invoke { it.saveSecurityQuarter(securityQuarterDto) }
+
+    @Retryable(maxAttempts = Int.MAX_VALUE, backoff = Backoff(delay = 60000))
+    fun end(region: String) = invoke { it.end(region) }
 }

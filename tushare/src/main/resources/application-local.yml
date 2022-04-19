@@ -4,7 +4,7 @@ spring:
   application:
     name: tushare
   datasource:
-    url: jdbc:oracle:thin:@localhost:1521:quant
+    url: jdbc:oracle:thin:@localhost:1521:quant2
     username: tushare
     password: tushare
     driver-class-name: oracle.jdbc.OracleDriver

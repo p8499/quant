@@ -2,7 +2,6 @@ package org.p8499.quant.tushare.dtoBuilder
 
 import org.p8499.quant.tushare.common.finiteOrNull
 import org.p8499.quant.tushare.common.let
-import org.p8499.quant.tushare.dto.GroupDto
 import org.p8499.quant.tushare.dto.StockDto
 import org.p8499.quant.tushare.entity.GroupStock
 import org.p8499.quant.tushare.entity.Stock
@@ -345,10 +344,5 @@ class GroupDtoBuilder(
         weightListBySh = weightListBySh.map { it / sum }
         weightListBySz = weightListBySz.map { it / sum }
         weightListBySh + weightListBySz
-    }
-
-    fun build(): GroupDto {
-        logger.info("Constructing $groupId DTO")
-        return GroupDto("CN", groupId, name, stockIdList, percentList, dateList, openPreList, closePreList, highPreList, lowPreList, volumePreList, amountList, flowShareList, totalShareList, flowValueList, totalValueList, pbList, peList, psList, pcfList, messageList)
     }
 }

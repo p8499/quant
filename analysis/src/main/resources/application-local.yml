@@ -4,7 +4,7 @@ spring:
   application:
     name: analysis
   datasource:
-    url: jdbc:oracle:thin:@localhost:1521:quant
+    url: jdbc:oracle:thin:@localhost:1521:quant2
     username: analysis
     password: analysis
     driver-class-name: oracle.jdbc.OracleDriver
@@ -40,4 +40,4 @@ eureka:
 logging:
   level:
     org.hibernate.SQL: off
-    org.p8499.quant.analysis.service.*: info
+    org.p8499.quant.analysis.service.*: debug

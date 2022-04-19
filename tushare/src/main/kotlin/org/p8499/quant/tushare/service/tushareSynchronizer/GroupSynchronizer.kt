@@ -1,6 +1,5 @@
 package org.p8499.quant.tushare.service.tushareSynchronizer
 
-import org.p8499.quant.tushare.TushareApplication
 import org.p8499.quant.tushare.entity.Group
 import org.p8499.quant.tushare.service.ControllerService
 import org.p8499.quant.tushare.service.GroupService
@@ -10,6 +9,7 @@ import org.p8499.quant.tushare.service.tushareRequest.IndexClassifyRequest
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 
 @Service
 class GroupSynchronizer {
@@ -32,6 +32,7 @@ class GroupSynchronizer {
 
     fun invoke() {
         logger.info("Start Synchronizing Group")
+        controllerService.begin("Group", LocalDateTime.now())
         val indexListOfMarket: (String) -> List<Group> = { market ->
             indexBasicRequest.invoke(IndexBasicRequest.InParams(market = market), IndexBasicRequest.OutParams::class.java).map { Group(it.tsCode, it.name, Group.Type.INDEX) }
         }
@@ -42,7 +43,7 @@ class GroupSynchronizer {
             conceptRequest.invoke(ConceptRequest.InParams(), ConceptRequest.OutParams::class.java).map { Group(it.code, it.name, Group.Type.CONCEPT) }
         }
         groupService.saveAll(indexListOfMarket("MSCI") + indexListOfMarket("CSI") + indexListOfMarket("SSE") + indexListOfMarket("SZSE") + indexListOfMarket("CICC") + indexListOfMarket("SW") + indexListOfMarket("OTH") + industryList() + conceptList())
-        controllerService.complete("Group")
+        controllerService.end("Group")
         logger.info("Finish Synchronizing Group")
     }
 }

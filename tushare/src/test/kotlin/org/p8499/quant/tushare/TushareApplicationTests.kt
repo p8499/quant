@@ -117,15 +117,24 @@ class TushareApplicationTests {
     @Autowired
     protected lateinit var objectMapper: ObjectMapper
 
+    @Autowired
+    protected lateinit var forecastRequest: ForecastRequest
+
     @Test
     fun contextLoads() {
-        val builder = dtoBuilderFactory.newStockBuilder("300435.SZ", LocalDate.of(2015, 1, 4), LocalDate.now())
-        builder.quarterNetProfitList
-        val dto = builder.build()
-        println(dto.profit)
-        println(dto.profitPublish)
-        persistentRequest.saveStock(dto)
+        val startDate = LocalDate.of(2013, 1, 1)
+        val endDate = tradingDateService.last("SSE")?.date
+        if (endDate != null) {
+//            dtoBuilderFactory.newSecurityQuarterDtoBuilder("000536.SZ", startDate, endDate).build().also(persistentRequest::saveSecurityQuarter)
+            val x = dtoBuilderFactory.newSecurityDayDtoBuilder("002014.SZ", startDate, endDate).build()
+            println()
+        }
 
+        //                    .also { persistentRequest.saveSecurityDay(it) }
+
+//        val x = incomeRequest.invoke(IncomeRequest.InParams(endDate = LocalDate.of(2020,3,31)), IncomeRequest.OutParams::class.java, arrayOf("ann_date", "end_date", "revenue", "n_income_attr_p", "update_flag"))
+//        incomeSynchronizer.invoke()
+//        val x = incomeRequest.invoke(IncomeRequest.InParams(tsCode = "000058.SZ"), IncomeRequest.OutParams::class.java)
 //        val startDate = LocalDate.of(2015, 1, 4)
 //        val endDate = tradingDateService.last("SSE")?.date
 //        if (endDate != null) {

@@ -16,7 +16,7 @@ import java.time.LocalDate
 
 @Service
 class CashflowRequest : TushareRequest<CashflowRequest.InParams, CashflowRequest.OutParams>() {
-    override val apiName = "cashflow"
+    override val apiName = "cashflow_vip"
 
     @Autowired
     override lateinit var objectMapper: ObjectMapper

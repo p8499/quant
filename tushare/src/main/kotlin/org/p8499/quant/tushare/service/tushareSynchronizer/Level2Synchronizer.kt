@@ -1,7 +1,6 @@
 package org.p8499.quant.tushare.service.tushareSynchronizer
 
 import io.reactivex.Flowable
-import org.p8499.quant.tushare.TushareApplication
 import org.p8499.quant.tushare.entity.Level2
 import org.p8499.quant.tushare.entity.Stock
 import org.p8499.quant.tushare.entity.TradingDate
@@ -14,6 +13,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.concurrent.TimeUnit
 
 @Service
@@ -37,6 +37,7 @@ class Level2Synchronizer {
 
     fun invoke() {
         logger.info("Start Synchronizing Level2")
+        controllerService.begin("Level2", LocalDateTime.now())
         val level2Iterable: (String) -> Iterable<Level2> = { tsCode ->
             val datesCollection = tradingDateService.unprocessedForLevel2(tsCode).mapNotNull(TradingDate::date).groupBy(LocalDate::getYear).values
             Flowable.fromIterable(datesCollection).zipWith(Flowable.interval(200, TimeUnit.MILLISECONDS)) { dateList, _ -> dateList }
@@ -46,7 +47,7 @@ class Level2Synchronizer {
         }
         val stockIdList = stockService.findAll().mapNotNull(Stock::id)
         stockIdList.forEach { level2Service.saveAll(level2Iterable(it)) }
-        controllerService.complete("Level2")
+        controllerService.end("Level2")
         logger.info("Finish Synchronizing Level2")
     }
 }

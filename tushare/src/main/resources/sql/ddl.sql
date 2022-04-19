@@ -47,58 +47,59 @@ create table F05
 create table F061
 (
     STOCK_ID                   VARCHAR2(16 char) not null,
+    PUBLISH                    DATE              not null,
     YEAR                       NUMBER(10)        not null,
     PERIOD                     NUMBER(10)        not null,
-    PUBLISH                    DATE              not null,
     TOTAL_HLDR_EQY_EXC_MIN_INT NUMBER(26, 2),
-    primary key (STOCK_ID, YEAR, PERIOD)
+    primary key (STOCK_ID, PUBLISH, YEAR, PERIOD)
 )
 /
 
 create table F062
 (
     STOCK_ID       VARCHAR2(16 char) not null,
+    PUBLISH        DATE              not null,
     YEAR           NUMBER(10)        not null,
     PERIOD         NUMBER(10)        not null,
     N_INCOME_ATTRP NUMBER(26, 2),
-    PUBLISH        DATE              not null,
     REVENUE        NUMBER(26, 2),
-    primary key (STOCK_ID, YEAR, PERIOD)
+    primary key (STOCK_ID, PUBLISH, YEAR, PERIOD)
 )
 /
 
 create table F063
 (
     STOCK_ID       VARCHAR2(16 char) not null,
+    PUBLISH        DATE              not null,
     YEAR           NUMBER(10)        not null,
     PERIOD         NUMBER(10)        not null,
     N_CASHFLOW_ACT NUMBER(26, 2),
-    PUBLISH        DATE              not null,
-    primary key (STOCK_ID, YEAR, PERIOD)
+    primary key (STOCK_ID, PUBLISH, YEAR, PERIOD)
 )
 /
 
 create table F06E
 (
     STOCK_ID                   VARCHAR2(16 char) not null,
+    PUBLISH                    DATE              not null,
     YEAR                       NUMBER(10)        not null,
     PERIOD                     NUMBER(10)        not null,
-    PUBLISH                    DATE              not null,
     REVENUE                    NUMBER(26, 2),
+    N_INCOME                   NUMBER(26, 2),
     TOTAL_HLDR_EQY_EXC_MIN_INT NUMBER(26, 2),
-    primary key (STOCK_ID, YEAR, PERIOD)
+    primary key (STOCK_ID, PUBLISH, YEAR, PERIOD)
 )
 /
 
 create table F07
 (
     STOCK_ID VARCHAR2(16 char) not null,
+    PUBLISH  DATE              not null,
     YEAR     NUMBER(10)        not null,
     PERIOD   NUMBER(10)        not null,
     CONTENT  CLOB,
-    PUBLISH  DATE              not null,
     SUBJECT  VARCHAR2(64 char) not null,
-    primary key (STOCK_ID, YEAR, PERIOD)
+    primary key (STOCK_ID, PUBLISH, YEAR, PERIOD)
 )
 /
 
@@ -155,7 +156,9 @@ create table F91
 (
     OBJECT_ID VARCHAR2(32 char) not null
         primary key,
-    DTE       TIMESTAMP(6)      not null
+    SNAPSHOT  TIMESTAMP(6)      null,
+    BEGIN     TIMESTAMP(6)      null,
+    END       TIMESTAMP(6)      null
 )
 /
 
