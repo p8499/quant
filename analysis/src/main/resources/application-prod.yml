@@ -39,6 +39,28 @@ spring:
     elasticsearch:
       repositories:
         enabled: false
+  mail:
+    host: smtp.126.com
+    port: 465
+    username: p8499@126.com
+    password: Sou`12
+    default-encoding: UTF-8
+    # Other properties
+    properties:
+      mail:
+        smtp:
+          auth: true
+          port: 465
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+          # TLS , port 587
+          starttls:
+            enable: true
+            required: true
+          # SSL, post 465
+          ssl:
+            enable: true
 eureka:
   client:
     service-url:

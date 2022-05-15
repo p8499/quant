@@ -26,7 +26,6 @@ class RegionAnalyzer(
 
     fun securities(predicate: (SecurityAnalyzer) -> Boolean) = map.values.filter(predicate).toList()
 
-
     operator fun get(id: String): SecurityAnalyzer? {
         return map[id]
     }

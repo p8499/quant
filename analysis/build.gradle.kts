@@ -27,6 +27,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-amqp")
     implementation("org.springframework.boot:spring-boot-starter-batch")
+    implementation("org.springframework.boot:spring-boot-starter-mail")
     implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
     implementation("io.reactivex.rxjava2:rxjava:2.2.21")
     runtimeOnly("com.oracle.database.jdbc:ojdbc8")
