@@ -5,6 +5,7 @@ import org.p8499.quant.analysis.analyzer.SecurityAnalyzer
 import org.p8499.quant.analysis.common.indexDay.*
 import org.p8499.quant.analysis.common.indexQuarter.*
 import org.p8499.quant.analysis.dayPolicy.cn.groupMacd
+import org.p8499.quant.analysis.dayPolicy.cn.pe
 import org.p8499.quant.analysis.dayPolicy.cn.ps
 import java.time.LocalDate
 

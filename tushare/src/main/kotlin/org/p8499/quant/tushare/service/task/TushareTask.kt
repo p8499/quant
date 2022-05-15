@@ -110,7 +110,7 @@ class TushareTask {
      *                                           │ express           │
      *                                           └ forecast          ┘
      */
-    @Scheduled(cron = "05 00 00 * * SUN-SAT")
+    @Scheduled(cron = "00 01 00 * * SUN-SAT")
     fun syncAndSend() {
         /**
          * Download from tushare.pro and save the data into database

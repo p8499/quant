@@ -126,7 +126,7 @@ class TushareApplicationTests {
         val endDate = tradingDateService.last("SSE")?.date
         if (endDate != null) {
 //            dtoBuilderFactory.newSecurityQuarterDtoBuilder("000536.SZ", startDate, endDate).build().also(persistentRequest::saveSecurityQuarter)
-            val x = dtoBuilderFactory.newSecurityDayDtoBuilder("002014.SZ", startDate, endDate).build()
+            val x = dtoBuilderFactory.newSecurityDayDtoBuilder("601666.SH", startDate, endDate).build()
             println()
         }
 

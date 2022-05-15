@@ -7,10 +7,17 @@ fun ref(valueList: List<SecurityIndexQuarter>, n: Int): List<SecurityIndexQuarte
     val resultList = ref(valueList.map(SecurityIndexQuarter::value), n)
     return valueList.mapIndexed { i, sid -> resultList[i].wrap(sid) }
 }
+
+fun ref(valueList: List<SecurityIndexQuarter>, nList: List<SecurityIndexQuarter>): List<SecurityIndexQuarter> {
+    val resultList = ref(valueList.map(SecurityIndexQuarter::value), valueList.map(SecurityIndexQuarter::value))
+    return valueList.mapIndexed { i, sid -> resultList[i].wrap(sid) }
+}
+
 fun abs(valueList: List<SecurityIndexQuarter>): List<SecurityIndexQuarter> {
     val resultList = abs(valueList.map(SecurityIndexQuarter::value))
     return valueList.mapIndexed { i, sid -> resultList[i].wrap(sid) }
 }
+
 fun cross(valueList: List<SecurityIndexQuarter>, n: Double): List<SecurityIndexQuarter> {
     val resultList = cross(valueList.map(SecurityIndexQuarter::value), n)
     return valueList.mapIndexed { i, siq -> resultList[i].wrap(siq) }
@@ -19,6 +26,16 @@ fun cross(valueList: List<SecurityIndexQuarter>, n: Double): List<SecurityIndexQ
 fun cross(n: Double, valueList: List<SecurityIndexQuarter>): List<SecurityIndexQuarter> {
     val resultList = cross(n, valueList.map(SecurityIndexQuarter::value))
     return valueList.mapIndexed { i, siq -> resultList[i].wrap(siq) }
+}
+
+fun min(aList: List<SecurityIndexQuarter>, bList: List<SecurityIndexQuarter>): List<SecurityIndexQuarter> {
+    val resultList = min(aList.map(SecurityIndexQuarter::value), bList.map(SecurityIndexQuarter::value))
+    return aList.mapIndexed { i, sid -> resultList[i].wrap(sid) }
+}
+
+fun max(aList: List<SecurityIndexQuarter>, bList: List<SecurityIndexQuarter>): List<SecurityIndexQuarter> {
+    val resultList = max(aList.map(SecurityIndexQuarter::value), bList.map(SecurityIndexQuarter::value))
+    return aList.mapIndexed { i, sid -> resultList[i].wrap(sid) }
 }
 
 fun std(valueList: List<SecurityIndexQuarter>, n: Int): List<SecurityIndexQuarter> {

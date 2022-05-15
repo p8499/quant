@@ -70,16 +70,34 @@ fun SecurityAnalyzer.ps(barDate: LocalDate, informDate: LocalDate) =
 fun SecurityAnalyzer.msg(informDate: LocalDate): List<SecurityMessageQuarter> =
         messageQuarter["message", informDate].apply { indexQuarter["profitForecast", informDate].lastOrNull()?.quarter?.let(this::expire) }
 
-fun SecurityAnalyzer.weekMacd(barDate: LocalDate, asOf: LocalDate): List<SecurityIndexDay> {
+fun SecurityAnalyzer.weekDif(barDate: LocalDate, asOf: LocalDate): List<SecurityIndexDay> {
     val weekClose = indexDay["close", barDate].lastByWeek(asOf)
-    val weekDif = ema(weekClose, 12) - ema(weekClose, 26)
+    return ema(weekClose, 12) - ema(weekClose, 26)
+}
+
+fun SecurityAnalyzer.weekDea(barDate: LocalDate, asOf: LocalDate): List<SecurityIndexDay> {
+    val weekDif = weekDif(barDate, asOf)
+    return ema(weekDif, 9)
+}
+
+fun SecurityAnalyzer.weekMacd(barDate: LocalDate, asOf: LocalDate): List<SecurityIndexDay> {
+    val weekDif = weekDif(barDate, asOf)
     val weekDea = ema(weekDif, 9)
     return (weekDif - weekDea) * 2.0
 }
 
-fun SecurityAnalyzer.groupMacd(barDate: LocalDate, groupSize: Int): List<SecurityIndexDay> {
+fun SecurityAnalyzer.groupDif(barDate: LocalDate, groupSize: Int): List<SecurityIndexDay> {
     val groupClose = indexDay["close", barDate].lastBy(groupSize)
-    val groupDif = ema(groupClose, 12) - ema(groupClose, 26)
+    return ema(groupClose, 12) - ema(groupClose, 26)
+}
+
+fun SecurityAnalyzer.groupDea(barDate: LocalDate, groupSize: Int): List<SecurityIndexDay> {
+    val groupDif = groupDif(barDate, groupSize)
+    return ema(groupDif, 9)
+}
+
+fun SecurityAnalyzer.groupMacd(barDate: LocalDate, groupSize: Int): List<SecurityIndexDay> {
+    val groupDif = groupDif(barDate, groupSize)
     val groupDea = ema(groupDif, 9)
     return (groupDif - groupDea) * 2.0
 }

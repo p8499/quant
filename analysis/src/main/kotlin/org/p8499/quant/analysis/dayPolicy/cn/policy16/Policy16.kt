@@ -75,7 +75,7 @@ open class Policy16(regionAnalyzer: RegionAnalyzer) : CNPolicy(regionAnalyzer) {
 
     override fun onOpening(stage: Stage<CNStatus>, barDate: LocalDate, informDate: LocalDate, readyDate: LocalDate) {
         val posSecurities = stage.positions.map(Position::security)
-        openingBuySecurities = (newSecurities - callingBuySecurities).take(slots - posSecurities.size)
+        openingBuySecurities = (newSecurities - callingBuySecurities).take(slots - posSecurities.size - stage.commissions.filter { it.action == Action.BUY }.size)
         val openingBuySlots = openingBuySecurities.size
         val openingBuyAmount = stage.cash
         openingBuySecurities.onEach {

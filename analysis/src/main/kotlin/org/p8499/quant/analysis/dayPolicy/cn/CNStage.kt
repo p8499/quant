@@ -5,6 +5,7 @@ import org.p8499.quant.analysis.common.ceil
 import org.p8499.quant.analysis.common.indexDay.asBool
 import org.p8499.quant.analysis.common.indexDay.asDouble
 import org.p8499.quant.analysis.common.indexDay.gt
+import org.p8499.quant.analysis.common.let
 import org.p8499.quant.analysis.common.round
 import org.p8499.quant.analysis.dayPolicy.*
 import org.p8499.quant.analysis.dayPolicy.common.get
@@ -14,11 +15,10 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.util.concurrent.locks.ReentrantLock
-import kotlin.math.max
-import kotlin.math.min
 
 class CNStage : Stage<CNStatus> {
     val lock = ReentrantLock()
+    val variation = 0.003//追赶误差
 
     override var date: LocalDate = LocalDate.ofEpochDay(0)
     override var status: CNStatus = CNStatus.BEFORE
@@ -36,47 +36,73 @@ class CNStage : Stage<CNStatus> {
 
     private fun promote(policy: Policy<CNStatus>) {
         lock.lock()
+        val roll: (() -> Unit) = {
+            when {
+                policy.isTradingDate(date) && status == CNStatus.BEFORE -> {
+                    // 09:15
+                    status = CNStatus.CALLING
+                }
+                policy.isTradingDate(date) && status == CNStatus.CALLING -> {
+                    // 09:25
+                    status = CNStatus.OPENING
+                }
+                policy.isTradingDate(date) && status == CNStatus.OPENING -> {
+                    // 09:30
+                    status = CNStatus.TRADING
+                }
+                policy.isTradingDate(date) && status == CNStatus.TRADING -> {
+                    // 14:57
+                    status = CNStatus.CLOSING
+                }
+                policy.isTradingDate(date) && status == CNStatus.CLOSING -> {
+                    // 15:00
+                    status = CNStatus.AFTER
+                }
+                policy.isTradingDate(date) && status == CNStatus.AFTER -> {
+                    // 00:00
+                    date = date.plusDays(1)
+                    status = CNStatus.BEFORE
+                }
+                else -> {
+                    // 00:00 of None Trading Date
+                    date = date.plusDays(1)
+                    status = CNStatus.BEFORE
+                }
+            }
+        }
+        roll()
         when {
-            status == CNStatus.BEFORE && policy.isTradingDate(date) -> {
-                // 09:15
-                status = CNStatus.CALLING
-            }
-            status == CNStatus.CALLING && policy.isTradingDate(date) -> {
-                // 09:25
-                status = CNStatus.OPENING
-                callingTrade()
-                policy.proceed(this)
-                policy.openingCommissions.forEach(::appendCommission)
-            }
-            status == CNStatus.OPENING && policy.isTradingDate(date) -> {
-                // 09:30
-                status = CNStatus.TRADING
-                openingTrade()//trade use open
-            }
-            status == CNStatus.TRADING && policy.isTradingDate(date) -> {
-                // 14:57
-                status = CNStatus.CLOSING
-                tradingTrade()//trade use close
-            }
-            status == CNStatus.CLOSING && policy.isTradingDate(date) -> {
-                // 15:00
-                status = CNStatus.AFTER
-                roll()
-                saveSnapshot()
-            }
-            status == CNStatus.AFTER && policy.isTradingDate(date) -> {
+            policy.isTradingDate(date) && status == CNStatus.BEFORE -> {
                 // 00:00
-                date = date.plusDays(1)
-                status = CNStatus.BEFORE
                 policy.callingCommissions.clear()
                 policy.openingCommissions.clear()
                 policy.proceed(this)
                 policy.callingCommissions.forEach(::appendCommission)
             }
+            policy.isTradingDate(date) && status == CNStatus.CALLING -> {
+                // 09:15
+            }
+            policy.isTradingDate(date) && status == CNStatus.OPENING -> {
+                // 09:25
+                callingTrade()
+                policy.proceed(this)
+                policy.openingCommissions.forEach(::appendCommission)
+            }
+            policy.isTradingDate(date) && status == CNStatus.TRADING -> {
+                // 09:30
+                openingTrade()
+            }
+            policy.isTradingDate(date) && status == CNStatus.CLOSING -> {
+                // 14:57
+                tradingTrade()
+            }
+            policy.isTradingDate(date) && status == CNStatus.AFTER -> {
+                // 15:00
+                close()
+                saveSnapshot()
+            }
             else -> {
                 // 00:00 of None Trading Date
-                date = date.plusDays(1)
-                status = CNStatus.BEFORE
                 policy.callingCommissions.clear()
                 policy.openingCommissions.clear()
                 policy.proceed(this)
@@ -144,8 +170,9 @@ class CNStage : Stage<CNStatus> {
         val iterator = commissions.iterator()
         while (iterator.hasNext()) {
             val commission = iterator.next()
-            commission.security.indexDay["open", date].asDouble()?.takeIf {
-                if (commission.action == Action.BUY) it <= commission.price else it >= commission.price
+            val price = commission.security.indexDay["open", date].asDouble()
+            price?.takeIf {
+                if (commission.action == Action.BUY) it < commission.price else it > commission.price
             }?.let {
                 iterator.remove()
                 internalTrade(LocalDateTime.of(date, LocalTime.of(9, 25)), commission, it)
@@ -158,7 +185,10 @@ class CNStage : Stage<CNStatus> {
         val iterator = commissions.iterator()
         while (iterator.hasNext()) {
             val commission = iterator.next()
-            commission.security.indexDay["open", date].asDouble()?.takeIf {
+            val price = commission.security.indexDay["open", date].asDouble()?.let {
+                if (commission.action == Action.BUY) it * (1 + variation) else it * (1 - variation)
+            }
+            price?.takeIf {
                 if (commission.action == Action.BUY) it < commission.price else it > commission.price
             }?.let {
                 iterator.remove()
@@ -172,18 +202,26 @@ class CNStage : Stage<CNStatus> {
         val iterator = commissions.iterator()
         while (iterator.hasNext()) {
             val commission = iterator.next()
-            (if (commission.action == Action.BUY) commission.security.indexDay["open", date].asDouble()?.let { min(it, commission.price) }
-            else commission.security.indexDay["open", date].asDouble()?.let { max(it, commission.price) })?.takeIf { price ->
-                if (commission.action == Action.BUY) commission.security.indexDay["low", date].asDouble()?.let { it < price } == true
-                else commission.security.indexDay["high", date].asDouble()?.let { it > price } == true
-            }?.let {
+            val thresholdPrice = let(
+                    commission.security.indexDay["open", date].asDouble(),
+                    commission.security.indexDay["high", date].asDouble(),
+                    commission.security.indexDay["low", date].asDouble()) { open, high, low ->
+                if (commission.action == Action.BUY)
+                    if (open == low) low * (1 + variation) else low
+                else
+                    if (open == high) high * (1 - variation) else high
+            }
+            val price = commission.price.takeIf {
+                thresholdPrice != null && if (commission.action == Action.BUY) it > thresholdPrice else it < thresholdPrice
+            }
+            price?.let {
                 iterator.remove()
                 internalTrade(LocalDateTime.of(date, LocalTime.of(14, 57)), commission, it)
             }
         }
     }
 
-    private fun roll() {
+    private fun close() {
         // rollback commission
         val iterator = commissions.iterator()
         while (iterator.hasNext()) {

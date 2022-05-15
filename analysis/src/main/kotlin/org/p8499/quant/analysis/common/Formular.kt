@@ -2,12 +2,26 @@ package org.p8499.quant.analysis.common
 
 import kotlin.math.abs
 import kotlin.math.max
+import kotlin.math.min
 import kotlin.math.sqrt
 
 fun ref(valueList: List<Double?>, n: Int): List<Double?> {
     return valueList.indices.map { i ->
         if (i - n >= 0) valueList[i - n] else null
     }
+}
+
+fun ref(valueList: List<Double?>, nList: List<Double?>): List<Double?> {
+    return if (valueList.size == nList.size)
+        valueList.indices.map { i ->
+            val n = nList[i]?.toInt()
+            if (n !== null)
+                if (i - n >= 0) valueList[i - n] else null
+            else
+                null
+        }
+    else
+        arrayOfNulls<Double>(valueList.size).toList()
 }
 
 fun abs(valueList: List<Double?>): List<Double?> {
@@ -26,6 +40,24 @@ fun cross(n: Double, valueList: List<Double?>): List<Double?> {
         val c = if (i > 0) let(valueList[i - 1], value) { a, b -> a > n && b < 0 } else null
         if (c == true) 1.0 else if (c == false) 0.0 else null
     }
+}
+
+fun min(aList: List<Double?>, bList: List<Double?>): List<Double?> {
+    return if (aList.size == bList.size)
+        aList.mapIndexed { i, a ->
+            val b = bList[i]
+            if (a !== null && b !== null) min(a, b) else null
+        } else
+        arrayOfNulls<Double>(aList.size).toList()
+}
+
+fun max(aList: List<Double?>, bList: List<Double?>): List<Double?> {
+    return if (aList.size == bList.size)
+        aList.mapIndexed { i, a ->
+            val b = bList[i]
+            if (a !== null && b !== null) max(a, b) else null
+        } else
+        arrayOfNulls<Double>(aList.size).toList()
 }
 
 fun std(valueList: List<Double?>, n: Int): List<Double?> {

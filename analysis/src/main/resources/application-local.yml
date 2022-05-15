@@ -8,6 +8,12 @@ spring:
     username: analysis
     password: analysis
     driver-class-name: oracle.jdbc.OracleDriver
+    hikari:
+      connection-timeout: 60000
+      idle-timeout: 60000
+      validation-timeout: 3000
+      login-timeout: 5
+      max-lifetime: 60000
   jpa:
     database: oracle
     #    show-sql: true

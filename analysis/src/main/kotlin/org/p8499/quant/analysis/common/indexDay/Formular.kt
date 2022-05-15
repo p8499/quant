@@ -8,6 +8,11 @@ fun ref(valueList: List<SecurityIndexDay>, n: Int): List<SecurityIndexDay> {
     return valueList.mapIndexed { i, sid -> resultList[i].wrap(sid) }
 }
 
+fun ref(valueList: List<SecurityIndexDay>, nList: List<SecurityIndexDay>): List<SecurityIndexDay> {
+    val resultList = ref(valueList.map(SecurityIndexDay::value), valueList.map(SecurityIndexDay::value))
+    return valueList.mapIndexed { i, sid -> resultList[i].wrap(sid) }
+}
+
 fun abs(valueList: List<SecurityIndexDay>): List<SecurityIndexDay> {
     val resultList = abs(valueList.map(SecurityIndexDay::value))
     return valueList.mapIndexed { i, sid -> resultList[i].wrap(sid) }
@@ -21,6 +26,16 @@ fun cross(valueList: List<SecurityIndexDay>, n: Double): List<SecurityIndexDay> 
 fun cross(n: Double, valueList: List<SecurityIndexDay>): List<SecurityIndexDay> {
     val resultList = cross(n, valueList.map(SecurityIndexDay::value))
     return valueList.mapIndexed { i, sid -> resultList[i].wrap(sid) }
+}
+
+fun min(aList: List<SecurityIndexDay>, bList: List<SecurityIndexDay>): List<SecurityIndexDay> {
+    val resultList = min(aList.map(SecurityIndexDay::value), bList.map(SecurityIndexDay::value))
+    return aList.mapIndexed { i, sid -> resultList[i].wrap(sid) }
+}
+
+fun max(aList: List<SecurityIndexDay>, bList: List<SecurityIndexDay>): List<SecurityIndexDay> {
+    val resultList = max(aList.map(SecurityIndexDay::value), bList.map(SecurityIndexDay::value))
+    return aList.mapIndexed { i, sid -> resultList[i].wrap(sid) }
 }
 
 fun std(valueList: List<SecurityIndexDay>, n: Int): List<SecurityIndexDay> {
