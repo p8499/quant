@@ -5,21 +5,17 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.sqrt
 
+private fun ref(valueList: List<Double?>, n: Int, i: Int): Double? {
+    return if (i - n >= 0) valueList[i - n] else null
+}
+
 fun ref(valueList: List<Double?>, n: Int): List<Double?> {
-    return valueList.indices.map { i ->
-        if (i - n >= 0) valueList[i - n] else null
-    }
+    return valueList.indices.map { i -> ref(valueList, n, i) }
 }
 
 fun ref(valueList: List<Double?>, nList: List<Double?>): List<Double?> {
     return if (valueList.size == nList.size)
-        valueList.indices.map { i ->
-            val n = nList[i]?.toInt()
-            if (n !== null)
-                if (i - n >= 0) valueList[i - n] else null
-            else
-                null
-        }
+        valueList.indices.map { i -> nList[i]?.toInt()?.let { n -> ref(valueList, n, i) } }
     else
         arrayOfNulls<Double>(valueList.size).toList()
 }
@@ -75,26 +71,21 @@ fun std(valueList: List<Double?>, n: Int): List<Double?> {
         arrayOfNulls<Double>(valueList.size).toList()
 }
 
+private fun ma(valueList: List<Double?>, i: Int, n: Int): Double? {
+    return if (n > 0) {
+        val elements = valueList.subList(max(i - n + 1, 0), i + 1)
+        if (elements.all { it !== null }) elements.mapNotNull { it }.sum() / elements.size else null
+    } else
+        null
+}
+
 fun ma(valueList: List<Double?>, n: Int): List<Double?> {
-    return if (n > 0)
-        valueList.indices.map { i ->
-            val elements = valueList.subList(max(i - n + 1, 0), i + 1)
-            if (elements.all { it !== null }) elements.mapNotNull { it }.sum() / elements.size else null
-        }
-    else
-        arrayOfNulls<Double>(valueList.size).toList()
+    return valueList.indices.map { i -> ma(valueList, i, n) }
 }
 
 fun ma(valueList: List<Double?>, nList: List<Double?>): List<Double?> {
     return if (valueList.size == nList.size)
-        valueList.mapIndexed { i, value ->
-            val n = nList[i]?.toInt()
-            if (n !== null) {
-                val elements = valueList.subList(max(i - n + 1, 0), i + 1)
-                if (elements.all { it !== null }) elements.mapNotNull { it }.sum() / elements.size else null
-            } else
-                null
-        }
+        valueList.mapIndexed { i, value -> nList[i]?.toInt()?.let { n -> ma(valueList, i, n) } }
     else
         arrayOfNulls<Double>(valueList.size).toList()
 }
@@ -129,40 +120,38 @@ fun mema(valueList: List<Double?>, n: Int): List<Double?> {
     return sma(valueList, n, 1)
 }
 
-fun hod(valueList: List<Double?>, n: Int): List<Double?> {
+private fun hod(valueList: List<Double?>, i: Int, n: Int): Double? {
     return if (n > 0)
-        valueList.mapIndexed { i, value ->
-            valueList.subList(max(i - n + 1, 0), i + 1).count { let(it, value) { a, b -> a > b } ?: false }.toDouble() + 1
-        }
+        valueList.subList(max(i - n + 1, 0), i + 1).count { let(it, valueList[i]) { a, b -> a > b } ?: false }.toDouble() + 1
     else
-        arrayOfNulls<Double>(valueList.size).toList()
+        null
+}
+
+fun hod(valueList: List<Double?>, n: Int): List<Double?> {
+    return valueList.indices.map { i -> hod(valueList, i, n) }
 }
 
 fun hod(valueList: List<Double?>, nList: List<Double?>): List<Double?> {
     return if (valueList.size == nList.size)
-        valueList.mapIndexed { i, value ->
-            val n = nList[i]?.toInt()
-            if (n !== null) valueList.subList(max(i - n + 1, 0), i + 1).count { let(it, value) { a, b -> a > b } ?: false }.toDouble() + 1 else null
-        }
+        valueList.indices.map { i -> nList[i]?.toInt()?.let { n -> hod(valueList, i, n) } }
     else
         arrayOfNulls<Double>(valueList.size).toList()
 }
 
-fun lod(valueList: List<Double?>, n: Int): List<Double?> {
+private fun lod(valueList: List<Double?>, i: Int, n: Int): Double? {
     return if (n > 0)
-        valueList.mapIndexed { i, value ->
-            valueList.subList(max(i - n + 1, 0), i + 1).count { let(it, value) { a, b -> a < b } ?: false }.toDouble() + 1
-        }
+        valueList.subList(max(i - n + 1, 0), i + 1).count { let(it, valueList[i]) { a, b -> a < b } ?: false }.toDouble() + 1
     else
-        arrayOfNulls<Double>(valueList.size).toList()
+        null
+}
+
+fun lod(valueList: List<Double?>, n: Int): List<Double?> {
+    return valueList.indices.map { i -> lod(valueList, i, n) }
 }
 
 fun lod(valueList: List<Double?>, nList: List<Double?>): List<Double?> {
     return if (valueList.size == nList.size)
-        valueList.mapIndexed { i, value ->
-            val n = nList[i]?.toInt()
-            if (n !== null) valueList.subList(max(i - n + 1, 0), i + 1).count { let(it, value) { a, b -> a < b } ?: false }.toDouble() + 1 else null
-        }
+        valueList.indices.map { i -> nList[i]?.toInt()?.let { n -> lod(valueList, i, n) } }
     else
         arrayOfNulls<Double>(valueList.size).toList()
 }
@@ -172,6 +161,23 @@ fun barscount(valueList: List<Double?>): List<Double?> {
     return valueList.indices.map { i ->
         (i - first + 1).let { if (it < 0) 0 else it }.toDouble()
     }
+}
+
+fun barssince(valueList: List<Double?>): List<Double?> {
+    val first: (Int) -> Int? = { iEnd ->
+        var i = 0
+        var result: Int? = null
+        do {
+            val value = valueList[i]
+            if (value !== null && value > 0.0) {
+                result = iEnd - i
+                break
+            }
+            i += 1
+        } while (i <= iEnd)
+        result
+    }
+    return valueList.indices.map { first(it) }.map { it?.toDouble() }
 }
 
 fun barslast(valueList: List<Double?>): List<Double?> {
@@ -191,30 +197,38 @@ fun barslast(valueList: List<Double?>): List<Double?> {
     return valueList.indices.map { last(it) }.map { it?.toDouble() }
 }
 
-fun every(valueList: List<Double?>, n: Int): List<Double?> {
-    return if (n > 1) {
-        val check: (Int) -> Double? = { iEnd ->
-            var i = iEnd
-            var result: Double? = 1.0
-            do {
-                if (i < 0) {
-                    result = null
-                    break
-                }
-                val value = valueList[i]
-                if (value == null) {
-                    result = null
-                    break
-                } else if (value <= 0.0) {
-                    result = 0.0
-                    break
-                }
-                i -= 1
-            } while (i > iEnd - n)
-            result
-        }
-        valueList.indices.map { i -> check(i) }
+fun every(valueList: List<Double?>, i: Int, n: Int): Double? {
+    return if (n > 0) {
+        var iMoving = i
+        var result: Double? = 1.0
+        do {
+            if (iMoving < 0) {
+                result = null
+                break
+            }
+            val value = valueList[iMoving]
+            if (value == null) {
+                result = null
+                break
+            } else if (value <= 0.0) {
+                result = 0.0
+                break
+            }
+            iMoving -= 1
+        } while (iMoving > i - n)
+        result
     } else
+        null
+}
+
+fun every(valueList: List<Double?>, n: Int): List<Double?> {
+    return valueList.indices.map { i -> every(valueList, i, n) }
+}
+
+fun every(valueList: List<Double?>, nList: List<Double?>): List<Double?> {
+    return if (valueList.size == nList.size)
+        valueList.indices.map { i -> nList[i]?.toInt()?.let { n -> every(valueList, i, n) } }
+    else
         arrayOfNulls<Double>(valueList.size).toList()
 }
 

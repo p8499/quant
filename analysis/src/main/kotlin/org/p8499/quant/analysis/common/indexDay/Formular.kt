@@ -9,7 +9,7 @@ fun ref(valueList: List<SecurityIndexDay>, n: Int): List<SecurityIndexDay> {
 }
 
 fun ref(valueList: List<SecurityIndexDay>, nList: List<SecurityIndexDay>): List<SecurityIndexDay> {
-    val resultList = ref(valueList.map(SecurityIndexDay::value), valueList.map(SecurityIndexDay::value))
+    val resultList = ref(valueList.map(SecurityIndexDay::value), nList.map(SecurityIndexDay::value))
     return valueList.mapIndexed { i, sid -> resultList[i].wrap(sid) }
 }
 
@@ -98,6 +98,11 @@ fun barscount(valueList: List<SecurityIndexDay>): List<SecurityIndexDay> {
     return valueList.mapIndexed { i, sid -> resultList[i].wrap(sid) }
 }
 
+fun barssince(valueList: List<SecurityIndexDay>): List<SecurityIndexDay> {
+    val resultList = barssince(valueList.map(SecurityIndexDay::value))
+    return valueList.mapIndexed { i, sid -> resultList[i].wrap(sid) }
+}
+
 fun barslast(valueList: List<SecurityIndexDay>): List<SecurityIndexDay> {
     val resultList = barslast(valueList.map(SecurityIndexDay::value))
     return valueList.mapIndexed { i, sid -> resultList[i].wrap(sid) }
@@ -105,6 +110,11 @@ fun barslast(valueList: List<SecurityIndexDay>): List<SecurityIndexDay> {
 
 fun every(valueList: List<SecurityIndexDay>, n: Int): List<SecurityIndexDay> {
     val resultList = every(valueList.map(SecurityIndexDay::value), n)
+    return valueList.mapIndexed { i, sid -> resultList[i].wrap(sid) }
+}
+
+fun every(valueList: List<SecurityIndexDay>, nList: List<SecurityIndexDay>): List<SecurityIndexDay> {
+    val resultList = every(valueList.map(SecurityIndexDay::value), nList.map(SecurityIndexDay::value))
     return valueList.mapIndexed { i, sid -> resultList[i].wrap(sid) }
 }
 

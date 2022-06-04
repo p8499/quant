@@ -1,5 +1,6 @@
 package org.p8499.quant.tushare.service.persistentRequest
 
+import org.p8499.quant.tushare.common.tryInvoke
 import org.p8499.quant.tushare.dto.SecurityDayDto
 import org.p8499.quant.tushare.dto.SecurityDto
 import org.p8499.quant.tushare.dto.SecurityQuarterDto
@@ -18,27 +19,18 @@ class PersistentRequest {
     @Autowired
     protected lateinit var persistentFeignClient: PersistentFeignClient
 
-    protected fun <T> invoke(method: (PersistentFeignClient) -> T): T {
-        try {
-            return method(persistentFeignClient)
-        } catch (e: Throwable) {
-            logger.info("PersistentRequest Failed And Retry.")
-            throw e
-        }
-    }
+    @Retryable(maxAttempts = Int.MAX_VALUE, backoff = Backoff(delay = 60000))
+    fun begin(region: String, snapshot: LocalDateTime) = tryInvoke({ persistentFeignClient.begin(region, snapshot) }, { logger.info("PersistentRequest Failed And Retry.") })
 
     @Retryable(maxAttempts = Int.MAX_VALUE, backoff = Backoff(delay = 60000))
-    fun begin(region: String, snapshot: LocalDateTime) = invoke { it.begin(region, snapshot) }
+    fun saveSecurity(securityDto: SecurityDto) = tryInvoke({ persistentFeignClient.saveSecurity(securityDto) }, { logger.info("PersistentRequest Failed And Retry.") })
 
     @Retryable(maxAttempts = Int.MAX_VALUE, backoff = Backoff(delay = 60000))
-    fun saveSecurity(securityDto: SecurityDto) = invoke { it.saveSecurity(securityDto) }
+    fun saveSecurityDay(securityDayDto: SecurityDayDto) = tryInvoke({ persistentFeignClient.saveSecurityDay(securityDayDto) }, { logger.info("PersistentRequest Failed And Retry.") })
 
     @Retryable(maxAttempts = Int.MAX_VALUE, backoff = Backoff(delay = 60000))
-    fun saveSecurityDay(securityDayDto: SecurityDayDto) = invoke { it.saveSecurityDay(securityDayDto) }
+    fun saveSecurityQuarter(securityQuarterDto: SecurityQuarterDto) = tryInvoke({ persistentFeignClient.saveSecurityQuarter(securityQuarterDto) }, { logger.info("PersistentRequest Failed And Retry.") })
 
     @Retryable(maxAttempts = Int.MAX_VALUE, backoff = Backoff(delay = 60000))
-    fun saveSecurityQuarter(securityQuarterDto: SecurityQuarterDto) = invoke { it.saveSecurityQuarter(securityQuarterDto) }
-
-    @Retryable(maxAttempts = Int.MAX_VALUE, backoff = Backoff(delay = 60000))
-    fun end(region: String) = invoke { it.end(region) }
+    fun end(region: String) = tryInvoke({ persistentFeignClient.end(region) }, { logger.info("PersistentRequest Failed And Retry.") })
 }

@@ -17,7 +17,7 @@ import kotlin.math.max
 import kotlin.math.min
 
 //基于21，设定卖出价
-public open class Policy22(regionAnalyzer: RegionAnalyzer) : CNPolicy(regionAnalyzer) {
+open class Policy22(regionAnalyzer: RegionAnalyzer) : CNPolicy(regionAnalyzer) {
     open val securities = regionAnalyzer.securities { true }.onEach { it.mcst() }
 
     open val slots = 4
@@ -129,10 +129,12 @@ public open class Policy22(regionAnalyzer: RegionAnalyzer) : CNPolicy(regionAnal
 
     open fun sellPrice(security: SecurityAnalyzer, barDate: LocalDate, informDate: LocalDate, readyDate: LocalDate): Double? {
         val close = security.indexDay["close", barDate]
-        val open = security.indexDay["open", barDate]
-        val lower = min(open, close)
-        val higher = max(open, close)
-        val price = ref(lower, barslast(ref(lower, 1) gt higher)).asDouble()
+//        val open = security.indexDay["open", barDate]
+//        val lower = min(open, close)
+//        val higher = max(open, close)
+        val lower = security.indexDay["low", barDate]
+        val higher = security.indexDay["high", barDate]
+        val price = ref(lower, barslast(ref(lower, 1) gt higher) + 1.0).asDouble()
         return let(price, close.asDouble()) { a, b -> if (a > b) a else null }
     }
 }

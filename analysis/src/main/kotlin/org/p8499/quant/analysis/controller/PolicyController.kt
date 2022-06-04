@@ -51,7 +51,7 @@ class PolicyController {
             updated?.takeIf { it == snapshot } ?: run {
                 logger.info("策略更新，时间戳从${updated?.let(dateTimeFormat::format)}至${dateTimeFormat.format(snapshot)}")
                 val stage = CNStage().apply {
-                    date = LocalDate.of(2022, 5, 16)
+                    date = LocalDate.of(2022, 5, 15)
 //                    date = LocalDate.of(2017, 12, 31)
                     status = CNStatus.AFTER
                     cash = 1000000.0

@@ -57,6 +57,11 @@ fun SecurityAnalyzer.kdj() = with(indexDay) {
     this["j"] = k * 3.0 - d * 3.0
 }
 
+//fun SecurityIndexDayAnalyzer.pressure(barDate: LocalDate): List<SecurityIndexDay> {
+//    val low = this["low", barDate]
+//    val high = this["high", barDate]
+//    return ref(high, barslast(ref(low, 1) gt high))
+//}
 
 fun SecurityAnalyzer.pb(barDate: LocalDate, informDate: LocalDate) =
         indexDay["close", barDate] / (indexQuarter.flatten["asset", barDate, informDate] / indexDay["totalShare", barDate])

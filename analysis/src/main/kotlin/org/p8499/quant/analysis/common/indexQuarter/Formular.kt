@@ -1,6 +1,7 @@
 package org.p8499.quant.analysis.common.indexQuarter
 
 import org.p8499.quant.analysis.common.*
+import org.p8499.quant.analysis.entity.SecurityIndexDay
 import org.p8499.quant.analysis.entity.SecurityIndexQuarter
 
 fun ref(valueList: List<SecurityIndexQuarter>, n: Int): List<SecurityIndexQuarter> {
@@ -9,7 +10,7 @@ fun ref(valueList: List<SecurityIndexQuarter>, n: Int): List<SecurityIndexQuarte
 }
 
 fun ref(valueList: List<SecurityIndexQuarter>, nList: List<SecurityIndexQuarter>): List<SecurityIndexQuarter> {
-    val resultList = ref(valueList.map(SecurityIndexQuarter::value), valueList.map(SecurityIndexQuarter::value))
+    val resultList = ref(valueList.map(SecurityIndexQuarter::value), nList.map(SecurityIndexQuarter::value))
     return valueList.mapIndexed { i, sid -> resultList[i].wrap(sid) }
 }
 
@@ -98,6 +99,11 @@ fun barscount(valueList: List<SecurityIndexQuarter>): List<SecurityIndexQuarter>
     return valueList.mapIndexed { i, siq -> resultList[i].wrap(siq) }
 }
 
+fun barssince(valueList: List<SecurityIndexQuarter>): List<SecurityIndexQuarter> {
+    val resultList = barssince(valueList.map(SecurityIndexQuarter::value))
+    return valueList.mapIndexed { i, siq -> resultList[i].wrap(siq) }
+}
+
 fun barslast(valueList: List<SecurityIndexQuarter>): List<SecurityIndexQuarter> {
     val resultList = barslast(valueList.map(SecurityIndexQuarter::value))
     return valueList.mapIndexed { i, siq -> resultList[i].wrap(siq) }
@@ -105,6 +111,11 @@ fun barslast(valueList: List<SecurityIndexQuarter>): List<SecurityIndexQuarter> 
 
 fun every(valueList: List<SecurityIndexQuarter>, n: Int): List<SecurityIndexQuarter> {
     val resultList = every(valueList.map(SecurityIndexQuarter::value), n)
+    return valueList.mapIndexed { i, siq -> resultList[i].wrap(siq) }
+}
+
+fun every(valueList: List<SecurityIndexQuarter>, nList: List<SecurityIndexDay>): List<SecurityIndexQuarter> {
+    val resultList = every(valueList.map(SecurityIndexQuarter::value), nList.map(SecurityIndexDay::value))
     return valueList.mapIndexed { i, siq -> resultList[i].wrap(siq) }
 }
 
